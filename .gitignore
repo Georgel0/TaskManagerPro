@@ -1,0 +1,11 @@
+# Root ignore
+node_modules/
+
+# Client ignore
+client/.next/
+client/node_modules/
+client/.env.local
+
+# Server ignore
+server/node_modules/
+server/.env
