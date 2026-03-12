@@ -1,66 +1,47 @@
-import Image from "next/image";
-import styles from "@/styles/page.module.css";
+import '@/styles/landingpage.css';
+import Link from 'next/link';
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="landing-container">
+      <div className="landing-content">
+        <section className="info-column">
+          <div className="info-content">
+            <h1>Productivity & Team Task Manager</h1>
+            <p>Welcome to the ultimate solution for organizing personal and team activities.</p>
+            
+            <h2>Features</h2>
+            <p>Create and manage complex projects efficiently.</p>
+            <p>Track tasks with priorities and deadlines.</p>
+            <p>Real-time team collaboration via comments.</p>
+            
+            <h2>About</h2>
+            <p>This application is built using Next.js, Node.js, Express, and PostgreSQL.</p>
+            <p>It supports file uploads, real-time notifications, and full authentication.</p>
+            
+            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            <p>More features coming soon...</p>
+          </div>
+        </section>
+
+        <section className="auth-column">
+          <div className="auth-card">
+            <h2>Welcome Back</h2>
+            <p>Log in to access your dashboard.</p>
+            <form className="dummy-form">
+              <input type="email" placeholder="Email" />
+              <input type="password" placeholder="Password" />
+              <Link href="/dashboard" className="login-btn">
+                Log In
+              </Link>
+            </form>
+          </div>
+        </section>
+      </div>
+      
+      <footer className="landing-footer">
+        <p>&copy; 2026 Task Manager Pro. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
