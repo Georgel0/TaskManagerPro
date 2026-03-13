@@ -37,11 +37,7 @@ export default function LandingPage() {
             </form>
           </div>
         </section>
-      </div>
-      
-      <footer className="landing-footer">
-        <p>&copy; 2026 Task Manager Pro. All rights reserved.</p>
-      </footer>
+      </div>        
     </div>
   );
 }
