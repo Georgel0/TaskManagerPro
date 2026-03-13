@@ -1,10 +1,17 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 
-export default function MainLayout({ children }) {
+export function MainLayout({ children }) {
+
+  const pathname = usePathname();
+  const isLandigPage = pathname === '/';
+
   return (
     <div className="main-layout">
-      
-      <Sidebar />
+
+      {!isLandigPage &&  (<Sidebar />)}
 
       <div className="content-area">
         <header className="topbar">
@@ -14,10 +21,6 @@ export default function MainLayout({ children }) {
         <main className="page-content">
           {children}
         </main>
-
-        <footer className="landing-footer">
-          <p>&copy; 2026 Task Manager Pro. All rights reserved.</p>
-        </footer>
       </div>
     </div>
   );

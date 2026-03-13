@@ -15,10 +15,11 @@ a {
   color: inherit;
 }
 
+::-webkit-scrollbar { display: none; }
+
 .main-layout {
   display: flex;
   height: 100vh;
-  overflow: hidden;
 }
 
 .content-area {
@@ -28,18 +29,20 @@ a {
 }
 
 .topbar {
-  height: 60px;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  min-height: 60px;
   background-color: #fff;
   border-bottom: 1px solid #ddd;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .page-content {
   flex: 1;
-  padding: 30px;
-  overflow-y: auto;
   background-color: #f9f9f9;
 }
