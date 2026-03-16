@@ -10,6 +10,7 @@ export default function LandingPage() {
     email: '',
     password: ''
   });
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,8 +19,9 @@ export default function LandingPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const endpoint = isLogin ? '/api/login' : '/api/register';
+    setErrorMsg('');
+    
+    const endpoint = isLogin ? 'http://localhost:5000/api/login' : 'http://localhost:5000/api/register';
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
       : formData;
@@ -33,11 +35,17 @@ export default function LandingPage() {
         body: JSON.stringify(payload)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         window.location.href = '/dashboard';
+      } else {
+        setErrorMsg(data.error || 'Authentication failed');
       }
     } catch (error) {
-      console.log("Login/Register Peoblems:", error);
+      setErrorMsg('Network error. Please try again.');
     }
   };
 
@@ -58,7 +66,7 @@ export default function LandingPage() {
             <p>This application is built using Next.js, Node.js, Express, and PostgreSQL.</p>
             <p>It supports file uploads, real-time notifications, and full authentication.</p>
 
-            <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
             <p>More features coming soon...</p>
           </div>
 
@@ -71,6 +79,8 @@ export default function LandingPage() {
           <div className="auth-card">
             <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
             <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
+
+            {errorMsg && <p className="error-message" style={{ color: '#ff4d4d', fontSize: '14px', marginBottom: '10px' }}>{errorMsg}</p>}
 
             <form className="dummy-form" onSubmit={handleSubmit}>
               {!isLogin && (
