@@ -6,7 +6,6 @@ import Sidebar from './Sidebar';
 
 export function MainLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
