@@ -1,9 +1,46 @@
 'use client';
 
+import { useState } from 'react';
 import '@/styles/landingpage.css';
-import Link from 'next/link';
 
 export default function LandingPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const endpoint = isLogin ? '/api/login' : '/api/register';
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : formData;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        window.location.href = '/dashboard';
+      }
+    } catch (error) {
+      console.log("Login/Register Peoblems:", error);
+    }
+  };
+
   return (
     <div className="landing-container">
       <div className="landing-content">
@@ -32,15 +69,51 @@ export default function LandingPage() {
 
         <section className="auth-column">
           <div className="auth-card">
-            <h2>Welcome Back</h2>
-            <p>Log in to access your dashboard.</p>
-            <form className="dummy-form">
-              <input type="email" placeholder="Email" />
-              <input type="password" placeholder="Password" />
-              <Link href="/dashboard" className="login-btn">
-                Log In
-              </Link>
+            <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
+            <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
+
+            <form className="dummy-form" onSubmit={handleSubmit}>
+              {!isLogin && (
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              )}
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+              <button type="submit" className="login-btn">
+                {isLogin ? 'Log In' : 'Register'}
+              </button>
             </form>
+
+            <p className="toggle-auth">
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button
+                type="button"
+                className="text-btn"
+                onClick={() => setIsLogin(!isLogin)}
+              >
+                {isLogin ? 'Register here' : 'Log in here'}
+              </button>
+            </p>
           </div>
         </section>
       </div>

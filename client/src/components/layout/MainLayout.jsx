@@ -20,7 +20,7 @@ export function MainLayout({ children }) {
       <div className="content-area">
         <header className="topbar">
           <button className='sidebar-toggle' onClick={toggleSidebar}>☰</button>
-          <h3>Task Manager</h3>
+          <h3>Task Manager Pro</h3>
         </header>
 
         <main className="page-content">
