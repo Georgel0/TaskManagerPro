@@ -71,6 +71,14 @@ a {
   color: var(--accent-color);
 }
 
+.topbar-profile-icon {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--pri-backgrround);
+  border-radius: 50%;
+}
+
 .loading-state {
   margin-top: 10px;
   display: flex;

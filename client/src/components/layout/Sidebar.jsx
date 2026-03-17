@@ -1,12 +1,20 @@
 'use client'
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import '@/styles/sidebar.css';
+
+const pages = [
+  { id: 'dashboard', label: 'Dashboard', icon:'fas fa-chart-simple', path: '/dashboard' },
+  { id: 'profile', label: 'Profile', icon:'fas fa-user', path: '/profile' },
+  { id: 'settings', label: 'Settings', icon:'fas fa-gear', path: '/settings' },
+];
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
 
   const sidebarRef = useRef(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -35,10 +43,21 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         <h2>Task Pro</h2>
       </div>
       <nav className="sidebar-nav">
-        <Link href="/dashboard" className="nav-link">Dashboard</Link>
-        <Link href="/profile" className="nav-link">Profile</Link>
-        <Link href="/settings" className="nav-link">Settings</Link>
-        <Link href="/" className="nav-link logout">Log Out</Link>
+        {pages.map(p => (
+          <Link 
+            key={p.id}
+            href={p.path}
+            className={`nav-link ${pathname === p.path ? 'active' : ''}`}
+            title={p.label}
+            onClick={() => {
+              if (window.innerHeight > 768) toggleSidebar();
+            }}
+          >
+            <i className={p.icon}></i>
+            {p.label}
+          </Link> 
+        ))}
+        <Link href='/' className='nav-link logout'>Log Out</Link>
       </nav>
     </aside>
   );

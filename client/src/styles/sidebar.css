@@ -33,10 +33,18 @@
   padding: 15px 25px;
   transition: background 0.3s;
   display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .nav-link:hover {
   background-color: #34495e;
+}
+
+.nav-link.active {
+  border: var(--accent-color);
+  color: var(--accent-color);
 }
 
 .logout {
