@@ -21,12 +21,16 @@ const registerUser = async (req, res) => {
     const user = newUser.rows[0];
     const token = generateToken(user.id);
 
-    res.status(201).json({ 
-      user: { id: user.id, name: user.name, email: user.email }, 
-      token 
+    res.status(201).json({
+      user: { id: user.id, name: user.name, email: user.email },
+      token
     });
   } catch (err) {
-    res.status(500).json({ error: "Email already exists or DB error." });
+    // 23505 is the PostgreSQL error code for "Unique Violation"
+    if (err.code === '23505') {
+      return res.status(400).json({ error: "This email is already registered." });
+    }
+    res.status(500).json({ error: "Server error during registration." });
   }
 };
 
@@ -35,7 +39,7 @@ const loginUser = async (req, res) => {
 
   try {
     const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    
+
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
@@ -48,9 +52,9 @@ const loginUser = async (req, res) => {
     }
 
     const token = generateToken(user.id);
-    res.status(200).json({ 
-      user: { id: user.id, name: user.name, email: user.email }, 
-      token 
+    res.status(200).json({
+      user: { id: user.id, name: user.name, email: user.email },
+      token
     });
   } catch (err) {
     res.status(500).json({ error: "Server error during login." });
