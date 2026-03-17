@@ -23,11 +23,16 @@ export default function Dashboard() {
     window.location.href = '/';
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (!user) return (
+    <div className='loading-state'>
+      <div className="pulse-ring"></div>
+      <p>Loading...</p>
+    </div>
+  );
 
   return (
     <div style={{ padding: '40px' }}>
-      <h1>Welcome, {user.name}!</h1>
+      <h1>Welcome, {user.name}</h1>
       <p>Your session is active and secure.</p>
       <button onClick={handleLogout} className="logout-btn">Log Out</button>
     </div>

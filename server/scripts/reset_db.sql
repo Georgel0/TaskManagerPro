@@ -1,4 +1,4 @@
--- Resets everything in one click
+-- Resets everything in one click -- for  testing
 TRUNCATE TABLE notifications RESTART IDENTITY CASCADE;
 TRUNCATE TABLE attachments RESTART IDENTITY CASCADE;
 TRUNCATE TABLE comments RESTART IDENTITY CASCADE;

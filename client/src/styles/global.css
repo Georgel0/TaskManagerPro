@@ -1,3 +1,11 @@
+:root {
+  --pri-text-color: #333;
+  --accent-color: #3498db;
+  --pri-backgrround: #fff;
+  --sec-background: #f9f9f9;
+  --border-color: #ddd;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,8 +14,8 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
-  color: #333;
+  background-color: var(--sec-background);
+  color: var(--pri-text-color);
 }
 
 a {
@@ -34,8 +42,8 @@ a {
 .topbar {
   width: 100%;
   min-height: 60px;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--pri-backgrround);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,7 +53,7 @@ a {
 
 .page-content {
   flex: 1;
-  background-color: #f9f9f9;
+  background-color: var(--sec-background);
 }
 
 .sidebar-toggle {
@@ -53,12 +61,46 @@ a {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
+  color: var(--pri-text-color);
   padding: 5px 10px;
   margin-right: 15px;
   transition: color 0.3s;
 }
 
 .sidebar-toggle:hover {
-  color: #3498db;
+  color: var(--accent-color);
+}
+
+.loading-state {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--accent-color);
+}
+
+.pulse-ring {
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  margin: 1rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
 }
