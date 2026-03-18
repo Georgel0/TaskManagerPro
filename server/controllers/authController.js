@@ -61,4 +61,68 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const userResult = await pool.query(
+      'SELECT id, name, email, avatar, created_at FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Send the user data back to the frontend
+    res.status(200).json(userResult.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while fetching profile." });
+  }
+};
+
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId= req.user.id; 
+
+  try {
+    // Get the current user's password
+    const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error:"User not found." });
+    }
+
+    // Check if the provided current password matches
+    const isMatch = await bcrypt.compare(currentPassword, userResult.rows[0].password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Incorrect current password." });
+    }
+
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the DB
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, userId]);
+
+    res.status(200).json({ message: "Password updated successfuly." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while updating password." });
+  } 
+};
+
+const deleteAccount = async (req, res)=> {
+  const userId = req.user.id;
+  
+  try {
+    await pool.query('DELETE FROM users WHERE id = $1', [userId])
+    res.status(200).json({ message: "Account deleted successfuly." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while deleting account." });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, changePassword, deleteAccount };

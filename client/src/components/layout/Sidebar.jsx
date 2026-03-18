@@ -37,6 +37,12 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     }
   }, [isOpen, toggleSidebar]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
+  };
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`} ref={sidebarRef} >
       <div className="sidebar-logo">
@@ -57,7 +63,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             {p.label}
           </Link> 
         ))}
-        <Link href='/' className='nav-link logout'>Log Out</Link>
+        <button onClick={handleLogout} className='nav-link logout'>Log Out</button>
       </nav>
     </aside>
   );

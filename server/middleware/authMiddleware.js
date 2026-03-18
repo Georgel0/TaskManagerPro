@@ -8,6 +8,7 @@ const protect = (req, res, next) => {
   }
 
   try {
+    // Verify the token using your secret
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Add user info to the request object
     next();

@@ -1,0 +1,20 @@
+.profile-container {
+  max-width: 600px; 
+  margin: 0 auto; 
+  padding: 20px;
+}
+
+.password-change-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delete-acc-btn {
+  padding: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px
+}

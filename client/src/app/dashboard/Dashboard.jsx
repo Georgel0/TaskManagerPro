@@ -17,12 +17,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
-  };
-
   if (!user) return (
     <div className='loading-state'>
       <div className="pulse-ring"></div>
@@ -34,7 +28,6 @@ export default function Dashboard() {
     <div style={{ padding: '40px' }}>
       <h1>Welcome, {user.name}</h1>
       <p>Your session is active and secure.</p>
-      <button onClick={handleLogout} className="logout-btn">Log Out</button>
     </div>
   );
 }

@@ -27,7 +27,7 @@ export function MainLayout({ children }) {
         <header className="topbar">
           {!isLandingPage && (<button className='sidebar-toggle' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>)}
           <h3>Task Manager Pro</h3>
-          {!isLandingPage || (<Link href='/profile' className='topbar-profile-icon' title='Profile Icon'><i className="fas fa-user"></i></Link>)}
+          {!isLandingPage && (<Link href='/profile' className='topbar-profile-icon' title='Profile Icon'><i className="fas fa-user"></i></Link>)}
         </header>
 
         <main className="page-content">
