@@ -7,22 +7,22 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, avatar } = req.body;
 
   try {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = await pool.query(
-      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *',
-      [name, email, hashedPassword]
+      'INSERT INTO users (name, email, password, avatar) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, email, hashedPassword, avatar]
     );
 
     const user = newUser.rows[0];
     const token = generateToken(user.id);
 
     res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
       token
     });
   } catch (err) {
@@ -53,7 +53,7 @@ const loginUser = async (req, res) => {
 
     const token = generateToken(user.id);
     res.status(200).json({
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
       token
     });
   } catch (err) {
@@ -106,7 +106,7 @@ const changePassword = async (req, res) => {
     // Update the DB
     await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, userId]);
 
-    res.status(200).json({ message: "Password updated successfuly." });
+    res.status(200).json({ message: "Password updated successfully." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error while updating password." });
@@ -118,7 +118,7 @@ const deleteAccount = async (req, res)=> {
   
   try {
     await pool.query('DELETE FROM users WHERE id = $1', [userId])
-    res.status(200).json({ message: "Account deleted successfuly." });
+    res.status(200).json({ message: "Account deleted successfully." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error while deleting account." });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { generateIdenticonBase64 } from '@/lib';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
@@ -20,11 +21,20 @@ export default function LandingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    
+
+    const userEmail = formData.email.trim().toLowerCase();
+
+    // Generate avatar only if we are registering
+    let avatar = null;
+    if (!isLogin) {
+      avatar = generateIdenticonBase64(userEmail, 32);
+    }
+
     const endpoint = isLogin ? 'http://localhost:5000/api/login' : 'http://localhost:5000/api/register';
+
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
-      : formData;
+      : { ...formData, avatar };
 
     try {
       const response = await fetch(endpoint, {

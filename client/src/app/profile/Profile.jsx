@@ -89,10 +89,17 @@ export default function ProfilePage() {
       if (!response.ok) throw new Error('Failed to delete account');
 
       localStorage.removeItem('token');
-      router.push('/login');
+      localStorage.removeItem('user');
+      window.location.href = '/';
     } catch (err) {
       alert(err.message);
     }
+  };
+
+   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
   };
 
   if (loading) return <div>Loading profile...</div>;
@@ -103,6 +110,7 @@ export default function ProfilePage() {
       
       {user && (
         <div style={{ marginBottom: '40px' }}>
+          <img src={user.avatar} alt="Avatar" />
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Member Since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
@@ -144,11 +152,12 @@ export default function ProfilePage() {
       <section>
         <h2 style={{ color: 'red' }}>Danger Zone</h2>
         <p>Once you delete your account, there is no going back. Please be certain.</p>
-        <button
-          className='delete-acc-btn' 
-          onClick={handleDeleteAccount}
-        >
+        <button className='delete-acc-btn' onClick={handleDeleteAccount}>
           Delete Account
+        </button>
+
+        <button onClick={handleLogout} className='nav-link logout'>
+          Log Out
         </button>
       </section>
     </div>
