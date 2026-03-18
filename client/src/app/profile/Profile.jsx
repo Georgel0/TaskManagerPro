@@ -44,7 +44,7 @@ export default function ProfilePage() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordMessage({ type: '', text: '' });
-    
+
     const token = localStorage.getItem('token');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -74,7 +74,7 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     const confirmDelete = window.confirm("Are you sure you want to delete your account? This action is permanent and will delete all your projects and tasks.");
-    
+
     if (!confirmDelete) return;
 
     const token = localStorage.getItem('token');
@@ -96,7 +96,7 @@ export default function ProfilePage() {
     }
   };
 
-   const handleLogout = () => {
+  const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/';
@@ -106,60 +106,61 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-container">
-      <h1>My Profile</h1>
-      
+      <h1 style={{ marginBottom: '24px' }}>Settings</h1>
+
       {user && (
-        <div style={{ marginBottom: '40px' }}>
-          <img src={user.avatar} alt="Avatar" />
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Member Since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+        <div className="profile-card profile-header">
+          <img className="profile-avatar" src={user.avatar} alt="Avatar" />
+          <div className="info-group">
+            <p><strong>{user.name}</strong></p>
+            <p>{user.email}</p>
+            <p style={{ fontSize: '0.85rem' }}>Member since {new Date(user.created_at).toLocaleDateString()}</p>
+          </div>
         </div>
       )}
 
-      <hr/>
-
-      <section style={{ marginBottom: '40px' }}>
+      <div className="profile-card form-section">
         <h2>Change Password</h2>
         <form onSubmit={handlePasswordChange} className='password-change-form'>
           <input
+            className="input-field"
             type="password"
             placeholder="Current Password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            style={{ padding: '8px' }}
           />
           <input
+            className="input-field"
             type="password"
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
-            style={{ padding: '8px' }}
           />
-          <button type="submit" style={{ padding: '10px', cursor: 'pointer' }}>Update Password</button>
+          <button type="submit" className="btn-primary">Update Password</button>
         </form>
         {passwordMessage.text && (
-          <p style={{ color: passwordMessage.type === 'error' ? 'red' : 'green', marginTop: '10px' }}>
+          <p className='password-message' style={{ color: passwordMessage.type === 'error' ? 'var(--error-color)' : 'var(--success-color)'}}>
             {passwordMessage.text}
           </p>
         )}
-      </section>
+      </div>
 
-      <hr/>
-
-      <section>
-        <h2 style={{ color: 'red' }}>Danger Zone</h2>
-        <p>Once you delete your account, there is no going back. Please be certain.</p>
-        <button className='delete-acc-btn' onClick={handleDeleteAccount}>
-          Delete Account
-        </button>
-
-        <button onClick={handleLogout} className='nav-link logout'>
-          Log Out
-        </button>
-      </section>
+      <div className="profile-card danger-zone">
+        <h2 style={{ color: 'var(--error-color)' }}>Danger Zone</h2>
+        <p style={{ marginBottom: '20px', fontSize: '0.9rem' }}>
+          Once you delete your account, there is no going back. All projects and tasks will be removed.
+        </p>
+        <div className='profile-acctions'>
+          <button className='delete-acc-btn' onClick={handleDeleteAccount}>
+            Delete Account
+          </button>
+          <button onClick={handleLogout} className='btn-logout'>
+            Log Out
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,9 +1,24 @@
 :root {
-  --pri-text-color: #333;
-  --accent-color: #3498db;
-  --pri-backgrround: #fff;
-  --sec-background: #f9f9f9;
-  --border-color: #ddd;
+  --pri-text-color: #2d3436;
+  --sec-text-color: #636e72;
+  --accent-color: #0984e3;
+  --accent-hover: #74b9ff;
+  
+  --success-color: #00b894;
+  --error-color: #d63031;
+  --warning-color: #fdcb6e;
+  
+  --pri-background: #ffffff;
+  --sec-background: #f1f2f6;
+  --card-background: #ffffff;
+  
+  --border-color: #dfe6e9;
+  --input-focus: #74b9ff;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --transition: all 0.2s ease-in-out;
 }
 
 * {
@@ -13,9 +28,10 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--sec-background);
   color: var(--pri-text-color);
+  line-height: 1.5;
 }
 
 a {
@@ -29,18 +45,20 @@ hr {
 
 ::-webkit-scrollbar { display: none; }
 
-.main-layout {
+.app-wrapper {
   display: flex;
   height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+  width: 100vw;overflow: hidden;
+  background-color: var(--card-background);
+  transition: background-color 0.3s ease;
 }
 
-.content-area {
-  flex: 1;
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 
 .topbar {
@@ -53,11 +71,6 @@ hr {
   justify-content: space-between;
   padding: 0 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.page-content {
-  flex: 1;
-  background-color: var(--sec-background);
 }
 
 .sidebar-toggle {

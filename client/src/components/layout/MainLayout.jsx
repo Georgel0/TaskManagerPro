@@ -14,7 +14,7 @@ export function MainLayout({ children }) {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="main-layout">
+    <div className="app-wrapper">
 
       {!isLandingPage && (
         <Sidebar
@@ -23,17 +23,15 @@ export function MainLayout({ children }) {
         />
       )}
 
-      <div className="content-area">
+      <main className="main-content">
         <header className="topbar">
           {!isLandingPage && (<button className='sidebar-toggle' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>)}
           <h3>Task Manager Pro</h3>
           {!isLandingPage && (<Link href='/profile' className='topbar-profile-icon' title='Profile Icon'><i className="fas fa-user"></i></Link>)}
         </header>
 
-        <main className="page-content">
-          {children}
-        </main>
-      </div>
+        {children}
+      </main>
     </div>
   );
 }
