@@ -60,7 +60,7 @@
 }
 
 .topbar-avatar:hover {
-  transform: scale(1.1);
+  border: 1px solid var(--pri-text-color);
 }
 
 .loading-state {

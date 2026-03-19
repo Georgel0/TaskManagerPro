@@ -14,7 +14,7 @@
 .info-column {
   flex: 1.5;
   overflow-y: auto;
-  background-color: #ffffff;
+  background-color: var(--pri-background);
 }
 
 .info-content {
@@ -27,17 +27,19 @@
 .info-content h1 {
   font-size: 2.5rem;
   margin-bottom: 20px;
-  color: #2c3e50;
+  color: var(--pri-text-color);
 }
 
 .info-content h2 {
   margin-top: 40px;
   margin-bottom: 15px;
+  color: var(--pri-text-color);
 }
 
 .info-content p {
   line-height: 1.6;
   margin-bottom: 20px;
+  color: var(--sec-text-color);
 }
 
 .auth-column {
@@ -46,15 +48,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f4f4f9;
-  border-left: 1px solid #ddd;
+  background-color: var(--sec-background);
+  border-left: 1px solid var(--border-color);
 }
 
 .auth-card {
-  background: white;
+  background: var(--card-background);
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -63,6 +65,7 @@
 
 .auth-card h2 {
   margin-bottom: 10px;
+  color: var(--pri-text-color);
 }
 
 .dummy-form {
@@ -74,29 +77,35 @@
 
 .dummy-form input {
   padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
+  transition: var(--transition);
+}
+
+.dummy-form input:focus {
+  outline: none;
+  border-color: var(--input-focus);
 }
 
 .login-btn {
   padding: 12px;
-  background-color: #3498db;
+  background-color: var(--accent-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: var(--transition);
   display: inline-block;
 }
 
 .login-btn:hover {
-  background-color: #2980b9;
+  background-color: var(--accent-hover);
 }
 
 .landing-footer {
-  background-color: #2c3e50;
+  background-color: var(--pri-text-color);
   color: white;
   text-align: center;
   padding: 15px;
@@ -106,21 +115,22 @@
 .toggle-auth {
   margin-top: 20px;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--sec-text-color);
 }
 
 .text-btn {
   background: none;
   border: none;
-  color: #3498db;
+  color: var(--accent-color);
   cursor: pointer;
   font-size: 0.9rem;
   text-decoration: underline;
   padding: 0;
+  transition: var(--transition);
 }
 
 .text-btn:hover {
-  color: #2980b9;
+  color: var(--accent-hover);
 }
 
 @keyframes fadeIn {
@@ -128,7 +138,6 @@
     opacity: 0;
     transform: translateY(10px);
   }
-  
   to {
     opacity: 1;
     transform: translateY(0);
