@@ -15,7 +15,7 @@ html[data-theme="light-default"], :root {
   --radius-md: 12px;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --transition: all 0.2s ease-in-out;
+  --transition: 0.2s ease-in-out;
 }
 
 * {

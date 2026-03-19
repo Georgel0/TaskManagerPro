@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useApp } from '@/context';
+import { useApp, useTheme } from '@/context';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
 
@@ -10,6 +10,7 @@ export function MainLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { user } = useApp();
+  const { currentTheme } = useTheme();
 
   const pathname = usePathname();
   const isLandingPage = pathname === '/';

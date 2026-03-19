@@ -60,7 +60,7 @@
 }
 
 .topbar-avatar:hover {
-  border: 1px solid var(--pri-text-color);
+  border: 3px solid var(--sec-text-color);
 }
 
 .loading-state {
@@ -87,10 +87,11 @@
   margin-top: auto;
   color: var(--accent-color);
   border: none;
+  cursor: pointer;
 }
 
 .logout:hover {
-  color: red;
+  color: var(--sec-text-color);
 }
 
 @keyframes pulse {

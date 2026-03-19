@@ -67,6 +67,8 @@
   border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: var(--transition);
+  background-color: var(--card-background);
+  color: var(--pri-text-color);
 }
 
 .input-field:focus {

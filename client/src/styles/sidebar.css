@@ -1,7 +1,7 @@
 .sidebar {
   width: 250px;
-  background-color: var(--pri-text-color);
-  color: white;
+  background-color: var(--sec-background);
+  color: var(--pri-text-color);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -35,12 +35,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: white;
   text-decoration: none;
 }
 
 .nav-link:hover {
-  background-color: var(--sec-text-color);
+  color: var(--sec-text-color);
+  border-color: var(--accent-hover);
 }
 
 .nav-link.active {
