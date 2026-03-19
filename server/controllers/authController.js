@@ -82,15 +82,37 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+const changeUsername = async (req, res) => {
+  const { newUsername } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Check if the new username is already taken by another user
+    const existingUser = await pool.query('SELECT id FROM users WHERE name = $1', [newUsername]);
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: "That username is already taken. Please choose another one." });
+    }
+
+    // Update the DB since it's unique
+    await pool.query('UPDATE users SET name = $1 WHERE id = $2', [newUsername, userId]);
+
+    res.status(200).json({ message: "Username updated successfully." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while updating username." });
+  }
+};
+
 const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  const userId= req.user.id; 
+  const userId = req.user.id;
 
   try {
     // Get the current user's password
     const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
     if (userResult.rows.length === 0) {
-      return res.status(404).json({ error:"User not found." });
+      return res.status(404).json({ error: "User not found." });
     }
 
     // Check if the provided current password matches
@@ -110,14 +132,31 @@ const changePassword = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error while updating password." });
-  } 
+  }
 };
 
 const deleteAccount = async (req, res)=> {
   const userId = req.user.id;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ error: "Password is required to delete your account." });
+  }
   
   try {
-    await pool.query('DELETE FROM users WHERE id = $1', [userId])
+    const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const isMatch = await bcrypt.compare(password, userResult.rows[0].password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Incorrect password. Account deletion cancelled." });
+    }
+
+    // Delete the account if the password matches
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
     res.status(200).json({ message: "Account deleted successfully." });
   } catch (err) {
     console.error(err);
@@ -125,4 +164,4 @@ const deleteAccount = async (req, res)=> {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, changePassword, deleteAccount };
+module.exports = { registerUser, loginUser, getUserProfile, changeUsername, changePassword, deleteAccount };
