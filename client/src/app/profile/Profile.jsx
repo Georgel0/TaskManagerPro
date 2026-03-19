@@ -1,12 +1,11 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useApp } from '@/context';
+
 import './profile.css';
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, setUser, loading } = useApp();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -19,34 +18,6 @@ export default function ProfilePage() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteMessage, setDeleteMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      try {
-        const response = await fetch(`${apiUrl}/profile`, {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch profile');
-        const data = await response.json();
-        setUser(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [router]);
 
   const handleUsernameChange = async (e) => {
     e.preventDefault();
@@ -62,7 +33,7 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-      
+
         body: JSON.stringify({ newUsername })
       });
 
@@ -129,9 +100,9 @@ export default function ProfilePage() {
     try {
       const response = await fetch(`${apiUrl}/profile`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ password: deletePassword })
       });
@@ -158,7 +129,7 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-container">
-      <h1 style={{ marginBottom: '24px' }}>Settings</h1>
+      <h1 style={{ marginBottom: '24px' }}>Profile</h1>
 
       {user && (
         <div className="profile-card profile-header">
@@ -191,7 +162,7 @@ export default function ProfilePage() {
         )}
 
         <h2>Change Password</h2>
-        <form onSubmit={handlePasswordChange} className='password-change-form'>
+        <form onSubmit={handlePasswordChange} className='username-change-form'>
           <input
             className="input-field"
             type="password"
@@ -222,9 +193,9 @@ export default function ProfilePage() {
         <p>Once you delete your account, there is no going back. All projects and tasks will be removed.</p>
         <div className='profile-acctions'>
           <button className='delete-acc-btn' onClick={handleDeleteAccountClick}>
-    Delete Account
-  </button>
-          <button onClick={handleLogout} className='btn-logout'>
+            Delete Account
+          </button>
+          <button onClick={handleLogout} className='logout'>
             Log Out
           </button>
         </div>
@@ -235,7 +206,7 @@ export default function ProfilePage() {
           <div className="modal-content">
             <h2>Confirm Deletion</h2>
             <p>This action is permanent. All your projects and tasks will be permanently removed.</p>
-            
+
             <form onSubmit={confirmDeleteAccount} className="delete-modal-form">
               <input
                 className="input-field"
@@ -250,11 +221,11 @@ export default function ProfilePage() {
                   {deleteMessage.text}
                 </p>
               )}
-              
+
               <div className="modal-actions">
-                <button 
-                  type="button" 
-                  className="btn-secondary" 
+                <button
+                  type="button"
+                  className="btn-secondary"
                   onClick={() => setIsDeleteModalOpen(false)}
                 >
                   Cancel

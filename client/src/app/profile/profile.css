@@ -24,7 +24,6 @@
 .profile-avatar {
   width: 100px;
   height: 100px;
-  border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--sec-background);
 }
@@ -40,7 +39,14 @@
 
 .form-section h2 {
   font-size: 1.25rem;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  margin-top: 2rem;
+}
+
+.username-change-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .password-change-form {
@@ -131,7 +137,6 @@
   font-size: 0.9rem;
 }
 
-/* Modal styles restricted strictly to Profile */
 .modal-overlay {
   position: fixed;
   top: 0;

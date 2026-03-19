@@ -46,17 +46,6 @@
   color: var(--accent-color);
 }
 
-.logout {
-  margin-top: auto;
-  color: #e74c3c;
-  border-top: 1px solid #34495e;
-}
-
-.logout:hover {
-  background-color: #c0392b;
-  color: white;
-}
-
 @media (max-width: 768px) {
   .sidebar {
     margin-left: 0;
