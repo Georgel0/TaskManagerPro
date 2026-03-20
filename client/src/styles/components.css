@@ -64,17 +64,18 @@
 }
 
 .loading-state {
+  font-size: larger;
   margin-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--accent-color);
+  color: var(--pri-text-color);
 }
 
 .pulse-ring {
-  width: 30px;
-  height: 30px;
-  border: 2px solid var(--accent-color);
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--pri-text-color);
   border-radius: 50%;
   margin: 1rem;
   animation: pulse 1.5s infinite;

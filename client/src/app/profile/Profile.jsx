@@ -125,7 +125,12 @@ export default function ProfilePage() {
     window.location.href = '/';
   };
 
-  if (loading) return <div>Loading profile...</div>;
+  if (loading) return (
+    <div className='loading-state'>
+      <div className="pulse-ring"></div>
+      <p>Loading...</p>
+    </div>
+  );
 
   return (
     <div className="profile-container">
@@ -223,7 +228,7 @@ export default function ProfilePage() {
               )}
 
               <div className="modal-actions">
-                <button
+                <button 
                   type="button"
                   className="btn-secondary"
                   onClick={() => setIsDeleteModalOpen(false)}
