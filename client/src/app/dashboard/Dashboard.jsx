@@ -6,6 +6,7 @@ import './dashboard.css';
 
 export default function Dashboard() {
   const { user } = useApp();
+  
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
