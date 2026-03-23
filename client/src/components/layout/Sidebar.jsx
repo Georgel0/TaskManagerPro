@@ -7,6 +7,8 @@ import '@/styles/sidebar.css';
 
 const pages = [
   { id: 'dashboard', label: 'Dashboard', icon:'fas fa-chart-simple', path: '/dashboard' },
+  { id: 'projects', label: 'Projects', icon:'fas fa-folder', path: '/projects' },
+  { id: 'tasks', label: 'Tasks', icon:'fas fa-list-check', path: '/tasks' },
   { id: 'profile', label: 'Profile', icon:'fas fa-user', path: '/profile' },
   { id: 'settings', label: 'Settings', icon:'fas fa-gear', path: '/settings' },
 ];
@@ -63,7 +65,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             {p.label}
           </Link> 
         ))}
-        <button onClick={handleLogout} className='nav-link logout'>Log Out</button>
+        <button onClick={handleLogout} className='nav-link logout'>Log Out <i class="fa fa-right-from-bracket"></i></button>
       </nav>
     </aside>
   );

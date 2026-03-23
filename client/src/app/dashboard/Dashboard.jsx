@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context';
-import './dashboard.css'; 
+import './dashboard.css';
 
 export default function Dashboard() {
   const { user } = useApp();
@@ -25,7 +26,7 @@ export default function Dashboard() {
         });
 
         if (!response.ok) throw new Error('Failed to fetch dashboard data');
-        
+
         const data = await response.json();
         setDashboardData(data);
       } catch (err) {
@@ -67,9 +68,14 @@ export default function Dashboard() {
           <h1>Welcome back, {user.name}</h1>
           <p className="text-secondary">Here are your projects.</p>
         </div>
-        <button className="btn btn-primary">
-          <i className="fas fa-plus"></i> New Task
-        </button>
+        <div className="header-actions">
+          <button className="btn btn-primary">
+            <i className="fas fa-plus"></i> New Task
+          </button>
+          <Link href='/projects' className="btn btn-primary">
+            <i className="fas fa-arrow-right"></i> See Projects
+          </Link>
+        </div>
       </header>
 
       <section className="stats-grid">
@@ -103,11 +109,11 @@ export default function Dashboard() {
       </section>
 
       <div className="dashboard-content-grid">
-        
+
         <section className="card dashboard-card">
           <div className="card-header">
             <h2><i className="fas fa-list-ul"></i> Active Tasks</h2>
-            <a href="/tasks" className="btn btn-icon"><i className="fas fa-arrow-right"></i></a>
+            <Link href="/tasks" className="btn btn-icon"><i className="fas fa-arrow-right"></i></Link>
           </div>
           <div className="card-body p-0">
             {activeTasks.length === 0 ? (

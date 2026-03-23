@@ -1,0 +1,77 @@
+.tasks-page {
+  padding: 20px;
+}
+
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tasks-filters {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background);
+  color: var(--pri-text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn.active {
+  background-color: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+}
+
+.tasks-empty-state {
+  padding: 20px;
+  text-align: center;
+  color: var(--sec-text-color);
+}
+
+.tasks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tasks-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-item:last-child {
+  border-bottom: none;
+}
+
+.task-title {
+  margin: 0 0 5px 0;
+}
+
+.task-due-date {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+}
+
+.task-meta-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.task-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}

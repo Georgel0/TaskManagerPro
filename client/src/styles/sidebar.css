@@ -48,6 +48,17 @@
   color: var(--accent-color);
 }
 
+.nav-link.logout {
+  color: red;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.nav-link.logout > i {
+  margin-left: 5px;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     margin-left: 0;

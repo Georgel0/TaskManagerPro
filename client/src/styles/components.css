@@ -1,18 +1,80 @@
-.app-wrapper {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  background-color: var(--card-background);
-  transition: background-color 0.3s ease;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+  font-size: 0.95rem;
 }
 
-.main-content {
-  flex-grow: 1;
-  overflow-y: auto;
-  min-width: 0;
+.btn-primary {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  background: none;
+  padding: 8px;
+  color: var(--sec-text-color);
+}
+
+.btn-icon:hover {
+  color: var(--accent-color);
+  background-color: var(--sec-background);
+}
+
+.card {
+  background-color: var(--card-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.card-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.p-0 { padding: 0 !important; }
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .topbar {
@@ -93,6 +155,13 @@
 
 .logout:hover {
   color: var(--sec-text-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--sec-text-color);
+  font-style: italic;
 }
 
 @keyframes pulse {
