@@ -7,15 +7,16 @@ import Link from 'next/link';
 import Sidebar from './Sidebar';
 
 export function MainLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { user } = useApp();
-  const { currentTheme } = useTheme();
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleSidebarCollapse = () => setSidebarCollapsed(!sidebarCollapsed);
 
   return (
     <div className="app-wrapper">
@@ -24,14 +25,18 @@ export function MainLayout({ children }) {
         <Sidebar
           isOpen={sidebarOpen}
           toggleSidebar={toggleSidebar}
+          toggleCollapse={toggleSidebarCollapse}
+          isCollapsed={sidebarCollapsed}
         />
       )}
 
       <main className="main-content">
-       <header className="topbar">
-          {!isLandingPage && (<button className='sidebar-toggle' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>)}
-          <h3>Task Manager Pro</h3>
-          
+        <header className="topbar">
+          {!isLandingPage && (<button className='sidebar-toggle mobile-only' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>)}
+          <div className="logo-group">
+            <div className="logo-image"></div>
+            <h3>Task Manager Pro</h3>
+          </div>
           {!isLandingPage && (
             <Link href='/profile' className='topbar-profile-link' title='Profile'>
               {user?.avatar ? (

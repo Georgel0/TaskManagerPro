@@ -5,10 +5,14 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  transition: margin-left var(--transition), box-shadow var(--transition);
+  transition: 
+    width 0.3s ease-in-out, 
+    margin-left 0.3s ease-in-out, 
+    box-shadow 0.3s ease-in-out;
   flex-shrink: 0;
   z-index: 10;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   margin-left: -250px; 
 }
 
@@ -17,8 +21,10 @@
 }
 
 .sidebar-logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid var(--sec-text-color);
   text-align: center;
 }
 
@@ -36,6 +42,7 @@
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -48,15 +55,61 @@
   color: var(--accent-color);
 }
 
+.nav-text {
+  transition: opacity 0.2s ease;
+  opacity: 1;
+}
+
+.sidebar.collapsed .nav-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .nav-link.logout {
-  color: red;
+  color: var(--pri-text-color);
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
 }
 
-.nav-link.logout > i {
+.nav-link.logout i {
   margin-left: 5px;
+}
+
+.nav-link.logout:hover {
+  color: red;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar.collapsed .nav-link i {
+  padding: 4px 0;
+}
+
+.header-icon-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--sec-text-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.header-icon-btn i {
+  font-size: 1rem;
+}
+
+.header-icon-btn:hover {
+  background-color: var(--sec-background);
+  color: var(--pri-text-color);
+  transform: scale(1.05);
 }
 
 @media (max-width: 768px) {

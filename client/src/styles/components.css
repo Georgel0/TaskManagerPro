@@ -89,6 +89,30 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.logo-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: 600;
+  column-gap: var(--pri-text-color);
+  font-size: 1.2rem;
+}
+
+.logo-image {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  background-color: var(--accent-color);
+  -webkit-mask-image: url('/logo.svg');
+  mask-image: url('/logo.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
 .sidebar-toggle {
   background: none;
   border: none;
@@ -164,6 +188,14 @@
   font-style: italic;
 }
 
+.mobile-only {
+  display: none !important; 
+}
+
+.desktop-only {
+  display: flex !important;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(0.95);
@@ -177,4 +209,14 @@
     transform: scale(0.95);
     opacity: 0.7;
   }
+}
+
+@media (max-width: 768px) {
+   .mobile-only {
+    display: flex !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  } 
 }
