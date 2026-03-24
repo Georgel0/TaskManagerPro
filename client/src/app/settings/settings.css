@@ -1,0 +1,19 @@
+.theme-selector-section {
+  padding: 1rem;
+}
+
+.theme-selector-section h3 {
+  font-size: 0.8rem;
+  color: var(--pri-text-color);
+}
+
+.theme-selector-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  background-color: var(--sec-background);
+  color: var(--pri-text-color);
+  border: 1px solid var(--sec-background);
+}

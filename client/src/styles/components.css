@@ -1,3 +1,7 @@
+.page-content {
+  padding: 20px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -99,9 +103,8 @@
 }
 
 .logo-image {
-  width: 30px;
-  height: 30px;
-  margin-right: 8px;
+  width: 35px;
+  height: 35px;
   background-color: var(--accent-color);
   -webkit-mask-image: url('/logo.svg');
   mask-image: url('/logo.svg');
@@ -194,6 +197,10 @@
 
 .desktop-only {
   display: flex !important;
+}
+
+.error-message {
+  color: var(--error-color);
 }
 
 @keyframes pulse {

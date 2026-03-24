@@ -5,7 +5,7 @@ export default function Settings() {
   const { currentTheme, changeTheme, groupedThemes } = useTheme();
 
   return (
-    <div>
+    <div className='page-content'>
       <div className="theme-selector-section">
         <h3>Select Theme:</h3>
         <select 

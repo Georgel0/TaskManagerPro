@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useApp } from '@/context';
-import './tasks.css'
+import './tasks.css';
 
 export default function Tasks() {
   const { user } = useApp();
@@ -9,7 +9,6 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [filter, setFilter] = useState('All');
 
   useEffect(() => {
@@ -53,56 +52,49 @@ export default function Tasks() {
   });
 
   return (
-    <div className="page-content" style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="page-content">
+      <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> All Tasks</h2>
-        <button className="btn btn-primary" style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: 'none', backgroundColor: 'var(--accent-color)', color: '#fff', cursor: 'pointer' }}>
-          <i className="fas fa-plus"></i> New Task
+        <button className="btn btn-primary">
+          <i className="fas fa-plus"></i> New Task 
         </button>
       </div>
 
-      <div className="filters" style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+      <div className="tasks-filters">
         {['All', 'Active', 'Completed'].map(f => (
           <button 
             key={f}
             onClick={() => setFilter(f)}
-            style={{ 
-              padding: '6px 12px', 
-              borderRadius: '20px', 
-              border: '1px solid var(--border-color)',
-              backgroundColor: filter === f ? 'var(--accent-color)' : 'var(--card-background)',
-              color: filter === f ? '#fff' : 'var(--pri-text-color)',
-              cursor: 'pointer'
-            }}
+            className={`filter-btn ${filter === f ? 'active' : ''}`}
           >
             {f}
           </button>
         ))}
       </div>
 
-      {error && <div className="error-message" style={{ color: 'var(--error-color)' }}>{error}</div>}
+      {error && <div className="error-message">{error}</div>}
 
-      <div className="card dashboard-card">
+      <div className="card">
         <div className="card-body p-0">
           {filteredTasks.length === 0 ? (
-            <p className="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--sec-text-color)' }}>
+            <p className="tasks-empty-state">
               No tasks found for this filter.
             </p>
           ) : (
-            <ul className="task-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <ul className="tasks-list">
               {filteredTasks.map(task => (
-                <li key={task.id} className="task-item" style={{ padding: '15px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div className="task-item-main">
-                    <h4 style={{ margin: '0 0 5px 0' }}>{task.title}</h4>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--sec-text-color)' }}>
+                <li key={task.id} className="tasks-item">
+                  <div className="task-info-group">
+                    <h4 className="task-title">{task.title}</h4>
+                    <span className="task-due-date">
                       <i className="fas fa-calendar"></i> Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
                     </span>
                   </div>
-                  <div className="task-meta" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px' }}>
+                  <div className="task-meta-group">
+                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
                       {task.priority || 'Medium'}
                     </span>
-                    <span className="badge status-badge" style={{ backgroundColor: 'var(--sec-background)', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px' }}>
+                    <span className="badge status-badge">
                       {task.status || 'To Do'}
                     </span>
                   </div>
