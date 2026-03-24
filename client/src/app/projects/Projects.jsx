@@ -15,6 +15,9 @@ export default function Projects() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '' });
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -53,7 +56,7 @@ export default function Projects() {
       });
 
       if (!response.ok) throw new Error('Failed to create project');
-      
+
       const newProject = await response.json();
       setProjects([newProject, ...projects]);
       setIsModalOpen(false);
@@ -67,10 +70,11 @@ export default function Projects() {
     }
   };
 
-  const handleDeleteProject = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this project? All associated tasks will be lost.")) return;
-    
+  const confirmDeleteProject = async (id) => {
+    setIsSubmitting(true);
+    if (!id) return;
     const token = localStorage.getItem('token');
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${id}`, {
         method: 'DELETE',
@@ -78,11 +82,16 @@ export default function Projects() {
       });
 
       if (!response.ok) throw new Error('Failed to delete project');
-      
+
       setProjects(projects.filter(p => p.id !== id));
       toast.success('Project deleted!');
+
+      setIsDeleteModalOpen(false);
+      setSelectedProject(null);
     } catch (err) {
       toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -126,7 +135,10 @@ export default function Projects() {
                   )}
                 </div>
                 {project.owner_id === user.id && (
-                  <button className="btn-icon delete-btn" onClick={() => handleDeleteProject(project.id)} title="Delete Project">
+                  <button className="btn-icon delete-btn" onClick={() => {
+                    setSelectedProject(project);
+                    setIsDeleteModalOpen(true);
+                  }} title="Delete Project">
                     <i className="fas fa-trash"></i>
                   </button>
                 )}
@@ -155,20 +167,20 @@ export default function Projects() {
               <div className="modal-body">
                 <div className="form-group">
                   <label>Project Name *</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-control"
+                    required
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea 
-                    className="form-control" 
+                  <textarea
+                    className="form-control"
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   ></textarea>
                 </div>
               </div>
@@ -179,6 +191,42 @@ export default function Projects() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="text-error">Confirm Deletion</h2>
+              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-3 text-secondary">Are you sure you want to delete <strong>{selectedProject?.name}</strong>?
+                This action is permanent and all tasks will be removed.</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsDeleteModalOpen(false)}
+                title='Close Modal'>
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmDeleteProject(selectedProject?.id);
+                }}
+                className="btn btn-danger" 
+                title='Delete'
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

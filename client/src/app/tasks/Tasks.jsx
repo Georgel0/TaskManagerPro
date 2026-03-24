@@ -19,6 +19,9 @@ export default function Tasks() {
     title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: ''
   });
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -77,10 +80,12 @@ export default function Tasks() {
     }
   };
 
-  const handleDeleteTask = async (id) => {
-    if (!window.confirm("Delete this task?")) return;
+  const confirmDeleteTask = async (id) => {
     
+    setIsSubmitting(true);
+    if (!id) return;
     const token = localStorage.getItem('token');
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
         method: 'DELETE',
@@ -91,8 +96,13 @@ export default function Tasks() {
       
       setTasks(tasks.filter(t => t.id !== id));
       toast.success('Task deleted!');
+
+      setIsDeleteModalOpen(false);
+      setSelectedTask(null);
     } catch (err) {
       toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -154,7 +164,10 @@ export default function Tasks() {
                     <span className="badge status-badge">
                       {task.status || 'To Do'}
                     </span>
-                    <button className="btn-icon delete-btn" onClick={() => handleDeleteTask(task.id)} title="Delete Task">
+                    <button className="btn-icon delete-btn" onClick={() => {
+                      setIsDeleteModalOpen(true);
+                      setSelectedTask(task)
+                    }} title="Delete Task">
                       <i className="fas fa-trash"></i>
                     </button>
                   </div>
@@ -234,6 +247,42 @@ export default function Tasks() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="text-error">Confirm Deletion</h2>
+              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-3 text-secondary">Are you sure you want to delete <strong>{selectedTask?.name}</strong>?
+                This action is permanent.</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsDeleteModalOpen(false)}
+                title='Close Modal'>
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmDeleteTask(selectedTask?.id);
+                }}
+                className="btn btn-danger" 
+                title='Delete'
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Deleting..' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

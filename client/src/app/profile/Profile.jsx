@@ -77,11 +77,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteAccountClick = () => {
-    setIsDeleteModalOpen(true);
-    setDeletePassword('');
-  };
-
   const confirmDeleteAccount = async (e) => {
     e.preventDefault();
 
@@ -178,7 +173,10 @@ export default function ProfilePage() {
         <h2 className="text-error mb-2">Danger Zone</h2>
         <p className="mb-4 text-sm">Once you delete your account, there is no going back. All projects and tasks will be removed.</p>
         <div className="profile-actions">
-          <button className="btn btn-danger" onClick={handleDeleteAccountClick}>
+          <button className="btn btn-danger" onClick={() => {
+            setIsDeleteModalOpen(true);
+            setDeletePassword('');
+          }}>
             Delete Account
           </button>
           <button onClick={handleLogout} className="btn-logout">
@@ -211,10 +209,14 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  title='Close Modal'>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger">
+                <button type="submit" className="btn btn-danger" title='Delete'>
                   Permanently Delete
                 </button>
               </div>
