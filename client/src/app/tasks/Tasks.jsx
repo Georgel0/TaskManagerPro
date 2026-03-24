@@ -59,7 +59,7 @@ export default function Tasks() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({...formData, assigned_user_id: user.id })
       });
 
       if (!response.ok) throw new Error('Failed to create task');

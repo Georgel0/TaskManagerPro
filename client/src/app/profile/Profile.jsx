@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useApp } from '@/context';
-
 import './profile.css';
 
 export default function ProfilePage() {
@@ -9,19 +9,15 @@ export default function ProfilePage() {
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
   const [newUsername, setNewUsername] = useState('');
-  const [usernameMessage, setUsernameMessage] = useState({ type: '', text: '' });
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
-  const [deleteMessage, setDeleteMessage] = useState({ type: '', text: '' });
 
 
   const handleUsernameChange = async (e) => {
     e.preventDefault();
-    setUsernameMessage({ type: '', text: '' });
 
     const token = localStorage.getItem('token');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -43,19 +39,18 @@ export default function ProfilePage() {
         throw new Error(data.error || 'Failed to update username.');
       }
 
-      setUsernameMessage({ type: 'success', text: 'Username updated successfully!' });
+      toast.success("Username updated successfully!");
       setNewUsername('');
 
       setUser(prevUser => ({ ...prevUser, name: newUsername }));
 
     } catch (err) {
-      setUsernameMessage({ type: 'error', text: err.message });
+      toast.error(err.message);
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    setPasswordMessage({ type: '', text: '' });
 
     const token = localStorage.getItem('token');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -76,23 +71,21 @@ export default function ProfilePage() {
         throw new Error(data.error || 'Failed to update password');
       }
 
-      setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
+      toast,success("Password updated successfully!");
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
-      setPasswordMessage({ type: 'error', text: err.message });
+      toast.error(err.message);
     }
   };
 
   const handleDeleteAccountClick = () => {
     setIsDeleteModalOpen(true);
-    setDeleteMessage({ type: '', text: '' });
     setDeletePassword('');
   };
 
   const confirmDeleteAccount = async (e) => {
     e.preventDefault();
-    setDeleteMessage({ type: '', text: '' });
 
     const token = localStorage.getItem('token');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -115,7 +108,7 @@ export default function ProfilePage() {
       localStorage.removeItem('user');
       window.location.href = '/';
     } catch (err) {
-      setDeleteMessage({ type: 'error', text: err.message });
+      toast.error(err.message);
     }
   };
 
@@ -160,11 +153,6 @@ export default function ProfilePage() {
           />
           <button type="submit" className="btn-primary">Update Username</button>
         </form>
-        {usernameMessage.text && (
-          <p className='password-message' style={{ color: usernameMessage.type === 'error' ? 'var(--error-color)' : 'var(--success-color)' }}>
-            {usernameMessage.text}
-          </p>
-        )}
 
         <h2>Change Password</h2>
         <form onSubmit={handlePasswordChange} className='username-change-form'>
@@ -186,11 +174,6 @@ export default function ProfilePage() {
           />
           <button type="submit" className="btn-primary">Update Password</button>
         </form>
-        {passwordMessage.text && (
-          <p className='password-message' style={{ color: passwordMessage.type === 'error' ? 'var(--error-color)' : 'var(--success-color)' }}>
-            {passwordMessage.text}
-          </p>
-        )}
       </div>
 
       <div className="profile-card danger-zone">
@@ -221,11 +204,6 @@ export default function ProfilePage() {
                 onChange={(e) => setDeletePassword(e.target.value)}
                 required
               />
-              {deleteMessage.text && (
-                <p className='password-message' style={{ color: 'var(--error-color)', margin: '10px 0' }}>
-                  {deleteMessage.text}
-                </p>
-              )}
 
               <div className="modal-actions">
                 <button 
