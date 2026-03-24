@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useApp, useTheme } from '@/context';
+import { Toaster } from 'react-hot-toast';
+import { useApp } from '@/context';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
 
@@ -20,6 +21,8 @@ export function MainLayout({ children }) {
 
   return (
     <div className="app-wrapper">
+
+      <Toaster position="bottom-right" />
 
       {!isLandingPage && (
         <Sidebar

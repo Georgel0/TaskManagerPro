@@ -125,11 +125,6 @@
   border-left: 4px solid var(--warning-color);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @media (max-width: 900px) {
   .dashboard-content-grid {
     grid-template-columns: 1fr;
