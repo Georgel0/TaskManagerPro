@@ -76,7 +76,7 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
             </span>
           </Link>
         ))}
-        <button onClick={handleLogout} className='nav-link logout'>
+        <button onClick={handleLogout} className='nav-link logout'  title='Log Out'>
           {isCollapsed ? '' : 'Log Out'} <i className="fa fa-right-from-bracket"></i>
         </button>
       </nav>

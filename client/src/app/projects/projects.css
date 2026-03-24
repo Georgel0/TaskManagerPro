@@ -9,6 +9,9 @@
   padding: 40px;
   text-align: center;
   color: var(--sec-text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .projects-empty-icon {
@@ -25,9 +28,7 @@
 
 .project-card {
   transition: transform 0.2s;
-  cursor: pointer;
 }
-
 .project-card:hover {
   transform: translateY(-2px);
 }
@@ -37,8 +38,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+  padding: 15px 20px;
+}
+
+.project-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.project-title-group h3 {
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .badge-owner {
@@ -53,11 +63,11 @@
 
 .project-description {
   color: var(--sec-text-color);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-bottom: 15px;
 }
 
 .project-meta {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--sec-text-color);
 }

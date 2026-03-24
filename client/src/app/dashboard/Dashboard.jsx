@@ -27,7 +27,6 @@ export default function Dashboard() {
     }
 
     try {
-      // Fetch Dashboard stats and Projects (for the modal) simultaneously
       const [dashRes, projectsRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -76,7 +75,6 @@ export default function Dashboard() {
       setIsModalOpen(false);
       setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '' });
       
-      // Refresh dashboard data to update stats and active task list
       fetchData(); 
     } catch (err) {
       toast.error(err.message);
@@ -96,9 +94,9 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="dashboard-container">
-        <div className="error-card">
-          <i className="fas fa-exclamation-triangle"></i>
+      <div className="page-content">
+        <div className="error-message text-center mt-4">
+          <i className="fas fa-exclamation-triangle mb-2"></i>
           <p>{error}</p>
         </div>
       </div>
@@ -108,75 +106,74 @@ export default function Dashboard() {
   const { statistics, activeTasks, upcomingDeadlines } = dashboardData;
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
+    <div className="page-content dashboard-container">
+      <header className="dashboard-header mb-4 d-flex justify-between align-center">
         <div>
           <h1>Welcome back, {user.name}</h1>
-          <p className="text-secondary">Here are your projects.</p>
+          <p className="text-secondary mt-2">Here is your overview.</p>
         </div>
-        <div className="header-actions">
+        <div className="d-flex gap-sm">
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
             <i className="fas fa-plus"></i> New Task
           </button>
-          <Link href='/projects' className="btn btn-primary">
-            <i className="fas fa-arrow-right"></i> See Projects
+          <Link href='/projects' className="btn btn-secondary desktop-only">
+            <i className="fas fa-arrow-right"></i> Projects
           </Link>
         </div>
       </header>
 
-      <section className="stats-grid">
-        <div className="stat-card">
+      <section className="stats-grid mb-4">
+        <div className="card stat-card">
           <div className="stat-icon bg-primary-light">
             <i className="fas fa-tasks text-primary"></i>
           </div>
           <div className="stat-info">
-            <h3>Total Tasks</h3>
-            <p className="stat-number">{statistics.totalTasks}</p>
+            <p className="text-secondary text-sm">Total Tasks</p>
+            <h3>{statistics.totalTasks}</h3>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="card stat-card">
           <div className="stat-icon bg-warning-light">
             <i className="fas fa-hourglass-half text-warning"></i>
           </div>
           <div className="stat-info">
-            <h3>Pending</h3>
-            <p className="stat-number">{statistics.pendingTasks}</p>
+            <p className="text-secondary text-sm">Pending</p>
+            <h3>{statistics.pendingTasks}</h3>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="card stat-card">
           <div className="stat-icon bg-success-light">
             <i className="fas fa-check-circle text-success"></i>
           </div>
           <div className="stat-info">
-            <h3>Completed</h3>
-            <p className="stat-number">{statistics.completedTasks}</p>
+            <p className="text-secondary text-sm">Completed</p>
+            <h3>{statistics.completedTasks}</h3>
           </div>
         </div>
       </section>
 
       <div className="dashboard-content-grid">
-        <section className="card dashboard-card">
+        <section className="card">
           <div className="card-header">
             <h2><i className="fas fa-list-ul"></i> Active Tasks</h2>
-            <Link href="/tasks" className="btn btn-icon"><i className="fas fa-arrow-right"></i></Link>
+            <Link href="/tasks" className="btn-icon"><i className="fas fa-arrow-right"></i></Link>
           </div>
           <div className="card-body p-0">
             {activeTasks.length === 0 ? (
               <p className="empty-state">No active tasks right now.</p>
             ) : (
-              <ul className="task-list">
+              <ul className="dash-task-list">
                 {activeTasks.map(task => (
-                  <li key={task.id} className="task-item">
-                    <div className="task-item-main">
-                      <span className={`status-dot status-${task.status.toLowerCase().replace(' ', '-')}`}></span>
-                      <div className="task-details">
+                  <li key={task.id} className="dash-task-item">
+                    <div className="dash-task-main">
+                      <div className="dash-task-details">
                         <h4>{task.title}</h4>
                         <span className="text-xs text-secondary">
                           Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
                         </span>
                       </div>
                     </div>
-                    <div className="task-item-meta">
+                    <div className="dash-task-meta">
                       <span className={`badge priority-${task.priority.toLowerCase()}`}>{task.priority}</span>
                       <span className="badge status-badge">{task.status}</span>
                     </div>
@@ -187,7 +184,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="card dashboard-card">
+        <section className="card">
           <div className="card-header">
             <h2><i className="fas fa-clock"></i> Upcoming Deadlines</h2>
           </div>
@@ -195,11 +192,11 @@ export default function Dashboard() {
             {upcomingDeadlines.length === 0 ? (
               <p className="empty-state">No immediate deadlines in the next 7 days.</p>
             ) : (
-              <ul className="task-list">
+              <ul className="dash-task-list">
                 {upcomingDeadlines.map(task => (
-                  <li key={task.id} className="task-item border-left-warning">
-                    <div className="task-item-main">
-                      <div className="task-details">
+                  <li key={task.id} className="dash-task-item border-left-warning">
+                    <div className="dash-task-main">
+                      <div className="dash-task-details">
                         <h4>{task.title}</h4>
                         <span className="text-xs text-warning">
                           <i className="fas fa-exclamation-circle"></i> Due: {new Date(task.deadline).toLocaleDateString()}
@@ -219,15 +216,17 @@ export default function Dashboard() {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Quick Add Task</h3>
-              <button className="btn-icon close-modal-btn" onClick={() => setIsModalOpen(false)}><i className="fas fa-times"></i></button>
+              <button className="btn-icon" onClick={() => setIsModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
             </div>
             
             {projects.length === 0 ? (
-              <div className="modal-body text-center">
-                <p className="text-warning">
+              <div className="modal-body text-center flex-col gap-md">
+                <p className="text-warning mb-3">
                   <i className="fas fa-exclamation-triangle"></i> You must create a project before adding tasks.
                 </p>
-                <Link href="/projects" className="btn btn-primary mt-2">Go to Projects</Link>
+                <Link href="/projects" className="btn btn-primary">Go to Projects</Link>
               </div>
             ) : (
               <form onSubmit={handleCreateTask}>
@@ -257,8 +256,8 @@ export default function Dashboard() {
                     </select>
                   </div>
 
-                  <div className="form-group" style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="form-row">
+                    <div className="form-group">
                       <label>Priority</label>
                       <select 
                         className="form-control" 
@@ -270,7 +269,7 @@ export default function Dashboard() {
                         <option value="High">High</option>
                       </select>
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>Deadline</label>
                       <input 
                         type="date" 

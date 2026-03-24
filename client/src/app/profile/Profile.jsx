@@ -29,7 +29,6 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-
         body: JSON.stringify({ newUsername })
       });
 
@@ -41,7 +40,6 @@ export default function ProfilePage() {
 
       toast.success("Username updated successfully!");
       setNewUsername('');
-
       setUser(prevUser => ({ ...prevUser, name: newUsername }));
 
     } catch (err) {
@@ -71,7 +69,7 @@ export default function ProfilePage() {
         throw new Error(data.error || 'Failed to update password');
       }
 
-      toast,success("Password updated successfully!");
+      toast.success("Password updated successfully!");
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
@@ -126,38 +124,38 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="profile-container">
-      <h1 style={{ marginBottom: '24px' }}>Profile</h1>
+    <div className="profile-container page-content">
+      <h1 className="mb-4">Profile</h1>
 
       {user && (
-        <div className="profile-card profile-header">
+        <div className="card profile-card profile-header">
           <img className="profile-avatar" src={user.avatar} alt="Avatar" />
-          <div className="info-group">
-            <p><strong>{user.name}</strong></p>
-            <p>{user.email}</p>
-            <p style={{ fontSize: '0.85rem' }}>Member since {new Date(user.created_at).toLocaleDateString()}</p>
+          <div className="profile-info-group">
+            <p className="profile-name">{user.name}</p>
+            <p className="text-secondary">{user.email}</p>
+            <p className="text-sm text-secondary mt-2">Member since {new Date(user.created_at).toLocaleDateString()}</p>
           </div>
         </div>
       )}
 
-      <div className="profile-card form-section">
-        <h2>Change Username</h2>
-        <form onSubmit={handleUsernameChange} className='password-change-form'>
+      <div className="card profile-card">
+        <h2 className="mb-3">Change Username</h2>
+        <form onSubmit={handleUsernameChange} className="form-group mb-4 d-flex flex-col gap-sm">
           <input
-            className="input-field"
+            className="form-control"
             type="text"
             placeholder="New Username"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
             required
           />
-          <button type="submit" className="btn-primary">Update Username</button>
+          <button type="submit" className="btn btn-primary">Update Username</button>
         </form>
 
-        <h2>Change Password</h2>
-        <form onSubmit={handlePasswordChange} className='username-change-form'>
+        <h2 className="mb-3 mt-4">Change Password</h2>
+        <form onSubmit={handlePasswordChange} className="form-group d-flex flex-col gap-sm">
           <input
-            className="input-field"
+            className="form-control"
             type="password"
             placeholder="Current Password"
             value={currentPassword}
@@ -165,55 +163,58 @@ export default function ProfilePage() {
             required
           />
           <input
-            className="input-field"
+            className="form-control"
             type="password"
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
-          <button type="submit" className="btn-primary">Update Password</button>
+          <button type="submit" className="btn btn-primary">Update Password</button>
         </form>
       </div>
 
-      <div className="profile-card danger-zone">
-        <h2>Danger Zone</h2>
-        <p>Once you delete your account, there is no going back. All projects and tasks will be removed.</p>
-        <div className='profile-acctions'>
-          <button className='delete-acc-btn' onClick={handleDeleteAccountClick}>
+      <div className="card profile-card danger-zone">
+        <h2 className="text-error mb-2">Danger Zone</h2>
+        <p className="mb-4 text-sm">Once you delete your account, there is no going back. All projects and tasks will be removed.</p>
+        <div className="profile-actions">
+          <button className="btn btn-danger" onClick={handleDeleteAccountClick}>
             Delete Account
           </button>
-          <button onClick={handleLogout} className='logout'>
+          <button onClick={handleLogout} className="btn-logout">
             Log Out
           </button>
         </div>
       </div>
 
       {isDeleteModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Confirm Deletion</h2>
-            <p>This action is permanent. All your projects and tasks will be permanently removed.</p>
-
-            <form onSubmit={confirmDeleteAccount} className="delete-modal-form">
-              <input
-                className="input-field"
-                type="password"
-                placeholder="Enter your password to confirm"
-                value={deletePassword}
-                onChange={(e) => setDeletePassword(e.target.value)}
-                required
-              />
-
-              <div className="modal-actions">
-                <button 
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                >
+        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="text-error">Confirm Deletion</h2>
+              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <form onSubmit={confirmDeleteAccount}>
+              <div className="modal-body">
+                <p className="mb-3 text-secondary">This action is permanent. All your projects and tasks will be permanently removed.</p>
+                <div className="form-group">
+                  <input
+                    className="form-control"
+                    type="password"
+                    placeholder="Enter your password to confirm"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="delete-acc-btn">
+                <button type="submit" className="btn btn-danger">
                   Permanently Delete
                 </button>
               </div>

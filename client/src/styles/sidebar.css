@@ -66,10 +66,13 @@
 }
 
 .nav-link.logout {
+  border: none;
+  background: none;
   color: var(--pri-text-color);
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  margin-top: auto;
 }
 
 .nav-link.logout i {
@@ -77,6 +80,8 @@
 }
 
 .nav-link.logout:hover {
+  background: none;
+  border: none;
   color: red;
 }
 

@@ -86,10 +86,15 @@ export default function Projects() {
     }
   };
 
-  if (loading || !user) return <div className='loading-state'><div className="pulse-ring"></div><p>Loading Projects...</p></div>;
+  if (loading || !user) return (
+    <div className='loading-state'>
+      <div className="pulse-ring"></div>
+      <p>Loading Projects...</p>
+    </div>
+  );
 
   return (
-    <div className="page-content projects-page">
+    <div className="page-content">
       <div className="projects-header">
         <h2><i className="fas fa-folder-open"></i> My Projects</h2>
         <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
@@ -102,18 +107,17 @@ export default function Projects() {
       {projects.length === 0 ? (
         <div className="card projects-empty-state">
           <i className="fas fa-folder-plus projects-empty-icon"></i>
-          <p>You don't have any projects yet. Create one to get started.</p>
-          <button className="btn btn-primary mt-3" onClick={() => setIsModalOpen(true)}>
-            <br />
-            <i className="fas fa-plus"></i> New 
+          <p className="mb-3">You don't have any projects yet. Create one to get started.</p>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <i className="fas fa-plus"></i> New Project
           </button>
         </div>
       ) : (
         <div className="projects-grid">
           {projects.map(project => (
-            <div key={project.id} className="card dashboard-card project-card">
-              <div className="card-header project-card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div key={project.id} className="card project-card">
+              <div className="project-card-header">
+                <div className="project-title-group">
                   <h3>{project.name}</h3>
                   {project.owner_id === user.id ? (
                     <span className="badge badge-owner">Owner</span>
@@ -123,7 +127,7 @@ export default function Projects() {
                 </div>
                 {project.owner_id === user.id && (
                   <button className="btn-icon delete-btn" onClick={() => handleDeleteProject(project.id)} title="Delete Project">
-                    <i className="fas fa-trash text-error"></i>
+                    <i className="fas fa-trash"></i>
                   </button>
                 )}
               </div>
@@ -143,7 +147,9 @@ export default function Projects() {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Create New Project</h3>
-              <button className="btn-icon close-modal-btn" onClick={() => setIsModalOpen(false)}><i className="fas fa-times"></i></button>
+              <button className="btn-icon" onClick={() => setIsModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
             </div>
             <form onSubmit={handleCreateProject}>
               <div className="modal-body">

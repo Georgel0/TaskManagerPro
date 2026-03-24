@@ -96,7 +96,12 @@ export default function Tasks() {
     }
   };
 
-  if (loading || !user) return <div className='loading-state'><div className="pulse-ring"></div><p>Loading Tasks...</p></div>;
+  if (loading || !user) return (
+    <div className='loading-state'>
+      <div className="pulse-ring"></div>
+      <p>Loading Tasks...</p>
+    </div>
+  );
 
   const filteredTasks = tasks.filter(task => {
     if (filter === 'All') return true;
@@ -119,7 +124,7 @@ export default function Tasks() {
           <button 
             key={f}
             onClick={() => setFilter(f)}
-            className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'} filter-btn`}
+            className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
           >
             {f}
           </button>
@@ -133,16 +138,16 @@ export default function Tasks() {
           {filteredTasks.length === 0 ? (
             <p className="empty-state">No tasks found for this filter.</p>
           ) : (
-            <ul className="tasks-list" style={{ listStyle: 'none', padding: 0 }}>
+            <ul className="tasks-list">
               {filteredTasks.map(task => (
-                <li key={task.id} className="tasks-item" style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', borderBottom: '1px solid var(--border-color)' }}>
+                <li key={task.id} className="tasks-item">
                   <div className="task-info-group">
                     <h4 className="task-title">{task.title}</h4>
-                    <span className="task-due-date text-xs text-secondary">
+                    <span className="text-xs text-secondary">
                       <i className="fas fa-calendar"></i> Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
                     </span>
                   </div>
-                  <div className="task-meta-group" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div className="task-meta-group">
                     <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
                       {task.priority || 'Medium'}
                     </span>
@@ -150,7 +155,7 @@ export default function Tasks() {
                       {task.status || 'To Do'}
                     </span>
                     <button className="btn-icon delete-btn" onClick={() => handleDeleteTask(task.id)} title="Delete Task">
-                      <i className="fas fa-trash text-error"></i>
+                      <i className="fas fa-trash"></i>
                     </button>
                   </div>
                 </li>
@@ -165,16 +170,20 @@ export default function Tasks() {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Create New Task</h3>
-              <button className="btn-icon close-modal-btn" onClick={() => setIsModalOpen(false)}><i className="fas fa-times"></i></button>
+              <button className="btn-icon" onClick={() => setIsModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
             </div>
             
             {projects.length === 0 ? (
               <div className="modal-body text-center">
-                <p className="text-warning"><i className="fas fa-exclamation-triangle"></i> You need to create a project first before adding tasks.</p>
+                <p className="text-warning mb-2">
+                  <i className="fas fa-exclamation-triangle"></i> You need to create a project first before adding tasks.
+                </p>
               </div>
             ) : (
               <form onSubmit={handleCreateTask}>
-                <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                <div className="modal-body modal-body-scroll">
                   <div className="form-group">
                     <label>Task Title *</label>
                     <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
@@ -188,8 +197,8 @@ export default function Tasks() {
                     </select>
                   </div>
 
-                  <div className="form-group" style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ flex: 1 }}>
+                  <div className="form-row">
+                    <div className="form-group">
                       <label>Priority</label>
                       <select className="form-control" value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
                         <option value="Low">Low</option>
@@ -197,7 +206,7 @@ export default function Tasks() {
                         <option value="High">High</option>
                       </select>
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div className="form-group">
                       <label>Status</label>
                       <select className="form-control" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
                         <option value="To Do">To Do</option>
