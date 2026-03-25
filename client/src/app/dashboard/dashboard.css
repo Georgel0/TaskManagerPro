@@ -76,6 +76,20 @@
   gap: 10px;
 }
 
+.dash-task-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.dash-task-link:hover {
+  background-color: var(--sec-background);
+}
+
 @media (min-width: 1024px) {
   .dashboard-content-grid {
     grid-template-columns: 2fr 1fr;

@@ -42,3 +42,67 @@
   gap: 15px;
   align-items: center;
 }
+
+.tasks-item {
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.tasks-item:hover {
+  background-color: var(--sec-background);
+}
+
+.task-description-preview {
+  margin-top: 2px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.task-highlight {
+  animation: taskHighlight 1.5s ease-out forwards;
+}
+
+.task-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-detail-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.task-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.task-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-detail-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sec-text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-detail-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--pri-text-color);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

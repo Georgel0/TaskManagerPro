@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useApp } from '@/context';
 import toast from 'react-hot-toast';
 import './tasks.css';
@@ -22,9 +23,29 @@ export default function Tasks() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get('highlight');
+
+  const [detailTask, setDetailTask] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!highlightId || tasks.length === 0) return;
+    setFilter('All');
+
+    setTimeout(() => {
+      const el = document.getElementById(`task-${highlightId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('task-highlight');
+        setTimeout(() => el.classList.remove('task-highlight'), 1500);
+      }
+    }, 150);
+  }, [highlightId, tasks]);
 
   const fetchData = async () => {
     const token = localStorage.getItem('token');
@@ -37,10 +58,10 @@ export default function Tasks() {
       ]);
 
       if (!tasksRes.ok || !projectsRes.ok) throw new Error('Failed to fetch data');
-      
+
       const tasksData = await tasksRes.json();
       const projectsData = await projectsRes.json();
-      
+
       setTasks(tasksData);
       setProjects(projectsData);
     } catch (err) {
@@ -62,11 +83,11 @@ export default function Tasks() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({...formData, assigned_user_id: user.id })
+        body: JSON.stringify({ ...formData, assigned_user_id: user.id })
       });
 
       if (!response.ok) throw new Error('Failed to create task');
-      
+
       const newTask = await response.json();
       setTasks([newTask, ...tasks]);
       setIsModalOpen(false);
@@ -81,7 +102,7 @@ export default function Tasks() {
   };
 
   const confirmDeleteTask = async (id) => {
-    
+
     setIsSubmitting(true);
     if (!id) return;
     const token = localStorage.getItem('token');
@@ -93,7 +114,7 @@ export default function Tasks() {
       });
 
       if (!response.ok) throw new Error('Failed to delete task');
-      
+
       setTasks(tasks.filter(t => t.id !== id));
       toast.success('Task deleted!');
 
@@ -125,13 +146,13 @@ export default function Tasks() {
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> All Tasks</h2>
         <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <i className="fas fa-plus"></i> New Task 
+          <i className="fas fa-plus"></i> New Task
         </button>
       </div>
 
       <div className="tasks-filters">
         {['All', 'Active', 'Completed'].map(f => (
-          <button 
+          <button
             key={f}
             onClick={() => setFilter(f)}
             className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
@@ -150,9 +171,19 @@ export default function Tasks() {
           ) : (
             <ul className="tasks-list">
               {filteredTasks.map(task => (
-                <li key={task.id} className="tasks-item">
+                <li
+                  key={task.id}
+                  id={`task-${task.id}`}
+                  className="tasks-item"
+                  onClick={() => { setDetailTask(task); setIsDetailModalOpen(true); }}
+                >
                   <div className="task-info-group">
                     <h4 className="task-title">{task.title}</h4>
+                    {task.description && (
+                      <p className="task-description-preview text-xs text-secondary">
+                        {task.description}
+                      </p>
+                    )}
                     <span className="text-xs text-secondary">
                       <i className="fas fa-calendar"></i> Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
                     </span>
@@ -164,10 +195,15 @@ export default function Tasks() {
                     <span className="badge status-badge">
                       {task.status || 'To Do'}
                     </span>
-                    <button className="btn-icon delete-btn" onClick={() => {
-                      setIsDeleteModalOpen(true);
-                      setSelectedTask(task)
-                    }} title="Delete Task">
+                    <button
+                      className="btn-icon delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsDeleteModalOpen(true);
+                        setSelectedTask(task);
+                      }}
+                      title="Delete Task"
+                    >
                       <i className="fas fa-trash"></i>
                     </button>
                   </div>
@@ -187,7 +223,7 @@ export default function Tasks() {
                 <i className="fas fa-times"></i>
               </button>
             </div>
-            
+
             {projects.length === 0 ? (
               <div className="modal-body text-center">
                 <p className="text-warning mb-2">
@@ -199,12 +235,12 @@ export default function Tasks() {
                 <div className="modal-body modal-body-scroll">
                   <div className="form-group">
                     <label>Task Title *</label>
-                    <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                    <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Project *</label>
-                    <select className="form-control" required value={formData.project_id} onChange={(e) => setFormData({...formData, project_id: e.target.value})}>
+                    <select className="form-control" required value={formData.project_id} onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}>
                       <option value="" disabled>Select a project</option>
                       {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
@@ -213,7 +249,7 @@ export default function Tasks() {
                   <div className="form-row">
                     <div className="form-group">
                       <label>Priority</label>
-                      <select className="form-control" value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
+                      <select className="form-control" value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })}>
                         <option value="Low">Low</option>
                         <option value="Medium">Medium</option>
                         <option value="High">High</option>
@@ -221,7 +257,7 @@ export default function Tasks() {
                     </div>
                     <div className="form-group">
                       <label>Status</label>
-                      <select className="form-control" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
+                      <select className="form-control" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
                         <option value="To Do">To Do</option>
                         <option value="In Progress">In Progress</option>
                         <option value="Done">Done</option>
@@ -231,12 +267,12 @@ export default function Tasks() {
 
                   <div className="form-group">
                     <label>Deadline</label>
-                    <input type="date" className="form-control" value={formData.deadline} onChange={(e) => setFormData({...formData, deadline: e.target.value})} />
+                    <input type="date" className="form-control" value={formData.deadline} onChange={(e) => setFormData({ ...formData, deadline: e.target.value })} />
                   </div>
 
                   <div className="form-group">
                     <label>Description</label>
-                    <textarea className="form-control" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}></textarea>
+                    <textarea className="form-control" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}></textarea>
                   </div>
                 </div>
                 <div className="modal-footer">
@@ -276,12 +312,49 @@ export default function Tasks() {
                 onClick={() => {
                   confirmDeleteTask(selectedTask?.id);
                 }}
-                className="btn btn-danger" 
+                className="btn btn-danger"
                 title='Delete'
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Deleting..' : 'Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDetailModalOpen && detailTask && (
+        <div className="modal-overlay" onClick={() => setIsDetailModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{detailTask.title}</h3>
+              <button className="btn-icon" onClick={() => setIsDetailModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body task-detail-body">
+              <div className="task-detail-badges">
+                <span className={`badge priority-${detailTask.priority?.toLowerCase() || 'medium'}`}>
+                  {detailTask.priority || 'Medium'}
+                </span>
+                <span className="badge status-badge">{detailTask.status || 'To Do'}</span>
+              </div>
+
+              <div className="task-detail-row">
+                <i className="fas fa-calendar-alt text-secondary"></i>
+                <span className="text-secondary text-sm">Deadline:</span>
+                <span>{detailTask.deadline ? new Date(detailTask.deadline).toLocaleDateString() : 'No deadline set'}</span>
+              </div>
+
+              <div className="task-detail-section">
+                <p className="task-detail-label">Description</p>
+                <p className="task-detail-description">
+                  {detailTask.description || <span className="text-secondary">No description provided.</span>}
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setIsDetailModalOpen(false)}>Close</button>
             </div>
           </div>
         </div>

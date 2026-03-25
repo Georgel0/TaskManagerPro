@@ -1,13 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context';
 import toast from 'react-hot-toast';
 import './dashboard.css';
 
 export default function Dashboard() {
   const { user } = useApp();
-  
+  const router = useRouter();
+
   const [dashboardData, setDashboardData] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,16 +68,16 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({...formData, assigned_user_id: user.id })
+        body: JSON.stringify({ ...formData, assigned_user_id: user.id })
       });
 
       if (!response.ok) throw new Error('Failed to create task');
-      
+
       toast.success('Task created successfully!');
       setIsModalOpen(false);
       setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '' });
-      
-      fetchData(); 
+
+      fetchData();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -163,21 +165,17 @@ export default function Dashboard() {
               <p className="empty-state">No active tasks right now.</p>
             ) : (
               <ul className="dash-task-list">
-                {activeTasks.map(task => (
-                  <li key={task.id} className="dash-task-item">
+                {upcomingDeadlines.map(task => (
+                  <Link key={task.id} href={`/tasks?highlight=${task.id}`} className="dash-task-item dash-task-link border-left-warning">
                     <div className="dash-task-main">
                       <div className="dash-task-details">
                         <h4>{task.title}</h4>
-                        <span className="text-xs text-secondary">
-                          Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
+                        <span className="text-xs text-warning">
+                          <i className="fas fa-exclamation-circle"></i> Due: {new Date(task.deadline).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
-                    <div className="dash-task-meta">
-                      <span className={`badge priority-${task.priority.toLowerCase()}`}>{task.priority}</span>
-                      <span className="badge status-badge">{task.status}</span>
-                    </div>
-                  </li>
+                  </Link>
                 ))}
               </ul>
             )}
@@ -220,7 +218,7 @@ export default function Dashboard() {
                 <i className="fas fa-times"></i>
               </button>
             </div>
-            
+
             {projects.length === 0 ? (
               <div className="modal-body text-center flex-col gap-md">
                 <p className="text-warning mb-3">
@@ -233,23 +231,23 @@ export default function Dashboard() {
                 <div className="modal-body">
                   <div className="form-group">
                     <label>Task Title *</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      required 
+                    <input
+                      type="text"
+                      className="form-control"
+                      required
                       placeholder="What needs to be done?"
                       value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Project *</label>
-                    <select 
-                      className="form-control" 
-                      required 
+                    <select
+                      className="form-control"
+                      required
                       value={formData.project_id}
-                      onChange={(e) => setFormData({...formData, project_id: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
                     >
                       <option value="" disabled>Assign to project</option>
                       {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -259,10 +257,10 @@ export default function Dashboard() {
                   <div className="form-row">
                     <div className="form-group">
                       <label>Priority</label>
-                      <select 
-                        className="form-control" 
+                      <select
+                        className="form-control"
                         value={formData.priority}
-                        onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                       >
                         <option value="Low">Low</option>
                         <option value="Medium">Medium</option>
@@ -271,11 +269,11 @@ export default function Dashboard() {
                     </div>
                     <div className="form-group">
                       <label>Deadline</label>
-                      <input 
-                        type="date" 
-                        className="form-control" 
+                      <input
+                        type="date"
+                        className="form-control"
                         value={formData.deadline}
-                        onChange={(e) => setFormData({...formData, deadline: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                       />
                     </div>
                   </div>
