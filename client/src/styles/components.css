@@ -79,6 +79,22 @@
   background: none;
 }
 
+.edit-btn {
+  color: var(--sec-text-color);
+  background: none;
+}
+
+.edit-btn:hover {
+  color: var(--accent-color);
+  background: none;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .card {
   background-color: var(--card-background);
   border-radius: var(--radius-md);
@@ -140,7 +156,7 @@
 .logo-image {
   width: 35px;
   height: 35px;
-  background-color: var(--accent-color);
+  background-color: var(--pri-text-color);
   -webkit-mask-image: url('/logo.svg');
   mask-image: url('/logo.svg');
   -webkit-mask-size: contain;

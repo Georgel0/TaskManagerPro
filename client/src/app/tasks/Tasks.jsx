@@ -29,6 +29,12 @@ export default function Tasks() {
   const [detailTask, setDetailTask] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    title: '', description: '', status: 'To Do', priority: 'Medium', deadline: ''
+  });
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -127,6 +133,35 @@ export default function Tasks() {
     }
   };
 
+  const handleEditTask = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${editingTask.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editFormData)
+      });
+
+      if (!response.ok) throw new Error('Failed to update task');
+
+      const updatedTask = await response.json();
+      setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+      setIsEditModalOpen(false);
+      setEditingTask(null);
+      toast.success('Task updated successfully!');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading || !user) return (
     <div className='loading-state'>
       <div className="pulse-ring"></div>
@@ -195,17 +230,37 @@ export default function Tasks() {
                     <span className="badge status-badge">
                       {task.status || 'To Do'}
                     </span>
-                    <button
-                      className="btn-icon delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsDeleteModalOpen(true);
-                        setSelectedTask(task);
-                      }}
-                      title="Delete Task"
-                    >
-                      <i className="fas fa-trash"></i>
-                    </button>
+                    <div className="action-buttons">
+                      <button
+                        className="btn-icon edit-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTask(task);
+                          setEditFormData({
+                            title: task.title,
+                            description: task.description || '',
+                            status: task.status || 'To Do',
+                            priority: task.priority || 'Medium',
+                            deadline: task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : ''
+                          });
+                          setIsEditModalOpen(true);
+                        }}
+                        title="Edit Task"
+                      >
+                        <i className="fas fa-pencil-alt"></i>
+                      </button>
+                      <button
+                        className="btn-icon delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDeleteModalOpen(true);
+                          setSelectedTask(task);
+                        }}
+                        title="Delete Task"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -292,9 +347,6 @@ export default function Tasks() {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="text-error">Confirm Deletion</h2>
-              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
             </div>
             <div className="modal-body">
               <p className="mb-3 text-secondary">Are you sure you want to delete <strong>{selectedTask?.name}</strong>?
@@ -356,6 +408,82 @@ export default function Tasks() {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setIsDetailModalOpen(false)}>Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && editingTask && (
+        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Task</h3>
+              <button className="btn-icon" onClick={() => setIsEditModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <form onSubmit={handleEditTask}>
+              <div className="modal-body modal-body-scroll">
+                <div className="form-group">
+                  <label>Task Title *</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    required
+                    value={editFormData.title}
+                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Priority</label>
+                    <select
+                      className="form-control"
+                      value={editFormData.priority}
+                      onChange={(e) => setEditFormData({ ...editFormData, priority: e.target.value })}
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select
+                      className="form-control"
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                    >
+                      <option value="To Do">To Do</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Done">Done</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Deadline</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={editFormData.deadline}
+                    onChange={(e) => setEditFormData({ ...editFormData, deadline: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    className="form-control"
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

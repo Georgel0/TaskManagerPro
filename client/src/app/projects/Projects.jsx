@@ -24,6 +24,9 @@ export default function Projects() {
   const [projectTasks, setProjectTasks] = useState([]);
   const [loadingProjectTasks, setLoadingProjectTasks] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({ name: '', description: '' });
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -125,6 +128,37 @@ export default function Projects() {
     }
   };
 
+  const handleEditProject = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${selectedProject.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editFormData)
+      });
+
+      if (!response.ok) throw new Error('Failed to update project');
+
+      const updatedProject = await response.json();
+      setProjects(projects.map(p =>
+        p.id === updatedProject.id ? { ...p, name: updatedProject.name, description: updatedProject.description } : p
+      ));
+      setIsEditModalOpen(false);
+      setSelectedProject(null);
+      toast.success('Project updated successfully!');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading || !user) return (
     <div className='loading-state'>
       <div className="pulse-ring"></div>
@@ -165,17 +199,31 @@ export default function Projects() {
                   )}
                 </div>
                 {project.owner_id === user.id && (
-                  <button
-                    className="btn-icon delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProject(project);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    title="Delete Project"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </button>
+                  <div className="action-buttons">
+                    <button
+                      className="btn-icon edit-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProject(project);
+                        setEditFormData({ name: project.name, description: project.description || '' });
+                        setIsEditModalOpen(true);
+                      }}
+                      title="Edit Project"
+                    >
+                      <i className="fas fa-pencil-alt"></i>
+                    </button>
+                    <button
+                      className="btn-icon delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProject(project);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      title="Delete Project"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="card-body">
@@ -238,9 +286,6 @@ export default function Projects() {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="text-error">Confirm Deletion</h2>
-              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
             </div>
             <div className="modal-body">
               <p className="mb-3 text-secondary">Are you sure you want to delete <strong>{selectedProject?.name}</strong>?
@@ -315,6 +360,47 @@ export default function Projects() {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setIsTasksModalOpen(false)}>Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && selectedProject && (
+        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Project</h3>
+              <button className="btn-icon" onClick={() => setIsEditModalOpen(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <form onSubmit={handleEditProject}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Project Name *</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    required
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    className="form-control"
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

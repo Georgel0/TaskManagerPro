@@ -115,10 +115,10 @@ export default function Dashboard() {
           <p className="text-secondary mt-2">Here is your overview.</p>
         </div>
         <div className="d-flex gap-sm">
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} title='New Task'>
             <i className="fas fa-plus"></i> New Task
           </button>
-          <Link href='/projects' className="btn btn-secondary desktop-only">
+          <Link href='/projects' className="btn btn-secondary desktop-only"title='Projects'>
             <i className="fas fa-arrow-right"></i> Projects
           </Link>
         </div>
