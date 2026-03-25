@@ -1,165 +1,32 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useApp } from '@/context';
-import toast from 'react-hot-toast';
+import { useTasks } from './useTasks';
+import { TaskItem, DeleteTaskModal, TaskDetailModal, TaskFormModal } from './components';
 import './tasks.css';
 
 export default function Tasks() {
   const { user } = useApp();
+  const { 
+    projects, loading, error, filter, setFilter, isSubmitting, 
+    filteredTasks, createTask, updateTask, deleteTask 
+  } = useTasks(user);
 
-  const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('All');
+  const [modalState, setModalState] = useState({ type: null, task: null });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: ''
-  });
+  const closeModal = () => setModalState({ type: null, task: null });
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-
-  const searchParams = useSearchParams();
-  const highlightId = searchParams.get('highlight');
-
-  const [detailTask, setDetailTask] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    title: '', description: '', status: 'To Do', priority: 'Medium', deadline: ''
-  });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (!highlightId || tasks.length === 0) return;
-    setFilter('All');
-
-    setTimeout(() => {
-      const el = document.getElementById(`task-${highlightId}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('task-highlight');
-        setTimeout(() => el.classList.remove('task-highlight'), 1500);
-      }
-    }, 150);
-  }, [highlightId, tasks]);
-
-  const fetchData = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    try {
-      const [tasksRes, projectsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`, { headers: { 'Authorization': `Bearer ${token}` } })
-      ]);
-
-      if (!tasksRes.ok || !projectsRes.ok) throw new Error('Failed to fetch data');
-
-      const tasksData = await tasksRes.json();
-      const projectsData = await projectsRes.json();
-
-      setTasks(tasksData);
-      setProjects(projectsData);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleFormSubmit = async (formData) => {
+    const success = modalState.type === 'create' 
+      ? await createTask(formData)
+      : await updateTask(modalState.task.id, formData);
+      
+    if (success) closeModal();
   };
 
-  const handleCreateTask = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ ...formData, assigned_user_id: user.id })
-      });
-
-      if (!response.ok) throw new Error('Failed to create task');
-
-      const newTask = await response.json();
-      setTasks([newTask, ...tasks]);
-      setIsModalOpen(false);
-      setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '' });
-
-      toast.success('Task created successfully!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const confirmDeleteTask = async (id) => {
-
-    setIsSubmitting(true);
-    if (!id) return;
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete task');
-
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success('Task deleted!');
-
-      setIsDeleteModalOpen(false);
-      setSelectedTask(null);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditTask = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${editingTask.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editFormData)
-      });
-
-      if (!response.ok) throw new Error('Failed to update task');
-
-      const updatedTask = await response.json();
-      setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-      setIsEditModalOpen(false);
-      setEditingTask(null);
-      toast.success('Task updated successfully!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleDeleteConfirm = async (id) => {
+    const success = await deleteTask(id);
+    if (success) closeModal();
   };
 
   if (loading || !user) return (
@@ -169,18 +36,11 @@ export default function Tasks() {
     </div>
   );
 
-  const filteredTasks = tasks.filter(task => {
-    if (filter === 'All') return true;
-    if (filter === 'Active') return task.status !== 'Done';
-    if (filter === 'Completed') return task.status === 'Done';
-    return true;
-  });
-
   return (
     <div className="page-content">
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> All Tasks</h2>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })}>
           <i className="fas fa-plus"></i> New Task
         </button>
       </div>
@@ -206,287 +66,43 @@ export default function Tasks() {
           ) : (
             <ul className="tasks-list">
               {filteredTasks.map(task => (
-                <li
-                  key={task.id}
-                  id={`task-${task.id}`}
-                  className="tasks-item"
-                  onClick={() => { setDetailTask(task); setIsDetailModalOpen(true); }}
-                >
-                  <div className="task-info-group">
-                    <h4 className="task-title">{task.title}</h4>
-                    {task.description && (
-                      <p className="task-description-preview text-xs text-secondary">
-                        {task.description}
-                      </p>
-                    )}
-                    <span className="text-xs text-secondary">
-                      <i className="fas fa-calendar"></i> Due: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
-                    </span>
-                  </div>
-                  <div className="task-meta-group">
-                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
-                      {task.priority || 'Medium'}
-                    </span>
-                    <span className="badge status-badge">
-                      {task.status || 'To Do'}
-                    </span>
-                    <div className="action-buttons">
-                      <button
-                        className="btn-icon edit-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingTask(task);
-                          setEditFormData({
-                            title: task.title,
-                            description: task.description || '',
-                            status: task.status || 'To Do',
-                            priority: task.priority || 'Medium',
-                            deadline: task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : ''
-                          });
-                          setIsEditModalOpen(true);
-                        }}
-                        title="Edit Task"
-                      >
-                        <i className="fas fa-pencil-alt"></i>
-                      </button>
-                      <button
-                        className="btn-icon delete-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsDeleteModalOpen(true);
-                          setSelectedTask(task);
-                        }}
-                        title="Delete Task"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </li>
+                <TaskItem 
+                  key={task.id} 
+                  task={task} 
+                  onDetail={(t) => setModalState({ type: 'detail', task: t })}
+                  onEdit={(t) => setModalState({ type: 'edit', task: t })}
+                  onDelete={(t) => setModalState({ type: 'delete', task: t })}
+                />
               ))}
             </ul>
           )}
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Create New Task</h3>
-              <button className="btn-icon" onClick={() => setIsModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
+      <TaskFormModal 
+        isOpen={modalState.type === 'create' || modalState.type === 'edit'}
+        mode={modalState.type}
+        initialData={modalState.task}
+        projects={projects}
+        isSubmitting={isSubmitting}
+        onClose={closeModal}
+        onSubmit={handleFormSubmit}
+      />
 
-            {projects.length === 0 ? (
-              <div className="modal-body text-center">
-                <p className="text-warning mb-2">
-                  <i className="fas fa-exclamation-triangle"></i> You need to create a project first before adding tasks.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleCreateTask}>
-                <div className="modal-body modal-body-scroll">
-                  <div className="form-group">
-                    <label>Task Title *</label>
-                    <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-                  </div>
+      <DeleteTaskModal 
+        isOpen={modalState.type === 'delete'}
+        task={modalState.task}
+        isSubmitting={isSubmitting}
+        onClose={closeModal}
+        onConfirm={handleDeleteConfirm}
+      />
 
-                  <div className="form-group">
-                    <label>Project *</label>
-                    <select className="form-control" required value={formData.project_id} onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}>
-                      <option value="" disabled>Select a project</option>
-                      {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Priority</label>
-                      <select className="form-control" value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })}>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Status</label>
-                      <select className="form-control" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
-                        <option value="To Do">To Do</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Done">Done</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Deadline</label>
-                    <input type="date" className="form-control" value={formData.deadline} onChange={(e) => setFormData({ ...formData, deadline: e.target.value })} />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Description</label>
-                    <textarea className="form-control" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                    {isSubmitting ? 'Creating...' : 'Create Task'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {isDeleteModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="text-error">Confirm Deletion</h2>
-            </div>
-            <div className="modal-body">
-              <p className="mb-3 text-secondary">Are you sure you want to delete <strong>{selectedTask?.name}</strong>?
-                This action is permanent.</p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setIsDeleteModalOpen(false)}
-                title='Close Modal'>
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  confirmDeleteTask(selectedTask?.id);
-                }}
-                className="btn btn-danger"
-                title='Delete'
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Deleting..' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isDetailModalOpen && detailTask && (
-        <div className="modal-overlay" onClick={() => setIsDetailModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{detailTask.title}</h3>
-              <button className="btn-icon" onClick={() => setIsDetailModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body task-detail-body">
-              <div className="task-detail-badges">
-                <span className={`badge priority-${detailTask.priority?.toLowerCase() || 'medium'}`}>
-                  {detailTask.priority || 'Medium'}
-                </span>
-                <span className="badge status-badge">{detailTask.status || 'To Do'}</span>
-              </div>
-
-              <div className="task-detail-row">
-                <i className="fas fa-calendar-alt text-secondary"></i>
-                <span className="text-secondary text-sm">Deadline:</span>
-                <span>{detailTask.deadline ? new Date(detailTask.deadline).toLocaleDateString() : 'No deadline set'}</span>
-              </div>
-
-              <div className="task-detail-section">
-                <p className="task-detail-label">Description</p>
-                <p className="task-detail-description">
-                  {detailTask.description || <span className="text-secondary">No description provided.</span>}
-                </p>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setIsDetailModalOpen(false)}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isEditModalOpen && editingTask && (
-        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Edit Task</h3>
-              <button className="btn-icon" onClick={() => setIsEditModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <form onSubmit={handleEditTask}>
-              <div className="modal-body modal-body-scroll">
-                <div className="form-group">
-                  <label>Task Title *</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    required
-                    value={editFormData.title}
-                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                  />
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Priority</label>
-                    <select
-                      className="form-control"
-                      value={editFormData.priority}
-                      onChange={(e) => setEditFormData({ ...editFormData, priority: e.target.value })}
-                    >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select
-                      className="form-control"
-                      value={editFormData.status}
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                    >
-                      <option value="To Do">To Do</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Done">Done</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Deadline</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={editFormData.deadline}
-                    onChange={(e) => setEditFormData({ ...editFormData, deadline: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea
-                    className="form-control"
-                    value={editFormData.description}
-                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                  ></textarea>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <TaskDetailModal 
+        isOpen={modalState.type === 'detail'}
+        onEdit={(t) => setModalState({ type: 'edit', task: t })}
+        task={modalState.task}
+        onClose={closeModal}
+      />
     </div>
   );
 }

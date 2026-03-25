@@ -28,6 +28,7 @@
 
 .project-card {
   transition: transform 0.2s;
+  width: 25vw;
 }
 .project-card:hover {
   transform: translateY(-2px);
