@@ -68,7 +68,11 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...formData, assigned_user_id: user.id })
+        body: JSON.stringify({
+          ...formData,
+          project_id: Number(formData.project_id),
+          assigned_user_id: user.id,
+        })
       });
 
       if (!response.ok) throw new Error('Failed to create task');
@@ -118,7 +122,7 @@ export default function Dashboard() {
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} title='New Task'>
             <i className="fas fa-plus"></i> New Task
           </button>
-          <Link href='/projects' className="btn btn-secondary desktop-only"title='Projects'>
+          <Link href='/projects' className="btn btn-secondary desktop-only" title='Projects'>
             <i className="fas fa-arrow-right"></i> Projects
           </Link>
         </div>
@@ -165,13 +169,13 @@ export default function Dashboard() {
               <p className="empty-state">No active tasks right now.</p>
             ) : (
               <ul className="dash-task-list">
-                {upcomingDeadlines.map(task => (
-                  <Link key={task.id} href={`/tasks?highlight=${task.id}`} className="dash-task-item dash-task-link border-left-warning">
+                {activeTasks.map(task => (
+                  <Link key={task.id} href={`/tasks?highlight=${task.id}`} className="dash-task-item dash-task-link">
                     <div className="dash-task-main">
                       <div className="dash-task-details">
                         <h4>{task.title}</h4>
-                        <span className="text-xs text-warning">
-                          <i className="fas fa-exclamation-circle"></i> Due: {new Date(task.deadline).toLocaleDateString()}
+                        <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
+                          {task.priority || 'Medium'}
                         </span>
                       </div>
                     </div>

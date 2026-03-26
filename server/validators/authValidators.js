@@ -1,0 +1,81 @@
+const { z } = require('zod');
+
+const registerSchema = z.object({
+  name: z
+    .string({ required_error: 'Name is required.' })
+    .trim()
+    .min(2, 'Name must be at least 2 characters.')
+    .max(50, 'Name must be at most 50 characters.'),
+
+  email: z
+    .string({ required_error: 'Email is required.' })
+    .trim()
+    .toLowerCase()
+    .email('Please provide a valid email address.'),
+
+  password: z
+    .string({ required_error: 'Password is required.' })
+    .min(8, 'Password must be at least 8 characters.')
+    .max(72, 'Password must be at most 72 characters.') // bcrypt hard limit
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter.')
+    .regex(/[0-9]/, 'Password must contain at least one number.'),
+
+  avatar: z
+    .string()
+    .regex(/^data:image\/[a-z]+;base64,/, 'Avatar must be a valid base64 image.')
+    .optional()
+    .nullable(),
+});
+
+const loginSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required.' })
+    .trim()
+    .toLowerCase()
+    .email('Please provide a valid email address.'),
+
+  password: z
+    .string({ required_error: 'Password is required.' })
+    .min(1, 'Password is required.'),
+});
+
+const changeUsernameSchema = z.object({
+  newUsername: z
+    .string({ required_error: 'New username is required.' })
+    .trim()
+    .min(2, 'Username must be at least 2 characters.')
+    .max(50, 'Username must be at most 50 characters.')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers, and underscores.'),
+});
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string({ required_error: 'Current password is required.' })
+      .min(1, 'Current password is required.'),
+
+    newPassword: z
+      .string({ required_error: 'New password is required.' })
+      .min(8, 'New password must be at least 8 characters.')
+      .max(72, 'New password must be at most 72 characters.')
+      .regex(/[A-Z]/, 'New password must contain at least one uppercase letter.')
+      .regex(/[0-9]/, 'New password must contain at least one number.'),
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password must be different from your current password.',
+    path: ['newPassword'],
+  });
+
+const deleteAccountSchema = z.object({
+  password: z
+    .string({ required_error: 'Password is required to delete your account.' })
+    .min(1, 'Password is required to delete your account.'),
+});
+
+module.exports = {
+  registerSchema,
+  loginSchema,
+  changeUsernameSchema,
+  changePasswordSchema,
+  deleteAccountSchema,
+};

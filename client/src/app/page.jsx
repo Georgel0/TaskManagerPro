@@ -30,7 +30,7 @@ export default function LandingPage() {
       avatar = generateIdenticonBase64(userEmail, 32);
     }
 
-    const endpoint = isLogin ? 'http://localhost:5000/api/login' : 'http://localhost:5000/api/register';
+    const endpoint = isLogin ? `${process.env.NEXT_PUBLIC_API_URL}/login` : `${process.env.NEXT_PUBLIC_API_URL}/register`;
 
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
