@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export function TasksModal({ project, tasks, loading, onClose }) {
   const router = useRouter();
@@ -22,7 +23,12 @@ export function TasksModal({ project, tasks, loading, onClose }) {
           {loading ? (
             <p className="text-center text-secondary">Loading tasks...</p>
           ) : tasks.length === 0 ? (
-            <p className="empty-state">No tasks in this project yet.</p>
+            <>
+              <p className="empty-state">No tasks in this project yet.</p>
+              <Link href='/tasks' className="empty-state-btn" title='Projects'>
+                <i className="fas fa-arrow-right"></i> Tasks
+              </Link>
+            </>
           ) : (
             <ul className="project-tasks-list">
               {tasks.map((task) => (

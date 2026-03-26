@@ -1,13 +1,13 @@
 const { z } = require('zod');
 
-const STATUSES = ['To Do', 'In Progress', 'In Review', 'Done'];
+const STATUSES = ['To Do', 'In Progress', 'Done'];
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
 const titleField = z
   .string({ required_error: 'Title is required.' })
   .trim()
   .min(1, 'Title cannot be empty.')
-  .max(200, 'Title must be at most 200 characters.');
+  .max(100, 'Title must be at most 100 characters.');
 
 const statusField = z
   .enum(STATUSES, { message: `Status must be one of: ${STATUSES.join(', ')}.` })
