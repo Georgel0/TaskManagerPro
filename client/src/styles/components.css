@@ -233,6 +233,19 @@
   border: 1px solid var(--error-color);
 }
 
+.input-error {
+  border-color: var(--error-color) !important;
+  outline-color: var(--error-color);
+}
+ 
+.field-error {
+  display: block;
+  color: var(--error-color);
+  font-size: 0.78rem;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;

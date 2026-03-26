@@ -81,6 +81,7 @@
   border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: var(--transition);
+  width: 100%;
 }
 
 .dummy-form input:focus {
@@ -131,15 +132,4 @@
 
 .text-btn:hover {
   color: var(--accent-hover);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

@@ -1,48 +1,52 @@
 'use client';
 
 import { useState } from 'react';
-import { generateIdenticonBase64 } from '@/lib';
+import { generateIdenticonBase64, registerSchema, loginSchema, validate } from '@/lib';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
-  const [errorMsg, setErrorMsg] = useState('');
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear the error for this field as the user types
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
+    setServerError('');
+
+    // Client-side validation before touching the network
+    const schema = isLogin ? loginSchema : registerSchema;
+    const fieldErrors = validate(schema, formData);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    setErrors({});
 
     const userEmail = formData.email.trim().toLowerCase();
-
-    // Generate avatar only if we are registering
     let avatar = null;
     if (!isLogin) {
       avatar = generateIdenticonBase64(userEmail, 32);
     }
 
-    const endpoint = isLogin ? `${process.env.NEXT_PUBLIC_API_URL}/login` : `${process.env.NEXT_PUBLIC_API_URL}/register`;
-
+    const API = process.env.NEXT_PUBLIC_API_URL;
+    const endpoint = isLogin ? `${API}/login` : `${API}/register`;
     const payload = isLogin
-      ? { email: formData.email, password: formData.password }
-      : { ...formData, avatar };
+      ? { email: userEmail, password: formData.password }
+      : { ...formData, email: userEmail, avatar };
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -52,11 +56,18 @@ export default function LandingPage() {
         localStorage.setItem('user', JSON.stringify(data.user));
         window.location.href = '/dashboard';
       } else {
-        setErrorMsg(data.error || 'Authentication failed');
+        setServerError(data.error || 'Authentication failed.');
       }
-    } catch (error) {
-      setErrorMsg('Network error. Please try again.');
+    } catch {
+      setServerError('Network error. Please try again.');
     }
+  };
+
+  const switchMode = () => {
+    setIsLogin(!isLogin);
+    setErrors({});
+    setServerError('');
+    setFormData({ name: '', email: '', password: '' });
   };
 
   return (
@@ -90,35 +101,51 @@ export default function LandingPage() {
             <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
             <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
 
-            {errorMsg && <p className="error-message" style={{ color: '#ff4d4d', fontSize: '14px', marginBottom: '10px' }}>{errorMsg}</p>}
+            {serverError && (
+              <p className="error-message" style={{ color: '#ff4d4d', fontSize: '14px', marginBottom: '10px' }}>
+                {serverError}
+              </p>
+            )}
 
-            <form className="dummy-form" onSubmit={handleSubmit}>
+            <form className="dummy-form" onSubmit={handleSubmit} noValidate>
               {!isLogin && (
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={errors.name ? 'input-error' : ''}
+                  />
+                  {errors.name && <span className="field-error">{errors.name}</span>}
+                </div>
               )}
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
+
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={errors.email ? 'input-error' : ''}
+                />
+                {errors.email && <span className="field-error">{errors.email}</span>}
+              </div>
+
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={errors.password ? 'input-error' : ''}
+                />
+                {errors.password && <span className="field-error">{errors.password}</span>}
+              </div>
+
               <button type="submit" className="login-btn">
                 {isLogin ? 'Log In' : 'Register'}
               </button>
@@ -126,11 +153,7 @@ export default function LandingPage() {
 
             <p className="toggle-auth">
               {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button
-                type="button"
-                className="text-btn"
-                onClick={() => setIsLogin(!isLogin)}
-              >
+              <button type="button" className="text-btn" onClick={switchMode}>
                 {isLogin ? 'Register here' : 'Log in here'}
               </button>
             </p>

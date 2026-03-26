@@ -5,7 +5,7 @@ const registerSchema = z.object({
     .string({ required_error: 'Name is required.' })
     .trim()
     .min(2, 'Name must be at least 2 characters.')
-    .max(50, 'Name must be at most 50 characters.'),
+    .max(20, 'Name must be at most 20 characters.'),
 
   email: z
     .string({ required_error: 'Email is required.' })
@@ -15,10 +15,8 @@ const registerSchema = z.object({
 
   password: z
     .string({ required_error: 'Password is required.' })
-    .min(8, 'Password must be at least 8 characters.')
-    .max(72, 'Password must be at most 72 characters.') // bcrypt hard limit
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter.')
-    .regex(/[0-9]/, 'Password must contain at least one number.'),
+    .min(4, 'Password must be at least 4 characters.')
+    .max(32, 'Password must be at most 32 characters.'),
 
   avatar: z
     .string()
@@ -44,7 +42,7 @@ const changeUsernameSchema = z.object({
     .string({ required_error: 'New username is required.' })
     .trim()
     .min(2, 'Username must be at least 2 characters.')
-    .max(50, 'Username must be at most 50 characters.')
+    .max(20, 'Username must be at most 20 characters.')
     .regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers, and underscores.'),
 });
 
@@ -56,10 +54,8 @@ const changePasswordSchema = z
 
     newPassword: z
       .string({ required_error: 'New password is required.' })
-      .min(8, 'New password must be at least 8 characters.')
-      .max(72, 'New password must be at most 72 characters.')
-      .regex(/[A-Z]/, 'New password must contain at least one uppercase letter.')
-      .regex(/[0-9]/, 'New password must contain at least one number.'),
+      .min(4, 'New password must be at least 4 characters.')
+      .max(32, 'New password must be at most 32 characters.'),
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: 'New password must be different from your current password.',
