@@ -101,12 +101,6 @@ export default function LandingPage() {
             <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
             <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
 
-            {serverError && (
-              <p className="error-message" style={{ color: '#ff4d4d', fontSize: '14px', marginBottom: '10px' }}>
-                {serverError}
-              </p>
-            )}
-
             <form className="dummy-form" onSubmit={handleSubmit} noValidate>
               {!isLogin && (
                 <div>
@@ -150,6 +144,13 @@ export default function LandingPage() {
                 {isLogin ? 'Log In' : 'Register'}
               </button>
             </form>
+
+            {serverError && (
+              <p className="error-message">
+                {serverError}
+              </p>
+            )}
+
 
             <p className="toggle-auth">
               {isLogin ? "Don't have an account? " : "Already have an account? "}

@@ -25,7 +25,8 @@ const deadlineField = z
     { message: 'Deadline cannot be in the past.' }
   )
   .optional()
-  .nullable();
+  .nullable()
+  .or(z.literal(''));
 
 const createTaskSchema = z.object({
   title: titleField,
@@ -41,7 +42,7 @@ const createTaskSchema = z.object({
   priority: priorityField,
   deadline: deadlineField,
 
-  project_id: z
+ project_id: z.coerce
     .number({ required_error: 'project_id is required.', invalid_type_error: 'project_id must be a number.' })
     .int('project_id must be an integer.')
     .positive('project_id must be a positive number.'),

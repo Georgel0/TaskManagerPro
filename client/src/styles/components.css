@@ -235,11 +235,7 @@
 
 .error-message {
   color: var(--error-color);
-  background-color: rgba(214, 48, 49, 0.1);
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 20px;
-  border: 1px solid var(--error-color);
+  padding: 5px;
 }
 
 .input-error {
@@ -254,6 +250,10 @@
   margin-top: 4px;
   margin-bottom: 2px;
 }
+
+.has-error .form-control { border-color: var(--color-danger); }
+
+.char-count { float: right; }
 
 .modal-overlay {
   position: fixed;
