@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { addMemberSchema, validate } from '@/lib';
 
 export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose }) {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [emailError, setEmailError] = useState(null);
   const router = useRouter();
 
   const getInitials = (name) =>
     name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsAdding(true);
-    await onAddMember(email);
-    setEmail('');
-    setIsAdding(false);
-  };
 
   const handleMemberClick = (member) => {
     onClose();
@@ -24,6 +18,39 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
 
   const totalTasks = (member) =>
     (member.todo_count ?? 0) + (member.in_progress_count ?? 0) + (member.done_count ?? 0);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate email format using Zod
+    const errors = validate(addMemberSchema, { email });
+    if (errors?.email) {
+      setEmailError(errors.email);
+      return;
+    }
+
+    // Check if the user is already in the members array
+    const isAlreadyMember = members.some(
+      (member) => member.email.toLowerCase() === email.toLowerCase().trim()
+    );
+
+    if (isAlreadyMember) {
+      setEmailError('This user is already a member of the project.');
+      return;
+    }
+
+    setEmailError(null);
+    setIsAdding(true);
+
+    try {
+      await onAddMember(email);
+      setEmail('');
+    } catch (error) {
+      setEmailError('Failed to add member. Please try again.');
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -106,17 +133,26 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
           )}
 
           {isOwner && (
-            <form className="add-member-form" onSubmit={handleSubmit}>
+            <form className="add-member-form" onSubmit={handleSubmit} noValidate>
               <h4 className="add-member-title">Add Member</h4>
               <div className="add-member-input-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Enter user email..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <div className="add-member-input-wrapper">
+                  <input
+                    type="email"
+                    className={`form-control ${emailError ? 'input-error' : ''}`}
+                    placeholder="Enter user email..."
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) setEmailError(null);
+                    }}
+                  />
+                  {emailError && (
+                    <span className="field-error">
+                      <i className="fas fa-exclamation-circle"></i> {emailError}
+                    </span>
+                  )}
+                </div>
                 <button type="submit" className="btn btn-primary" disabled={isAdding}>
                   {isAdding ? 'Adding...' : <><i className="fas fa-user-plus"></i> Add</>}
                 </button>

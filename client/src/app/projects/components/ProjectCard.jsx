@@ -4,7 +4,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
   const memberCount = project.member_count ?? 1;
 
   return (
-    <div className="card project-card" onClick={() => onOpen(project)}>
+    <div className="card project-card">
       <div className="project-card-header">
         <div className="project-title-group">
           <h3>{project.name}</h3>
@@ -52,9 +52,13 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
               <i className="fas fa-users"></i> {memberCount}
             </button>
 
-            <span className="project-task-count">
+            <button 
+              className="project-task-count" 
+              onClick={() => onOpen(project)}
+              title="View Members"
+            >
               <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
-            </span>
+            </button>
           </div>
         </div>
       </div>

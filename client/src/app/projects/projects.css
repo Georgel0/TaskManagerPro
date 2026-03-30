@@ -92,10 +92,18 @@
   gap: 5px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--accent-color);
-  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  color: var(--sec-text-color);
+  background-color: var(--sec-background);
   padding: 3px 9px;
   border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.project-task-count:hover {
+  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  color: var(--accent-color);
 }
 
 .project-tasks-list {
@@ -246,6 +254,12 @@
   font-weight: 600;
   margin-bottom: 10px;
   color: var(--sec-text-color);
+}
+
+.add-member-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .add-member-input-group {

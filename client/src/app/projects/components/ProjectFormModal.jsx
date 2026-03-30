@@ -1,12 +1,36 @@
-export function ProjectFormModal({
-  mode = 'create',  // or 'edit
-  formData,
-  setFormData,
-  onSubmit,
-  onClose,
-  isSubmitting,
-}) {
+import { useState, useEffect } from 'react';
+import { createProjectSchema, updateProjectSchema, validate } from '@/lib';
+
+export function ProjectFormModal({ mode = 'create', formData, setFormData, onSubmit, onClose, isSubmitting }) {
   const isEdit = mode === 'edit';
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Clear errors when modal opens/switches mode
+  useEffect(() => {
+    setFieldErrors({});
+  }, [mode, onClose]);
+
+  const handleChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const schema = isEdit ? updateProjectSchema : createProjectSchema;
+    const errors = validate(schema, formData);
+
+    if (errors) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
+    onSubmit(e);
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -18,26 +42,44 @@ export function ProjectFormModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="modal-body">
-            <div className="form-group">
+
+            <div className={`form-group ${fieldErrors.name ? 'has-error' : ''}`}>
               <label>Project Name *</label>
               <input
                 type="text"
                 className="form-control"
-                required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => handleChange('name', e.target.value)}
               />
+              {fieldErrors.name && (
+                <span className="field-error">
+                  <i className="fas fa-exclamation-circle"></i> {fieldErrors.name}
+                </span>
+              )}
             </div>
-            <div className="form-group">
-              <label>Description</label>
+
+            <div className={`form-group ${fieldErrors.description ? 'has-error' : ''}`}>
+              <label>
+                Description
+                <span className="char-count text-secondary text-xs">
+                  {formData.description?.length ?? 0}/2000
+                </span>
+              </label>
               <textarea
                 className="form-control"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                maxLength={2000}
+                onChange={(e) => handleChange('description', e.target.value)}
               />
+              {fieldErrors.description && (
+                <span className="field-error">
+                  <i className="fas fa-exclamation-circle"></i> {fieldErrors.description}
+                </span>
+              )}
             </div>
+
           </div>
 
           <div className="modal-footer">
