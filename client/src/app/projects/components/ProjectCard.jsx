@@ -1,6 +1,7 @@
-export function ProjectCard({ project, userId, onOpen, onEdit, onDelete }) {
+export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
+  const memberCount = project.member_count ?? 1;
 
   return (
     <div className="card project-card" onClick={() => onOpen(project)}>
@@ -41,9 +42,20 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete }) {
             <i className="fas fa-calendar-alt"></i> Created:{' '}
             {new Date(project.created_at).toLocaleDateString()}
           </span>
-          <span className="project-task-count">
-            <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
-          </span>
+
+          <div className="project-meta-chips">
+            <button
+              className="project-member-count"
+              title="View team"
+              onClick={(e) => { e.stopPropagation(); onMembers(project); }}
+            >
+              <i className="fas fa-users"></i> {memberCount}
+            </button>
+
+            <span className="project-task-count">
+              <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
+            </span>
+          </div>
         </div>
       </div>
     </div>

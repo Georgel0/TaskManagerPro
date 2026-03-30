@@ -15,6 +15,7 @@ export function useProjects() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState(null);
   const [createForm, setCreateForm] = useState({ name: '', description: '' });
@@ -22,6 +23,9 @@ export function useProjects() {
 
   const [projectTasks, setProjectTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
+
+  const [projectMembers, setProjectMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -37,7 +41,6 @@ export function useProjects() {
       });
 
       if (!res.ok) throw new Error('Failed to fetch projects');
-      
       setProjects(await res.json());
     } catch (err) {
       setError(err.message);
@@ -59,11 +62,11 @@ export function useProjects() {
         },
         body: JSON.stringify(createForm),
       });
+
       if (!res.ok) throw new Error('Failed to create project');
 
       const newProject = await res.json();
-
-      setProjects((prev) => [newProject, ...prev]);
+      setProjects((prev) => [{ ...newProject, task_count: 0, member_count: 1 }, ...prev]);
       setIsCreateModalOpen(false);
       setCreateForm({ name: '', description: '' });
 
@@ -123,7 +126,6 @@ export function useProjects() {
       if (!res.ok) throw new Error('Failed to delete project');
 
       setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
-
       setIsDeleteModalOpen(false);
       setSelectedProject(null);
 
@@ -166,6 +168,82 @@ export function useProjects() {
     setIsDeleteModalOpen(true);
   };
 
+  const openMembers = async (project) => {
+    setSelectedProject(project);
+    setIsMembersModalOpen(true);
+    setLoadingMembers(true);
+
+    try {
+      const res = await fetch(`${API}/projects/${project.id}/members`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch members');
+
+      setProjectMembers(await res.json());
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleAddMember = async (email) => {
+    try {
+      const res = await fetch(`${API}/projects/${selectedProject.id}/members`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add member');
+
+      setProjectMembers((prev) => [...prev, data]);
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === selectedProject.id
+            ? { ...p, member_count: (p.member_count ?? 1) + 1 }
+            : p
+        )
+      );
+
+      toast.success(`${data.name} added to the project!`);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleRemoveMember = async (memberId) => {
+    try {
+      const res = await fetch(
+        `${API}/projects/${selectedProject.id}/members/${memberId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
+
+      if (!res.ok) throw new Error('Failed to remove member');
+
+      setProjectMembers((prev) => prev.filter((m) => m.id !== memberId));
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === selectedProject.id
+            ? { ...p, member_count: Math.max((p.member_count ?? 1) - 1, 1) }
+            : p
+        )
+      );
+
+      toast.success('Member removed.');
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   return {
     // Data
     projects,
@@ -175,6 +253,8 @@ export function useProjects() {
     projectTasks,
     loadingTasks,
     selectedProject,
+    projectMembers, 
+    loadingMembers,
 
     // Forms
     createForm,
@@ -191,13 +271,18 @@ export function useProjects() {
     setIsTasksModalOpen,
     isEditModalOpen,
     setIsEditModalOpen,
+     isMembersModalOpen,
+    setIsMembersModalOpen,
 
     // Actions
     handleCreate,
     handleEdit,
     handleDelete,
+    handleAddMember,
+    handleRemoveMember,
     openTasks,
     openEdit,
     openDelete,
+    openMembers
   };
 }

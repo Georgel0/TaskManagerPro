@@ -1,4 +1,4 @@
-const { z } = require('zod');
+const { z, email } = require('zod');
 
 const projectBodySchema = z.object({
   name: z
@@ -19,4 +19,12 @@ const projectBodySchema = z.object({
 const createProjectSchema = projectBodySchema;
 const updateProjectSchema = projectBodySchema;
 
-module.exports = { createProjectSchema, updateProjectSchema };
+const addMemberSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is requierd.' })
+    .trim()
+    .email('Must be a valid email address')
+    .max(150, 'Email must be at most 150 characters.'),
+});
+
+module.exports = { createProjectSchema, updateProjectSchema, addMemberSchema };

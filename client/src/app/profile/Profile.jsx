@@ -236,6 +236,7 @@ export default function ProfilePage() {
                       setDeletePassword(e.target.value);
                       if (deleteError) setDeleteError('');
                     }}
+                    autoFocus
                   />
                   {deleteError && <span className="field-error">{deleteError}</span>}
                 </div>

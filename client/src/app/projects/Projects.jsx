@@ -1,22 +1,27 @@
 'use client';
 import { useApp } from '@/context';
 import { useProjects } from './useProjects';
-import { ProjectCard, ProjectFormModal, DeleteProjectModal, TasksModal } from './components';
+import { ProjectCard, ProjectFormModal, DeleteProjectModal, TasksModal, MembersModal } from './components';
 import './projects.css';
 
 export default function Projects() {
   const { user } = useApp();
   const {
     projects, loading, error, isSubmitting,
-    projectTasks, loadingTasks, selectedProject,
+    projectTasks, loadingTasks,
+    projectMembers, loadingMembers,
+    selectedProject,
     createForm, setCreateForm,
     editForm, setEditForm,
     isCreateModalOpen, setIsCreateModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isEditModalOpen, setIsEditModalOpen,
+    isMembersModalOpen, setIsMembersModalOpen,
     handleCreate, handleEdit, handleDelete,
+    handleAddMember, handleRemoveMember,
     openTasks, openEdit, openDelete,
+    openMembers,
   } = useProjects();
 
   if (loading || !user) return (
@@ -55,6 +60,7 @@ export default function Projects() {
               onOpen={openTasks}
               onEdit={openEdit}
               onDelete={openDelete}
+              onMembers={openMembers}
             />
           ))}
         </div>
@@ -97,6 +103,18 @@ export default function Projects() {
           tasks={projectTasks}
           loading={loadingTasks}
           onClose={() => setIsTasksModalOpen(false)}
+        />
+      )}
+
+      {isMembersModalOpen && selectedProject && (
+        <MembersModal
+          project={selectedProject}
+          members={projectMembers}
+          loading={loadingMembers}
+          isOwner={selectedProject.owner_id === user.id}
+          onAddMember={handleAddMember}
+          onRemoveMember={handleRemoveMember}
+          onClose={() => setIsMembersModalOpen(false)}
         />
       )}
     </div>
