@@ -95,30 +95,43 @@ const getProjectMembers = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // Only members or owner can view the team
     const access = await pool.query(
       `SELECT 1 FROM projects p
        LEFT JOIN project_members pm ON p.id = pm.project_id
        WHERE p.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
       [id, userId]
     );
-
+    
     if (access.rows.length === 0) {
       return res.status(403).json({ error: 'Not authorized.' });
     }
 
     const result = await pool.query(
-      `SELECT u.id, u.name, u.email, u.avatar, 'owner' AS role
+      `SELECT
+         u.id, u.name, u.email, u.avatar,
+         'owner' AS role,
+         COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
+         COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
+         COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
        FROM projects p
        JOIN users u ON u.id = p.owner_id
+       LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
        WHERE p.id = $1
+       GROUP BY u.id, u.name, u.email, u.avatar
 
        UNION
 
-       SELECT u.id, u.name, u.email, u.avatar, 'member' AS role
+       SELECT
+         u.id, u.name, u.email, u.avatar,
+         'member' AS role,
+         COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
+         COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
+         COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
        FROM project_members pm
        JOIN users u ON u.id = pm.user_id
+       LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
        WHERE pm.project_id = $1
+       GROUP BY u.id, u.name, u.email, u.avatar
 
        ORDER BY role DESC, name ASC`,
       [id]
@@ -182,7 +195,7 @@ const removeProjectMember = async (req, res) => {
       'SELECT * FROM projects WHERE id = $1 AND owner_id = $2',
       [id, userId]
     );
-    
+
     if (project.rows.length === 0) {
       return res.status(403).json({ error: 'Not authorized.' });
     }

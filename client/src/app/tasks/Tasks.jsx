@@ -7,20 +7,24 @@ import './tasks.css';
 
 export default function Tasks() {
   const { user } = useApp();
-  const { 
-    projects, loading, error, filter, setFilter, isSubmitting, 
-    filteredTasks, createTask, updateTask, deleteTask 
+  const {
+    projects, loading, error, isSubmitting,
+    filteredTasks,
+    statusFilter, setStatusFilter,
+    projectFilter, setProjectFilter,
+    userFilter, setUserFilter,
+    usersInSelectedProject,
+    hasActiveFilters, clearFilters,
+    createTask, updateTask, deleteTask,
   } = useTasks(user);
 
   const [modalState, setModalState] = useState({ type: null, task: null });
-
   const closeModal = () => setModalState({ type: null, task: null });
 
   const handleFormSubmit = async (formData) => {
-    const success = modalState.type === 'create' 
+    const success = modalState.type === 'create'
       ? await createTask(formData)
       : await updateTask(modalState.task.id, formData);
-      
     if (success) closeModal();
   };
 
@@ -30,7 +34,7 @@ export default function Tasks() {
   };
 
   if (loading || !user) return (
-    <div className='loading-state'>
+    <div className="loading-state">
       <div className="pulse-ring"></div>
       <p>Loading Tasks...</p>
     </div>
@@ -46,15 +50,47 @@ export default function Tasks() {
       </div>
 
       <div className="tasks-filters">
-        {['All', 'Active', 'Completed'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
+        <div className="tasks-filter-group">
+          {['All', 'Active', 'Completed'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`btn ${statusFilter === f ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        <select
+          className="form-control tasks-filter-select"
+          value={projectFilter}
+          onChange={(e) => { setProjectFilter(e.target.value); setUserFilter(''); }}
+        >
+          <option value="">All Projects</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+
+        {projectFilter && (
+          <select
+            className="form-control tasks-filter-select"
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
           >
-            {f}
+            <option value="">All Members</option>
+            {usersInSelectedProject.map((u) => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
+          </select>
+        )}
+
+        {hasActiveFilters && (
+          <button className="btn btn-ghost tasks-filter-clear" onClick={clearFilters}>
+            <i className="fas fa-times"></i> Clear
           </button>
-        ))}
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -62,13 +98,19 @@ export default function Tasks() {
       <div className="card">
         <div className="card-body p-0">
           {filteredTasks.length === 0 ? (
-            <p className="empty-state">No tasks found for this filter.</p>
+            <div className="empty-state">
+              <i className="fas fa-filter"></i>
+              <p>No tasks match the current filters.</p>
+              {hasActiveFilters && (
+                <button className="btn btn-secondary mt-2" onClick={clearFilters}>Clear Filters</button>
+              )}
+            </div>
           ) : (
             <ul className="tasks-list">
-              {filteredTasks.map(task => (
-                <TaskItem 
-                  key={task.id} 
-                  task={task} 
+              {filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
                   onDetail={(t) => setModalState({ type: 'detail', task: t })}
                   onEdit={(t) => setModalState({ type: 'edit', task: t })}
                   onDelete={(t) => setModalState({ type: 'delete', task: t })}
@@ -79,7 +121,7 @@ export default function Tasks() {
         </div>
       </div>
 
-      <TaskFormModal 
+      <TaskFormModal
         isOpen={modalState.type === 'create' || modalState.type === 'edit'}
         mode={modalState.type}
         initialData={modalState.task}
@@ -89,7 +131,7 @@ export default function Tasks() {
         onSubmit={handleFormSubmit}
       />
 
-      <DeleteTaskModal 
+      <DeleteTaskModal
         isOpen={modalState.type === 'delete'}
         task={modalState.task}
         isSubmitting={isSubmitting}
@@ -97,7 +139,7 @@ export default function Tasks() {
         onConfirm={handleDeleteConfirm}
       />
 
-      <TaskDetailModal 
+      <TaskDetailModal
         isOpen={modalState.type === 'detail'}
         onEdit={(t) => setModalState({ type: 'edit', task: t })}
         task={modalState.task}

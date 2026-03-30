@@ -1,26 +1,43 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
+
+const API = process.env.NEXT_PUBLIC_API_URL;
+const getToken = () => localStorage.getItem('token');
 
 export function useTasks(user) {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('All');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [projectFilter, setProjectFilter] = useState('');
+  const [userFilter, setUserFilter] = useState('');
 
   const searchParams = useSearchParams();
   const highlightId = searchParams.get('highlight');
+  const urlProjectId = searchParams.get('project_id');
+  const urlUserId = searchParams.get('user_id');
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Apply URL params once data is loaded
+  useEffect(() => {
+    if (loading) return;
+    if (urlProjectId) setProjectFilter(urlProjectId);
+    if (urlUserId) setUserFilter(urlUserId);
+  }, [loading, urlProjectId, urlUserId]);
+
   useEffect(() => {
     if (!highlightId || tasks.length === 0) return;
-    setFilter('All');
+    setStatusFilter('All');
+    setProjectFilter('');
+    setUserFilter('');
 
     setTimeout(() => {
       const el = document.getElementById(`task-${highlightId}`);
@@ -33,13 +50,13 @@ export function useTasks(user) {
   }, [highlightId, tasks]);
 
   const fetchData = async () => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) return;
 
     try {
       const [tasksRes, projectsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${API}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (!tasksRes.ok || !projectsRes.ok) throw new Error('Failed to fetch data');
@@ -55,19 +72,18 @@ export function useTasks(user) {
 
   const createTask = async (taskData) => {
     setIsSubmitting(true);
-    const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
+      const res = await fetch(`${API}/tasks`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ ...taskData, assigned_user_id: user.id })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({ ...taskData, assigned_user_id: user.id }),
       });
 
-      if (!response.ok) throw new Error('Failed to create task');
-      
-      const newTask = await response.json();
-      setTasks([newTask, ...tasks]);
+      if (!res.ok) throw new Error('Failed to create task');
+
+      const newTask = await res.json();
+      setTasks((prev) => [newTask, ...prev]);
 
       toast.success('Task created successfully!');
       return true;
@@ -81,19 +97,18 @@ export function useTasks(user) {
 
   const updateTask = async (id, taskData) => {
     setIsSubmitting(true);
-    const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
+      const res = await fetch(`${API}/tasks/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(taskData)
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify(taskData),
       });
 
-      if (!response.ok) throw new Error('Failed to update task');
+      if (!res.ok) throw new Error('Failed to update task');
 
-      const updatedTask = await response.json();
-      setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+      const updatedTask = await res.json();
+      setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
 
       toast.success('Task updated successfully!');
       return true;
@@ -107,16 +122,16 @@ export function useTasks(user) {
 
   const deleteTask = async (id) => {
     setIsSubmitting(true);
-    const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
+      const res = await fetch(`${API}/tasks/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) throw new Error('Failed to delete task');
 
-      setTasks(tasks.filter(t => t.id !== id));
+      if (!res.ok) throw new Error('Failed to delete task');
+
+      setTasks((prev) => prev.filter((t) => t.id !== id));
 
       toast.success('Task deleted!');
       return true;
@@ -128,23 +143,62 @@ export function useTasks(user) {
     }
   };
 
-  const filteredTasks = tasks.filter(task => {
-    if (filter === 'All') return true;
-    if (filter === 'Active') return task.status !== 'Done';
-    if (filter === 'Completed') return task.status === 'Done';
-    return true;
-  });
+  // Users from the currently selected project (for the user dropdown)
+  const usersInSelectedProject = useMemo(() => {
+    if (!projectFilter) return [];
+    
+    const projectTasks = tasks.filter((t) => String(t.project_id) === String(projectFilter));
+
+    const seen = new Set();
+    const users = [];
+
+    for (const t of projectTasks) {
+      if (t.assigned_user_id && !seen.has(t.assigned_user_id)) {
+        seen.add(t.assigned_user_id);
+        users.push({ id: t.assigned_user_id, name: t.assigned_user_name ?? `User #${t.assigned_user_id}` });
+      }
+    }
+
+    return users;
+  }, [tasks, projectFilter]);
+
+  const filteredTasks = useMemo(() =>
+    tasks.filter((task) => {
+      if (statusFilter === 'Active' && task.status === 'Done') return false;
+      if (statusFilter === 'Completed' && task.status !== 'Done') return false;
+      if (projectFilter && String(task.project_id) !== String(projectFilter)) return false;
+      if (userFilter && String(task.assigned_user_id) !== String(userFilter)) return false;
+      return true;
+    }),
+    [tasks, statusFilter, projectFilter, userFilter]
+  );
+
+  const clearFilters = () => {
+    setStatusFilter('All');
+    setProjectFilter('');
+    setUserFilter('');
+  };
+
+  const hasActiveFilters = statusFilter !== 'All' || projectFilter !== '' || userFilter !== '';
 
   return {
     projects,
     loading,
     error,
-    filter,
-    setFilter,
     isSubmitting,
     filteredTasks,
+
+    // filters
+    statusFilter, setStatusFilter,
+    projectFilter, setProjectFilter,
+    userFilter, setUserFilter,
+    usersInSelectedProject,
+    hasActiveFilters,
+    clearFilters,
+
+    // actions
     createTask,
     updateTask,
-    deleteTask
+    deleteTask,
   };
 }

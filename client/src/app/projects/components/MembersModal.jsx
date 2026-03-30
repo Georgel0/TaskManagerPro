@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose, }) {
+export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose }) {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const router = useRouter();
 
   const getInitials = (name) =>
     name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
@@ -14,6 +16,14 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
     setEmail('');
     setIsAdding(false);
   };
+
+  const handleMemberClick = (member) => {
+    onClose();
+    router.push(`/tasks?project_id=${project.id}&user_id=${member.id}`);
+  };
+
+  const totalTasks = (member) =>
+    (member.todo_count ?? 0) + (member.in_progress_count ?? 0) + (member.done_count ?? 0);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -34,32 +44,62 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
             <ul className="members-list">
               {members.map((member) => (
                 <li key={member.id} className="member-item">
-                  <div className="member-avatar">
-                    {member.avatar ? (
-                      <img src={member.avatar} alt={member.name} />
-                    ) : (
-                      <span>{getInitials(member.name)}</span>
+                  <button
+                    className="member-clickable-area"
+                    onClick={() => handleMemberClick(member)}
+                    title={`View ${member.name}'s tasks`}
+                  >
+                    <div className="member-avatar">
+                      {member.avatar ? (
+                        <img src={member.avatar} alt={member.name} />
+                      ) : (
+                        <span>{getInitials(member.name)}</span>
+                      )}
+                    </div>
+
+                    <div className="member-info">
+                      <span className="member-name">{member.name}</span>
+                      <span className="member-email">{member.email}</span>
+
+                      {totalTasks(member) === 0 ? (
+                        <span className="member-no-tasks">No tasks assigned</span>
+                      ) : (
+                        <div className="member-task-stats">
+                          {member.todo_count > 0 && (
+                            <span className="member-stat member-stat-todo">
+                              {member.todo_count} To Do
+                            </span>
+                          )}
+                          {member.in_progress_count > 0 && (
+                            <span className="member-stat member-stat-progress">
+                              {member.in_progress_count} In Progress
+                            </span>
+                          )}
+                          {member.done_count > 0 && (
+                            <span className="member-stat member-stat-done">
+                              {member.done_count} Done
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+
+                  <div className="member-actions">
+                    <span className={`badge ${member.role === 'owner' ? 'badge-owner' : 'badge-member'}`}>
+                      {member.role === 'owner' ? 'Owner' : 'Member'}
+                    </span>
+
+                    {isOwner && member.role !== 'owner' && (
+                      <button
+                        className="btn-icon delete-btn"
+                        title="Remove member"
+                        onClick={() => onRemoveMember(member.id)}
+                      >
+                        <i className="fas fa-user-minus"></i>
+                      </button>
                     )}
                   </div>
-
-                  <div className="member-info">
-                    <span className="member-name">{member.name}</span>
-                    <span className="member-email">{member.email}</span>
-                  </div>
-
-                  <span className={`badge ${member.role === 'owner' ? 'badge-owner' : 'badge-member'}`}>
-                    {member.role === 'owner' ? 'Owner' : 'Member'}
-                  </span>
-
-                  {isOwner && member.role !== 'owner' && (
-                    <button
-                      className="btn-icon delete-btn"
-                      title="Remove member"
-                      onClick={() => onRemoveMember(member.id)}
-                    >
-                      <i className="fas fa-user-minus"></i>
-                    </button>
-                  )}
                 </li>
               ))}
             </ul>
@@ -78,11 +118,7 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
                   required
                 />
                 <button type="submit" className="btn btn-primary" disabled={isAdding}>
-                  {isAdding ? (
-                    'Adding...'
-                  ) : (
-                    <><i className="fas fa-user-plus"></i> Add</>
-                  )}
+                  {isAdding ? 'Adding...' : <><i className="fas fa-user-plus"></i> Add</>}
                 </button>
               </div>
             </form>
@@ -90,9 +126,7 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
+          <button className="btn btn-secondary" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>

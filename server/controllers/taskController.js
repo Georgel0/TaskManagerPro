@@ -37,20 +37,20 @@ const getTasks = async (req, res) => {
   const { title, project_id, assigned_user_id, status, priority } = req.query;
 
   try {
-    // Start building the query. Only fetch tasks from projects the user owns or is a member of.
     let queryText = `
-      SELECT DISTINCT t.* FROM tasks t
+      SELECT DISTINCT t.*, u.name AS assigned_user_name
+      FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN users u ON u.id = t.assigned_user_id
       WHERE (p.owner_id = $1 OR pm.user_id = $1)
     `;
     const queryParams = [userId];
     let paramIndex = 2;
 
-    // Add filters dynamically based on query parameters
     if (title) {
       queryText += ` AND t.title ILIKE $${paramIndex}`;
-      queryParams.push(`%${title}%`); // ILIKE allows for case-insensitive partial matches
+      queryParams.push(`%${title}%`);
       paramIndex++;
     }
     if (project_id) {
