@@ -17,6 +17,11 @@
   font-size: 0.95rem;
 }
 
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}
+
 .btn-primary {
   background-color: var(--accent-color);
   color: #fff;
@@ -342,11 +347,6 @@
   outline: none;
   border-color: var(--input-focus);
   box-shadow: 0 0 0 2px rgba(9, 132, 227, 0.1);
-}
-
-textarea.form-control {
-  resize: vertical;
-  min-height: 80px;
 }
 
 .mobile-only { display: none !important; }

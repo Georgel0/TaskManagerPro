@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { generateIdenticonBase64, registerSchema, loginSchema, validate } from '@/lib';
+import { registerSchema, loginSchema, validate } from '@/lib/validators';
+import { generateIdenticonBase64 } from '@/lib';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {

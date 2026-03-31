@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useApp } from '@/context';
-import { changeUsernameSchema, changePasswordSchema, deleteAccountSchema, validate } from '@/lib';
+import { changeUsernameSchema, changePasswordSchema, deleteAccountSchema, validate } from '@/lib/validators';
 import './profile.css';
 
 export default function ProfilePage() {

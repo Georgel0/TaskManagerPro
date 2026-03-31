@@ -144,6 +144,9 @@ export default function Tasks() {
         onEdit={(t) => setModalState({ type: 'edit', task: t })}
         task={modalState.task}
         onClose={closeModal}
+        isProjectOwner={
+          projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
+        }
       />
     </div>
   );

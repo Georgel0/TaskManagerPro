@@ -2,14 +2,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context';
 import { useComments } from './useComments';
-import { commentSchema, validate } from '@/lib';
-import { formatDate, formatTime, getInitials } from '@/lib';
+import { commentSchema, validate } from '@/lib/validators';
+import { formatDate, formatTime, getInitials, autoResize } from '@/lib';
 
-export function TaskDetailModal({ isOpen, onClose, onEdit, task }) {
+export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner }) {
   const { user } = useApp();
   const [commentText, setCommentText] = useState('');
   const [commentError, setCommentError] = useState(null);
   const commentsEndRef = useRef(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   const {
     comments, loading, isSubmitting,
@@ -84,124 +85,144 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task }) {
           </div>
 
           <div className="task-detail-section">
-            <p className="task-detail-label">
-              Comments
-              {comments.length > 0 && (
-                <span className="comment-count">{comments.length}</span>
-              )}
-            </p>
+            <hr />
+            <div className="comments-collapsible">
+              <button
+                className="comments-toggle"
+                onClick={() => setCommentsOpen((prev) => !prev)}
+              >
+                <i className={`fas fa-chevron-right comments-toggle-icon ${commentsOpen ? 'comments-toggle-icon-open' : ''}`}></i>
+                <p className="task-detail-label">
+                  Comments
+                  {comments.length > 0 && (
+                    <span className="comment-count">{comments.length}</span>
+                  )}
+                </p>
+              </button>
 
-            <div className="comments-list">
-              {loading ? (
-                <p className="text-secondary text-sm text-center">Loading comments...</p>
-              ) : comments.length === 0 ? (
-                <p className="comments-empty">No comments yet. Be the first to comment.</p>
-              ) : (
-                comments.map((c) => (
-                  <div key={c.id} className={`comment-item ${c.user_id === user?.id ? 'comment-own' : ''}`}>
-                    <div className="comment-avatar">
-                      {c.user_avatar ? (
-                        <img src={c.user_avatar} alt={c.user_name} />
-                      ) : (
-                        <span>{getInitials(c.user_name)}</span>
-                      )}
-                    </div>
-
-                    <div className="comment-body">
-                      <div className="comment-meta">
-                        <span className="comment-author">{c.user_name}</span>
-                        <span className="comment-time" title={formatTime(c.created_at)}>
-                          {formatDate(c.created_at)}
-                        </span>
-                      </div>
-
-                      {editingId === c.id ? (
-                        <div className="comment-edit-area">
-                          <textarea
-                            className="form-control comment-edit-input"
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            rows={2}
-                            autoFocus
-                          />
-                          <div className="comment-edit-actions">
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={() => saveEdit(c.id)}
-                              disabled={isSubmitting || !editText.trim()}
-                            >
-                              Save
-                            </button>
-                            <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
-                              Cancel
-                            </button>
+              <div className={`comments-section-content ${commentsOpen ? 'comments-section-open' : ''}`}>
+                <div className="comments-section-inner">
+                  <div className="comments-list">
+                    {loading ? (
+                      <p className="text-secondary text-sm text-center">Loading comments...</p>
+                    ) : comments.length === 0 ? (
+                      <p className="comments-empty">No comments yet. Be the first to comment.</p>
+                    ) : (
+                      comments.map((c) => (
+                        <div key={c.id} className={`comment-item ${c.user_id === user?.id ? 'comment-own' : ''}`}>
+                          <div className="comment-avatar">
+                            {c.user_avatar ? (
+                              <img src={c.user_avatar} alt={c.user_name} />
+                            ) : (
+                              <span>{getInitials(c.user_name)}</span>
+                            )}
                           </div>
+
+                          <div className="comment-body">
+                            <div className="comment-meta">
+                              <span className="comment-author">{c.user_name}</span>
+                              <span className="comment-time" title={formatTime(c.created_at)}>
+                                {formatDate(c.created_at)}
+                              </span>
+                              {c.updated_at && (
+                                <span className="comment-edited">edited</span>
+                              )}
+                            </div>
+
+                            {editingId === c.id ? (
+                              <div className="comment-edit-area">
+                                <textarea
+                                  className="form-control comment-edit-input"
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  onInput={autoResize}
+                                  rows={1}
+                                  autoFocus
+                                />
+                                <div className="comment-edit-actions">
+                                  <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => saveEdit(c.id)}
+                                    disabled={isSubmitting || !editText.trim()}
+                                  >
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="comment-text">{c.comment}</p>
+                            )}
+                          </div>
+
+                          {(c.user_id === user?.id || isProjectOwner) && editingId !== c.id && (
+                            <div className="comment-actions">
+                              {c.user_id === user?.id && (
+                                <button
+                                  className="btn-icon edit-btn"
+                                  title="Edit comment"
+                                  onClick={() => startEdit(c)}
+                                >
+                                  <i className="fas fa-pencil-alt"></i>
+                                </button>
+                              )}
+                              <button
+                                className="btn-icon delete-btn"
+                                title="Delete comment"
+                                onClick={() => deleteComment(c.id)}
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <p className="comment-text">{c.comment}</p>
-                      )}
-                    </div>
-
-                    {c.user_id === user?.id && editingId !== c.id && (
-                      <div className="comment-actions">
-                        <button
-                          className="btn-icon edit-btn"
-                          title="Edit comment"
-                          onClick={() => startEdit(c)}
-                        >
-                          <i className="fas fa-pencil-alt"></i>
-                        </button>
-                        <button
-                          className="btn-icon delete-btn"
-                          title="Delete comment"
-                          onClick={() => deleteComment(c.id)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
+                      ))
                     )}
+                    <div ref={commentsEndRef} />
                   </div>
-                ))
-              )}
-              <div ref={commentsEndRef} />
-            </div>
 
-            <form className="comment-form" onSubmit={handleSubmit} noValidate>
-              <div className="comment-input-row">
-                <div className="comment-avatar comment-avatar-sm">
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt={user.name} />
-                  ) : (
-                    <span>{getInitials(user?.name)}</span>
-                  )}
+                  <form className="comment-form" onSubmit={handleSubmit} noValidate>
+                    <div className="comment-input-row">
+                      <div className="comment-avatar comment-avatar-sm">
+                        {user?.avatar ? (
+                          <img src={user.avatar} alt={user.name} />
+                        ) : (
+                          <span>{getInitials(user?.name)}</span>
+                        )}
+                      </div>
+                      <div className={`comment-input-wrapper ${commentError ? 'has-error' : ''}`}>
+                        <textarea
+                          className="form-control comment-input"
+                          placeholder="Write a comment..."
+                          value={commentText}
+                          rows={1}
+                          onChange={(e) => {
+                            setCommentText(e.target.value);
+                            if (commentError) setCommentError(null);
+                          }}
+                          onInput={autoResize}
+                          onKeyDown={handleKeyDown}
+                        />
+                        {commentError && (
+                          <span className="field-error">
+                            <i className="fas fa-exclamation-circle"></i> {commentError}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="submit"
+                        className="btn btn-primary btn-sm comment-submit-btn"
+                        disabled={isSubmitting || !commentText.trim()}
+                      >
+                        <i className="fas fa-paper-plane"></i>
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div className={`comment-input-wrapper ${commentError ? 'has-error' : ''}`}>
-                  <textarea
-                    className="form-control comment-input"
-                    placeholder="Write a comment... (Enter to send, Shift+Enter for new line)"
-                    value={commentText}
-                    rows={1}
-                    onChange={(e) => {
-                      setCommentText(e.target.value);
-                      if (commentError) setCommentError(null);
-                    }}
-                    onKeyDown={handleKeyDown}
-                  />
-                  {commentError && (
-                    <span className="field-error">
-                      <i className="fas fa-exclamation-circle"></i> {commentError}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm comment-submit-btn"
-                  disabled={isSubmitting || !commentText.trim()}
-                >
-                  <i className="fas fa-paper-plane"></i>
-                </button>
               </div>
-            </form>
+            </div>
           </div>
 
         </div>

@@ -26,7 +26,7 @@ export function useComments(taskId) {
       });
 
       if (!res.ok) throw new Error('Failed to fetch comments');
-      
+
       setComments(await res.json());
     } catch (err) {
       toast.error(err.message);
@@ -49,9 +49,9 @@ export function useComments(taskId) {
       });
 
       if (!res.ok) throw new Error('Failed to post comment');
-      
+
       const newComment = await res.json();
-      
+
       setComments((prev) => [...prev, newComment]);
     } catch (err) {
       toast.error(err.message);
@@ -73,7 +73,7 @@ export function useComments(taskId) {
   const saveEdit = async (id) => {
     if (!editText.trim()) return;
     setIsSubmitting(true);
-    
+
     try {
       const res = await fetch(`${API}/comments/${id}`, {
         method: 'PUT',
@@ -83,12 +83,18 @@ export function useComments(taskId) {
         },
         body: JSON.stringify({ comment: editText }),
       });
-      
+
       if (!res.ok) throw new Error('Failed to update comment');
-      
+
       const updated = await res.json();
-      
-      setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === updated.id
+            ? { ...c, comment: updated.comment, updated_at: updated.updated_at }
+            : c
+        )
+      );
       cancelEdit();
     } catch (err) {
       toast.error(err.message);
@@ -103,9 +109,9 @@ export function useComments(taskId) {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      
+
       if (!res.ok) throw new Error('Failed to delete comment');
-      
+
       setComments((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       toast.error(err.message);

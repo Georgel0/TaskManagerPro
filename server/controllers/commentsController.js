@@ -46,10 +46,10 @@ const updateComment = async (req, res) => {
   try {
     const updatedComment = await pool.query(
       `UPDATE comments
-       SET comment = $1
-       WHERE id = $2 AND user_id = $3  
-       RETURNING *`,
-      [comment, id, userId] 
+      SET comment = $1, updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+      RETURNING *`,
+      [comment, id, userId]
     );
 
     if (updatedComment.rows.length === 0) {
@@ -80,7 +80,7 @@ const deleteComment = async (req, res) => {
            AND p.owner_id = $2
          )
        )`,
-      [id, userId] 
+      [id, userId]
     );
 
     res.status(200).json({ message: 'Comment deleted successfully.' });
@@ -90,4 +90,4 @@ const deleteComment = async (req, res) => {
   }
 };
 
-module.exports = { getComments, createComment, updateComment, deleteComment  };
+module.exports = { getComments, createComment, updateComment, deleteComment };

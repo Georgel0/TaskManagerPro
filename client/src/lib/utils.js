@@ -6,3 +6,9 @@ export const formatDate = (date) =>
 
 export const formatTime = (date) =>
   new Date(date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+export const autoResize = (e) => {
+  const el = e.target;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight}px`;
+};
