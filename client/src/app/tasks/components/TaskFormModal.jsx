@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { createTaskSchema, updateTaskSchema, validate } from '@/lib';
+import { createTaskSchema, updateTaskSchema, validate } from '@/lib/validators';
 
 export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, projects, isSubmitting }) {
   const [formData, setFormData] = useState({

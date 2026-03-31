@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { addMemberSchema, validate } from '@/lib';
+import { addMemberSchema, validate } from '@/lib/validators';
+import { getInitials } from '@/lib';
 
 export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose }) {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [emailError, setEmailError] = useState(null);
   const router = useRouter();
-
-  const getInitials = (name) =>
-    name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   const handleMemberClick = (member) => {
     onClose();
@@ -22,14 +20,12 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate email format using Zod
     const errors = validate(addMemberSchema, { email });
     if (errors?.email) {
       setEmailError(errors.email);
       return;
     }
 
-    // Check if the user is already in the members array
     const isAlreadyMember = members.some(
       (member) => member.email.toLowerCase() === email.toLowerCase().trim()
     );

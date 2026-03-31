@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createProjectSchema, updateProjectSchema, validate } from '@/lib';
+import { createProjectSchema, updateProjectSchema, validate } from '@/lib/validators';
 
 export function ProjectFormModal({ mode = 'create', formData, setFormData, onSubmit, onClose, isSubmitting }) {
   const isEdit = mode === 'edit';
