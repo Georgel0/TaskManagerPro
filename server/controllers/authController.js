@@ -188,14 +188,14 @@ const forgotPassword = async (req, res) => {
     const expires = new Date(Date.now() + 15 * 60 * 1000);
 
     await pool.query(
-      'UPDATE users SET reset_token = $1, reset_token_expiers = $2 WHERE id = $3',
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
       [hashedToken, expires, user.id]
     );
 
-    const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${plainToken}&id=${user.id}`;
+    const resetLink = `${process.env.CLIENT_URL}/?token=${plainToken}&id=${user.id}`;
 
     await resend.emails.send({
-      from: 'Task Manager',
+      from: 'Task Manager <onboarding@resend.dev>',
       to: email,
       subject: 'Reset your password.',
       html: `

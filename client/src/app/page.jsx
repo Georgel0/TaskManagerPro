@@ -1,79 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { registerSchema, loginSchema, validate } from '@/lib/validators';
-import { generateIdenticonBase64 } from '@/lib';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ForgotPasswordForm } from './(auth)/ForgotPasswordForm';
+import { ResetPasswordForm } from './(auth)/ResetPasswordForm';
+import { LoginRegisterForm } from './(auth)/LoginRegisterForm';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
+  const searchParams = useSearchParams();
+  const [view, setView] = useState('login');
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    // Clear the error for this field as the user types
-    if (errors[name]) setErrors({ ...errors, [name]: '' });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setServerError('');
-
-    // Client-side validation before touching the network
-    const schema = isLogin ? loginSchema : registerSchema;
-    const fieldErrors = validate(schema, formData);
-    if (fieldErrors) {
-      setErrors(fieldErrors);
-      return;
+  useEffect(() => {
+    if (searchParams.get('token')) {
+      setView('reset');
     }
-    setErrors({});
-
-    const userEmail = formData.email.trim().toLowerCase();
-    let avatar = null;
-    if (!isLogin) {
-      avatar = generateIdenticonBase64(userEmail, 32);
-    }
-
-    const API = process.env.NEXT_PUBLIC_API_URL;
-    const endpoint = isLogin ? `${API}/login` : `${API}/register`;
-    const payload = isLogin
-      ? { email: userEmail, password: formData.password }
-      : { ...formData, email: userEmail, avatar };
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = '/dashboard';
-      } else {
-        setServerError(data.error || 'Authentication failed.');
-      }
-    } catch {
-      setServerError('Network error. Please try again.');
-    }
-  };
-
-  const switchMode = () => {
-    setIsLogin(!isLogin);
-    setErrors({});
-    setServerError('');
-    setFormData({ name: '', email: '', password: '' });
-  };
+  }, [searchParams]);
 
   return (
     <div className="landing-container">
       <div className="landing-content">
+
         <section className="info-column">
           <div className="info-content">
             <h1>Productivity & Team Task Manager</h1>
@@ -97,70 +44,21 @@ export default function LandingPage() {
           </footer>
         </section>
 
+
         <section className="auth-column">
-          <div className="auth-card">
-            <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
-            <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
-
-            <form className="dummy-form" onSubmit={handleSubmit} noValidate>
-              {!isLogin && (
-                <div>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={errors.name ? 'input-error' : ''}
-                  />
-                  {errors.name && <span className="field-error">{errors.name}</span>}
-                </div>
-              )}
-
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={errors.email ? 'input-error' : ''}
-                />
-                {errors.email && <span className="field-error">{errors.email}</span>}
-              </div>
-
-              <div>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={errors.password ? 'input-error' : ''}
-                />
-                {errors.password && <span className="field-error">{errors.password}</span>}
-              </div>
-
-              <button type="submit" className="login-btn">
-                {isLogin ? 'Log In' : 'Register'}
-              </button>
-            </form>
-
-            {serverError && (
-              <p className="error-message">
-                {serverError}
-              </p>
+            {view === 'login' && (
+              <LoginRegisterForm onForgotClick={() => setView('forgot')} />
             )}
 
+            {view === 'forgot' && (
+              <ForgotPasswordForm onBack={() => setView('login')} />
+            )}
 
-            <p className="toggle-auth">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button type="button" className="text-btn" onClick={switchMode}>
-                {isLogin ? 'Register here' : 'Log in here'}
-              </button>
-            </p>
-          </div>
+            {view === 'reset' && (
+              <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />
+            )}
         </section>
+
       </div>
     </div>
   );
