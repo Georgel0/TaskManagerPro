@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ForgotPasswordForm } from './(auth)/ForgotPasswordForm';
-import { ResetPasswordForm } from './(auth)/ResetPasswordForm';
-import { LoginRegisterForm } from './(auth)/LoginRegisterForm';
+import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from './auth';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
@@ -46,17 +44,24 @@ export default function LandingPage() {
 
 
         <section className="auth-column">
-            {view === 'login' && (
-              <LoginRegisterForm onForgotClick={() => setView('forgot')} />
-            )}
+          {view === 'login' && (
+            <LoginRegisterForm
+              onForgotClick={() => setView('forgot')}
+            />
+          )}
 
-            {view === 'forgot' && (
-              <ForgotPasswordForm onBack={() => setView('login')} />
-            )}
+          {view === 'forgot' && (
+            <ForgotPasswordForm
+              onBack={() => setView('login')}
+            />
+          )}
 
-            {view === 'reset' && (
-              <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />
-            )}
+          {view === 'reset' && (
+            <ResetPasswordForm
+              onSuccess={() => setView('login')}
+              onBack={() => setView('login')}
+            />
+          )}
         </section>
 
       </div>
