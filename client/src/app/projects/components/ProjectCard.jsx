@@ -8,7 +8,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
       <div>
         <div>
           <h3>{project.name}</h3>
-          <span className={`badge ${isOwner ? 'badge-owner' : 'badge-member'}`}>
+          <span className={`badge ${isOwner ? 'badge-owner' : 'badge-member'}`} title="Authority">
             {isOwner ? 'Owner' : 'Member'}
           </span>
         </div>
@@ -34,9 +34,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
       </div>
 
       <div>
-        <p>
-          {project.description || 'No description provided.'}
-        </p>
+        <p>{project.description || 'No description provided.'}</p>
         <div>
           <span>
             <i className="fas fa-calendar-alt"></i> Created:{' '}
@@ -46,7 +44,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
           <div>
             <button
               className="project-member-count"
-              title="View team"
+              title="View Members"
               onClick={(e) => { e.stopPropagation(); onMembers(project); }}
             >
               <i className="fas fa-users"></i> {memberCount}
@@ -55,7 +53,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             <button 
               className="project-task-count" 
               onClick={() => onOpen(project)}
-              title="View Members"
+              title="View Tasks"
             >
               <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
             </button>

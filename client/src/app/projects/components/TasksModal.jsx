@@ -25,7 +25,7 @@ export function TasksModal({ project, tasks, loading, onClose }) {
           ) : tasks.length === 0 ? (
             <>
               <p className="empty-state">No tasks in this project yet.</p>
-              <Link href='/tasks' className="empty-state-btn" title='Projects'>
+              <Link href='/tasks' className="empty-state-btn" title='Tasks'>
                 <i className="fas fa-arrow-right"></i> Tasks
               </Link>
             </>
@@ -39,7 +39,7 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                 >
                   <div>
                     <span>{task.title}</span>
-                    <span className="text-xs text-secondary">
+                    <span className="text-xs text-secondary" title='Deadline'>
                       <i className="fas fa-calendar"></i>{' '}
                       {task.deadline
                         ? new Date(task.deadline).toLocaleDateString()
@@ -47,10 +47,10 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                     </span>
                   </div>
                   <div>
-                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
+                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title='Priority'>
                       {task.priority || 'Medium'}
                     </span>
-                    <span className="badge status-badge">{task.status}</span>
+                    <span className="badge status-badge" title='Status'>{task.status}</span>
                     <i className="fas fa-arrow-right text-secondary"></i>
                   </div>
                 </li>
@@ -60,7 +60,7 @@ export function TasksModal({ project, tasks, loading, onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>Close</button>
+          <button className="btn btn-secondary" onClick={onClose} title='Close'>Close</button>
         </div>
       </div>
     </div>

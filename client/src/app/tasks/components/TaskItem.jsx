@@ -2,7 +2,7 @@
 import { useApp } from "@/context";
 import { formatDate } from "@/lib";
 
-export function TaskItem({ task, onDetail, onEdit, onDelete, isProjectOwner }) {
+export function TaskItem({ task, onDetail, onEdit, onDelete }) {
   const { user } = useApp();
 
   const hasEditRights = user?.id === task.project_owner_id || user?.id === task.assigned_user_id;
@@ -45,10 +45,10 @@ export function TaskItem({ task, onDetail, onEdit, onDelete, isProjectOwner }) {
       </div>
 
       <div className="task-meta-group">
-        <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
+        <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title="Priority">
           {task.priority || 'Medium'}
         </span>
-        <span className="badge status-badge">
+        <span className="badge status-badge" title="Status">
           {task.status || 'To Do'}
         </span>
         {hasEditRights && (

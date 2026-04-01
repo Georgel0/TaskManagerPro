@@ -65,13 +65,13 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
         <div className="modal-body task-detail-body modal-body-scroll">
 
           <div className="task-detail-badges">
-            <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
+            <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title="Priority">
               {task.priority || 'Medium'}
             </span>
-            <span className="badge status-badge">{task.status || 'To Do'}</span>
+            <span className="badge status-badge" title="Status">{task.status || 'To Do'}</span>
           </div>
 
-          <div className="task-detail-row">
+          <div className="task-detail-row" title="Deadline">
             <i className="fas fa-calendar-alt task-detail-icon"></i>
             <span className="task-detail-inline-label">Deadline:</span>
             <span>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline set'}</span>
@@ -215,6 +215,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
                         type="submit"
                         className="btn btn-primary btn-sm comment-submit-btn"
                         disabled={isSubmitting || !commentText.trim()}
+                        title="Submit"
                       >
                         <i className="fas fa-paper-plane"></i>
                       </button>
@@ -228,7 +229,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>Close</button>
+          <button className="btn btn-secondary" onClick={onClose} title="CLose">Close</button>
         </div>
       </div>
     </div>
