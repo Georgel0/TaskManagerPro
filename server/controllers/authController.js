@@ -1,6 +1,10 @@
 const pool = require('../database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -135,17 +139,17 @@ const changePassword = async (req, res) => {
   }
 };
 
-const deleteAccount = async (req, res)=> {
+const deleteAccount = async (req, res) => {
   const userId = req.user.id;
   const { password } = req.body;
 
   if (!password) {
     return res.status(400).json({ error: "Password is required to delete your account." });
   }
-  
+
   try {
     const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
-    
+
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "User not found." });
     }
@@ -164,4 +168,110 @@ const deleteAccount = async (req, res)=> {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, changeUsername, changePassword, deleteAccount };
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userResult = await pool.query(
+      'SELECT id, name FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    const user = userResult.rows[0];
+
+    const plainToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(plainToken, 10);
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await pool.query(
+      'UPDATE users SET reset_token = $1, reset_token_expiers = $2 WHERE id = $3',
+      [hashedToken, expires, user.id]
+    );
+
+    const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${plainToken}&id=${user.id}`;
+
+    await resend.emails.send({
+      from: 'Task Manager',
+      to: email,
+      subject: 'Reset your password.',
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Reset your password</h2>
+          <p>Hi ${user.name},</p>
+          <p>We received a request to reset your password. Click the button below to choose a new one.</p>
+          <a href="${resetLink}"
+            style="display: inline-block; padding: 12px 24px; background-color: #0984e3;
+              color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">
+            Reset Password
+          </a>
+          <p style="color: #666; font-size: 0.85rem;">
+            This link expires in 15 minutes. If you didn't request this, you can safely ignore this email.
+          </p>
+          <p style="color: #666; font-size: 0.85rem;">
+            Or copy this link: ${resetLink}
+          </p>
+        </div>
+      `,
+    });
+
+    res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while processing password reset.' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, userId, newPassword } = req.body;
+
+  try {
+    const userResult = await pool.query(
+      'SELECT reset_token, reset_token_expires FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset link.' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if token is expired
+    if (!user.reset_token || new Date() > new Date(user.reset_token_expires)) {
+      return res.status(400).json({ error: 'Reset link has expired. Please request a new one.' });
+    }
+
+    // Verify the token matches
+    const isMatch = await bcrypt.compare(token, user.reset_token);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid or expired reset link.' });
+    }
+
+    // Hash new password and clear the reset token
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [hashedPassword, userId]
+    );
+
+    res.status(200).json({ message: 'Password reset successfully. You can now log in.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while resetting password.' });
+  }
+};
+
+module.exports = { 
+  registerUser, 
+  loginUser, 
+  getUserProfile, 
+  changeUsername, 
+  changePassword, 
+  deleteAccount,
+  forgotPassword,
+  resetPassword 
+};

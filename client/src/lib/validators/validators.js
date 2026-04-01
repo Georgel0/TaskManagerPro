@@ -55,6 +55,23 @@ export const deleteAccountSchema = z.object({
   password: z.string().min(1, 'Password is required.'),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required.' })
+    .trim()
+    .email('Please enter a valid email address.'),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: passwordField,
+    confirmPassword: z.string().min(1, 'Please confirm your password.'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match.',
+    path: ['confirmPassword'],
+  });
+
 /**
  * Runs a Zod schema against data and returns a flat { field: message } map.
  * Returns null if validation passes.

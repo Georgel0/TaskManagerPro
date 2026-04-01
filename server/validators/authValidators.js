@@ -68,10 +68,28 @@ const deleteAccountSchema = z.object({
     .min(1, 'Password is required to delete your account.'),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z
+    .string({ required_error: 'Email is required. '})
+    .trim()
+    .email('Please enter a valid email address.'),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string({ required_error: 'Token is requierd.'}).min(1),
+  userId: z.union([z.string(),z.number()]).transform(Number),
+  newPassword: z
+    .string({ required_error: 'Password is required.'})
+    .min(4, 'Password must be at least 4 characters.')
+    .max(32, 'Password must be at most 32 characters.'),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   changeUsernameSchema,
   changePasswordSchema,
   deleteAccountSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
 };
