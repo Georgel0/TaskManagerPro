@@ -59,40 +59,26 @@ hr {
   flex-direction: column;
 }
 
-.status-badge { background-color: var(--sec-background); color: var(--sec-text-color); }
-.priority-low { background-color: color-mix(in srgb, var(--success-color) 15%, transparent); color: var(--success-color); }
-.priority-medium { background-color: color-mix(in srgb, var(--warning-color) 15%, transparent); color: var(--warning-color); }
-.priority-high { background-color: color-mix(in srgb, var(--error-color) 15%, transparent); color: var(--error-color); }
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 
-.text-secondary { color: var(--sec-text-color); }
-.text-xs { font-size: 0.8rem; }
-.text-sm { font-size: 0.85rem; }
-.text-primary { color: var(--accent-color); }
-.text-success { color: var(--success-color); }
-.text-warning { color: var(--warning-color); }
-.text-error { color: var(--error-color); }
-.text-center { text-align: center; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-.bg-primary-light { background-color: color-mix(in srgb, var(--accent-color) 15%, transparent); }
-.bg-success-light { background-color: color-mix(in srgb, var(--success-color) 15%, transparent); }
-.bg-warning-light { background-color: color-mix(in srgb, var(--warning-color) 15%, transparent); }
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
 
-.d-flex { display: flex; }
-.flex-col { display: flex; flex-direction: column; }
-.justify-between { justify-content: space-between; }
-.align-center { align-items: center; }
-.gap-sm { gap: 10px; }
-.gap-md { gap: 15px; }
-.gap-lg { gap: 24px; }
-.flex-1 { flex: 1; }
-
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
-.mt-4 { margin-top: 1.5rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 1.5rem; }
-.p-0 { padding: 0 !important; }
+@keyframes taskHighlight {
+  0%   { background-color: color-mix(in srgb, var(--accent-color) 20%, transparent); }
+  100% { background-color: transparent; }
+}
 
 html[data-theme="light-nature"] {
   --pri-text-color: #2c3e50;

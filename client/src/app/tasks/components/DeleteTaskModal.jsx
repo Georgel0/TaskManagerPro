@@ -7,10 +7,10 @@ export function DeleteTaskModal({ isOpen, onClose, onConfirm, task, isSubmitting
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="text-error">Confirm Deletion</h2>
+          <h2 className="modal-title-error">Confirm Deletion</h2>
         </div>
         <div className="modal-body">
-          <p className="mb-3 text-secondary">
+          <p className="modal-confirm-text">
             Are you sure you want to delete <strong>{task.title}</strong>? This action is permanent.
           </p>
         </div>

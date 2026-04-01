@@ -130,15 +130,15 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-container page-content">
-      <h1 className="mb-4">Profile</h1>
+      <h1 className="profile-main-title">Profile</h1>
 
       {user && (
         <div className="card profile-card profile-header">
           <img className="profile-avatar" src={user.avatar} alt="Avatar" />
           <div className="profile-info-group">
             <p className="profile-name">{user.name}</p>
-            <p className="text-secondary">{user.email}</p>
-            <p className="text-sm text-secondary mt-2">
+            <p className="profile-email">{user.email}</p>
+            <p className="profile-join-date">
               Member since {new Date(user.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -146,8 +146,8 @@ export default function ProfilePage() {
       )}
 
       <div className="card profile-card">
-        <h2 className="mb-3">Change Username</h2>
-        <form onSubmit={handleUsernameChange} className="form-group mb-4 d-flex flex-col gap-sm" noValidate>
+        <h2 className="profile-section-title">Change Username</h2>
+        <form onSubmit={handleUsernameChange} className="form-group profile-form profile-form-username" noValidate>
           <input
             className={`form-control ${usernameError ? 'input-error' : ''}`}
             type="text"
@@ -162,8 +162,8 @@ export default function ProfilePage() {
           <button type="submit" className="btn btn-primary">Update Username</button>
         </form>
 
-        <h2 className="mb-3 mt-4">Change Password</h2>
-        <form onSubmit={handlePasswordChange} className="form-group d-flex flex-col gap-sm" noValidate>
+        <h2 className="profile-section-title profile-section-spacing">Change Password</h2>
+        <form onSubmit={handlePasswordChange} className="form-group profile-form" noValidate>
           <input
             className={`form-control ${passwordErrors.currentPassword ? 'input-error' : ''}`}
             type="password"
@@ -197,8 +197,8 @@ export default function ProfilePage() {
       </div>
 
       <div className="card profile-card danger-zone">
-        <h2 className="text-error mb-2">Danger Zone</h2>
-        <p className="mb-4 text-sm">
+        <h2 className="profile-danger-title">Danger Zone</h2>
+        <p className="profile-danger-desc">
           Once you delete your account, there is no going back. All projects and tasks will be removed.
         </p>
         <div className="profile-actions">
@@ -216,14 +216,14 @@ export default function ProfilePage() {
         <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="text-error">Confirm Deletion</h2>
+              <h2 className="profile-danger-title">Confirm Deletion</h2>
               <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
                 <i className="fas fa-times"></i>
               </button>
             </div>
             <form onSubmit={confirmDeleteAccount} noValidate>
               <div className="modal-body">
-                <p className="mb-3 text-secondary">
+                <p className="profile-modal-desc">
                   This action is permanent. All your projects and tasks will be permanently removed.
                 </p>
                 <div className="form-group">

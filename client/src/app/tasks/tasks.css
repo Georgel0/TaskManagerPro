@@ -82,6 +82,8 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
 }
 
 .task-meta-group {
@@ -92,6 +94,43 @@
 
 .task-highlight {
   animation: taskHighlight 1.5s ease-out forwards;
+}
+
+
+.tasks-card-body {
+  padding: 0 !important;
+}
+
+.tasks-empty-btn {
+  margin-top: 0.5rem;
+}
+
+.task-item-details {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+}
+
+.task-detail-icon {
+  color: var(--sec-text-color);
+}
+
+.task-detail-inline-label {
+  color: var(--sec-text-color);
+  font-size: 0.85rem;
+}
+
+.task-detail-empty-text {
+  color: var(--sec-text-color);
+}
+
+.task-form-warning {
+  color: var(--warning-color);
+  margin-bottom: 0.5rem;
+}
+
+.task-form-char-count {
+  color: var(--sec-text-color);
+  font-size: 0.8rem;
 }
 
 .modal-content-lg {
@@ -136,6 +175,12 @@
   color: var(--pri-text-color);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.task-assigned-user {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .comments-collapsible {
@@ -367,4 +412,10 @@ textarea.form-control.comment-input {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
+}
+
+.comments-loading-text {
+  color: var(--sec-text-color);
+  font-size: 0.85rem;
+  text-align: center;
 }

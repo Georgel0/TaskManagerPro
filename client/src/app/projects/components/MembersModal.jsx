@@ -130,7 +130,7 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
 
           {isOwner && (
             <form className="add-member-form" onSubmit={handleSubmit} noValidate>
-              <h4 className="add-member-title">Add Member</h4>
+              <h4>Add Member</h4>
               <div className="add-member-input-group">
                 <div className="add-member-input-wrapper">
                   <input

@@ -38,7 +38,11 @@ const getTasks = async (req, res) => {
 
   try {
     let queryText = `
-      SELECT DISTINCT t.*, u.name AS assigned_user_name
+      SELECT DISTINCT t.*, 
+             u.name AS assigned_user_name,
+             u.avatar AS assigned_user_avatar,
+             p.owner_id AS project_owner_id,
+             (SELECT COUNT(*)::int FROM comments WHERE task_id = t.id) AS comment_count
       FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id
@@ -77,6 +81,7 @@ const getTasks = async (req, res) => {
     queryText += ` ORDER BY t.created_at DESC`;
 
     const tasks = await pool.query(queryText, queryParams);
+
     res.status(200).json(tasks.rows);
   } catch (err) {
     console.error("Error fetching tasks: ", err);
@@ -94,8 +99,7 @@ const updateTask = async (req, res) => {
     const taskCheck = await pool.query(
       `SELECT t.id FROM tasks t
        JOIN projects p ON t.project_id = p.id
-       LEFT JOIN project_members pm ON p.id = pm.project_id
-       WHERE t.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
+       WHERE t.id = $1 AND (p.owner_id = $2 OR t.assigned_user_id = $2)`,
       [id, userId]
     );
 
@@ -131,8 +135,7 @@ const deleteTask = async (req, res) => {
     const taskCheck = await pool.query(
       `SELECT t.id FROM tasks t
        JOIN projects p ON t.project_id = p.id
-       LEFT JOIN project_members pm ON p.id = pm.project_id
-       WHERE t.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
+       WHERE t.id = $1 AND (p.owner_id = $2 OR t.assigned_user_id = $2)`,
       [id, userId]
     );
 
@@ -141,6 +144,7 @@ const deleteTask = async (req, res) => {
     }
 
     await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+
     res.status(200).json({ message: "Task deleted successfully." });
   } catch (err) {
     console.error("Error deleting task: ", err);

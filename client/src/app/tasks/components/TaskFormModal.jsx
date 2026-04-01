@@ -79,7 +79,7 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
             <button className="btn-icon" onClick={onClose}><i className="fas fa-times"></i></button>
           </div>
           <div className="modal-body text-center">
-            <p className="text-warning mb-2">
+            <p className="text-form-warning">
               <i className="fas fa-exclamation-triangle"></i> You need to create a project first before adding tasks.
             </p>
           </div>
@@ -182,7 +182,7 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
             <div className={`form-group ${fieldErrors.description ? 'has-error' : ''}`}>
               <label>
                 Description
-                <span className="char-count text-secondary text-xs">
+                <span className="char-count task-form-char-count">
                   {formData.description.length}/2000
                 </span>
               </label>

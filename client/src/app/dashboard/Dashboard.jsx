@@ -101,8 +101,8 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="page-content">
-        <div className="error-message text-center mt-4">
-          <i className="fas fa-exclamation-triangle mb-2"></i>
+        <div className="error-message dashboard-error">
+          <i className="fas fa-exclamation-triangle dashboard-error-icon"></i>
           <p>{error}</p>
         </div>
       </div>
@@ -113,46 +113,46 @@ export default function Dashboard() {
 
   return (
     <div className="page-content dashboard-container">
-      <header className="dashboard-header mb-4 d-flex justify-between align-center">
+      <header className="dashboard-header">
         <div>
           <h1>Welcome back, {user.name}</h1>
-          <p className="text-secondary mt-2">Here is your overview.</p>
+          <p className="dashboard-subtitle">Here is your overview.</p>
         </div>
-        <div className="d-flex gap-sm">
+        <div className="dashboard-header-actions">
           <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} title='New Task'>
             <i className="fas fa-plus"></i> New Task
           </button>
-          <Link href='/projects' className="btn btn-secondary desktop-only" title='Projects'>
+          <Link href='/projects' className="btn btn-secondary dashboard-projects-btn" title='Projects'>
             <i className="fas fa-arrow-right"></i> Projects
           </Link>
         </div>
       </header>
 
-      <section className="stats-grid mb-4">
+      <section className="stats-grid">
         <div className="card stat-card">
-          <div className="stat-icon bg-primary-light">
-            <i className="fas fa-tasks text-primary"></i>
+          <div className="stat-icon stat-icon-primary">
+            <i className="fas fa-tasks"></i>
           </div>
           <div className="stat-info">
-            <p className="text-secondary text-sm">Total Tasks</p>
+            <p className="stat-label">Total Tasks</p>
             <h3>{statistics.totalTasks}</h3>
           </div>
         </div>
         <div className="card stat-card">
-          <div className="stat-icon bg-warning-light">
-            <i className="fas fa-hourglass-half text-warning"></i>
+          <div className="stat-icon stat-icon-warning">
+            <i className="fas fa-hourglass-half"></i>
           </div>
           <div className="stat-info">
-            <p className="text-secondary text-sm">Pending</p>
+            <p className="stat-label">Pending</p>
             <h3>{statistics.pendingTasks}</h3>
           </div>
         </div>
         <div className="card stat-card">
-          <div className="stat-icon bg-success-light">
-            <i className="fas fa-check-circle text-success"></i>
+          <div className="stat-icon stat-icon-success">
+            <i className="fas fa-check-circle"></i>
           </div>
           <div className="stat-info">
-            <p className="text-secondary text-sm">Completed</p>
+            <p className="stat-label">Completed</p>
             <h3>{statistics.completedTasks}</h3>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
             <h2><i className="fas fa-list-ul"></i> Active Tasks</h2>
             <Link href="/tasks" className="btn-icon"><i className="fas fa-arrow-right"></i></Link>
           </div>
-          <div className="card-body p-0">
+          <div className="card-body dashboard-card-body">
             {activeTasks.length === 0 ? (
               <p className="empty-state">No active tasks right now.</p>
             ) : (
@@ -190,17 +190,17 @@ export default function Dashboard() {
           <div className="card-header">
             <h2><i className="fas fa-clock"></i> Upcoming Deadlines</h2>
           </div>
-          <div className="card-body p-0">
+          <div className="card-body dashboard-card-body">
             {upcomingDeadlines.length === 0 ? (
               <p className="empty-state">No immediate deadlines in the next 7 days.</p>
             ) : (
               <ul className="dash-task-list">
                 {upcomingDeadlines.map(task => (
-                  <li key={task.id} className="dash-task-item border-left-warning">
+                  <li key={task.id} className="dash-task-item dash-task-upcoming">
                     <div className="dash-task-main">
                       <div className="dash-task-details">
                         <h4>{task.title}</h4>
-                        <span className="text-xs text-warning">
+                        <span className="dash-task-due">
                           <i className="fas fa-exclamation-circle"></i> Due: {new Date(task.deadline).toLocaleDateString()}
                         </span>
                       </div>
@@ -224,8 +224,8 @@ export default function Dashboard() {
             </div>
 
             {projects.length === 0 ? (
-              <div className="modal-body text-center flex-col gap-md">
-                <p className="text-warning mb-3">
+              <div className="modal-body dashboard-empty-project-modal">
+                <p className="dashboard-warning-text">
                   <i className="fas fa-exclamation-triangle"></i> You must create a project before adding tasks.
                 </p>
                 <Link href="/projects" className="btn btn-primary">Go to Projects</Link>

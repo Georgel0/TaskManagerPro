@@ -72,15 +72,15 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
           </div>
 
           <div className="task-detail-row">
-            <i className="fas fa-calendar-alt text-secondary"></i>
-            <span className="text-secondary text-sm">Deadline:</span>
+            <i className="fas fa-calendar-alt task-detail-icon"></i>
+            <span className="task-detail-inline-label">Deadline:</span>
             <span>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline set'}</span>
           </div>
 
           <div className="task-detail-section">
             <p className="task-detail-label">Description</p>
             <p className="task-detail-description">
-              {task.description || <span className="text-secondary">No description provided.</span>}
+              {task.description || <span className="task-detail-empty-text">No description provided.</span>}
             </p>
           </div>
 
@@ -104,7 +104,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
                 <div className="comments-section-inner">
                   <div className="comments-list">
                     {loading ? (
-                      <p className="text-secondary text-sm text-center">Loading comments...</p>
+                      <p className="comments-loading-text">Loading comments...</p>
                     ) : comments.length === 0 ? (
                       <p className="comments-empty">No comments yet. Be the first to comment.</p>
                     ) : (

@@ -4,10 +4,28 @@
   gap: 24px;
 }
 
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-subtitle {
+  color: var(--sec-text-color);
+  margin-top: 8px;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
@@ -27,6 +45,26 @@
   font-size: 1.5rem;
 }
 
+.stat-icon-primary {
+  background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
+  color: var(--accent-color);
+}
+
+.stat-icon-warning {
+  background-color: color-mix(in srgb, var(--warning-color) 15%, transparent);
+  color: var(--warning-color);
+}
+
+.stat-icon-success {
+  background-color: color-mix(in srgb, var(--success-color) 15%, transparent);
+  color: var(--success-color);
+}
+
+.stat-label {
+  color: var(--sec-text-color);
+  font-size: 0.85rem;
+}
+
 .stat-info h3 {
   font-size: 1.5rem;
   font-weight: 700;
@@ -38,6 +76,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+}
+
+.dashboard-card-body {
+  padding: 0 !important;
 }
 
 .dash-task-list {
@@ -54,7 +96,8 @@
 .dash-task-item:last-child {
   border-bottom: none;
 }
-.dash-task-item.border-left-warning {
+
+.dash-task-upcoming {
   border-left: 4px solid var(--warning-color);
 }
 
@@ -68,6 +111,14 @@
   margin: 0 0 4px 0;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.dash-task-due {
+  font-size: 0.8rem;
+  color: var(--warning-color);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .dash-task-meta {
@@ -90,6 +141,28 @@
   background-color: var(--sec-background);
 }
 
+.dashboard-error {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.dashboard-error-icon {
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-empty-project-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 15px;
+}
+
+.dashboard-warning-text {
+  color: var(--warning-color);
+  margin-bottom: 1rem;
+}
+
 @media (min-width: 1024px) {
   .dashboard-content-grid {
     grid-template-columns: 2fr 1fr;
@@ -101,5 +174,9 @@
     flex-direction: column;
     align-items: flex-start !important;
     gap: 15px;
+  }
+  
+  .dashboard-projects-btn {
+    display: none !important;
   }
 }

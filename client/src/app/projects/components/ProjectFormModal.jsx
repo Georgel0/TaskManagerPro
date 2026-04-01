@@ -5,7 +5,6 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   const isEdit = mode === 'edit';
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // Clear errors when modal opens/switches mode
   useEffect(() => {
     setFieldErrors({});
   }, [mode, onClose]);
@@ -45,7 +44,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
         <form onSubmit={handleSubmit} noValidate>
           <div className="modal-body">
 
-            <div className={`form-group ${fieldErrors.name ? 'has-error' : ''}`}>
+            <div className={fieldErrors.name ? 'has-error' : ''}>
               <label>Project Name *</label>
               <input
                 type="text"
@@ -60,7 +59,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
               )}
             </div>
 
-            <div className={`form-group ${fieldErrors.description ? 'has-error' : ''}`}>
+            <div className={fieldErrors.description ? 'has-error' : ''}>
               <label>
                 Description
                 <span className="char-count text-secondary text-xs">

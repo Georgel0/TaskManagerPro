@@ -37,8 +37,8 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                   className="project-task-item"
                   onClick={() => handleTaskClick(task.id)}
                 >
-                  <div className="project-task-info">
-                    <span className="project-task-title">{task.title}</span>
+                  <div>
+                    <span>{task.title}</span>
                     <span className="text-xs text-secondary">
                       <i className="fas fa-calendar"></i>{' '}
                       {task.deadline
@@ -46,7 +46,7 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                         : 'No deadline'}
                     </span>
                   </div>
-                  <div className="project-task-meta">
+                  <div>
                     <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}>
                       {task.priority || 'Medium'}
                     </span>

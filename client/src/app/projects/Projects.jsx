@@ -45,7 +45,7 @@ export default function Projects() {
       {projects.length === 0 ? (
         <div className="card projects-empty-state">
           <i className="fas fa-folder-plus projects-empty-icon"></i>
-          <p className="mb-3">You don't have any projects yet. Create one to get started.</p>
+          <p>You don't have any projects yet. Create one to get started.</p>
           <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
             <i className="fas fa-plus"></i> New Project
           </button>

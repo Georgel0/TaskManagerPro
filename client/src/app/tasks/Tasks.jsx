@@ -96,13 +96,13 @@ export default function Tasks() {
       {error && <div className="error-message">{error}</div>}
 
       <div className="card">
-        <div className="card-body p-0">
+        <div className="card-body tasks-card-body">
           {filteredTasks.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-filter"></i>
               <p>No tasks match the current filters.</p>
               {hasActiveFilters && (
-                <button className="btn btn-secondary mt-2" onClick={clearFilters}>Clear Filters</button>
+                <button className="btn btn-secondary tasks-empty-btn" onClick={clearFilters}>Clear Filters</button>
               )}
             </div>
           ) : (
@@ -114,6 +114,9 @@ export default function Tasks() {
                   onDetail={(t) => setModalState({ type: 'detail', task: t })}
                   onEdit={(t) => setModalState({ type: 'edit', task: t })}
                   onDelete={(t) => setModalState({ type: 'delete', task: t })}
+                  isProjectOwner={
+                    projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
+                  }
                 />
               ))}
             </ul>

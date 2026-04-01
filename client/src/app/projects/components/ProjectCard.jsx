@@ -4,9 +4,9 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
   const memberCount = project.member_count ?? 1;
 
   return (
-    <div className="card project-card">
-      <div className="project-card-header">
-        <div className="project-title-group">
+    <div className="project-card">
+      <div>
+        <div>
           <h3>{project.name}</h3>
           <span className={`badge ${isOwner ? 'badge-owner' : 'badge-member'}`}>
             {isOwner ? 'Owner' : 'Member'}
@@ -14,7 +14,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
         </div>
 
         {isOwner && (
-          <div className="action-buttons">
+          <div>
             <button
               className="btn-icon edit-btn"
               title="Edit Project"
@@ -33,17 +33,17 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
         )}
       </div>
 
-      <div className="card-body">
-        <p className="project-description">
+      <div>
+        <p>
           {project.description || 'No description provided.'}
         </p>
-        <div className="project-meta">
+        <div>
           <span>
             <i className="fas fa-calendar-alt"></i> Created:{' '}
             {new Date(project.created_at).toLocaleDateString()}
           </span>
 
-          <div className="project-meta-chips">
+          <div>
             <button
               className="project-member-count"
               title="View team"

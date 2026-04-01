@@ -27,50 +27,14 @@
 }
 
 .project-card {
-  transition: transform 0.2s;
-  width: 25vw;
-}
-.project-card:hover {
-  transform: translateY(-2px);
-}
-
-.project-card-header {
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-}
-
-.project-title-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.project-title-group h3 {
-  font-size: 1.1rem;
-  margin: 0;
-}
-
-.badge-owner {
-  background-color: var(--accent-color);
-  color: #fff;
-}
-
-.badge-member {
-  background-color: var(--sec-background);
-  color: var(--sec-text-color);
-}
-
-.project-description {
-  color: var(--sec-text-color);
-  font-size: 0.95rem;
-  margin-bottom: 15px;
-}
-
-.project-card {
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
+  width: 25vw;
+  background-color: var(--card-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
 }
 
 .project-card:hover {
@@ -78,7 +42,42 @@
   box-shadow: var(--shadow-md);
 }
 
-.project-meta {
+.project-card > div:first-child {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.project-card > div:first-child > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-card > div:first-child h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.project-card > div:first-child > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.project-card > div:last-child {
+  padding: 20px;
+}
+
+.project-card > div:last-child > p {
+  color: var(--sec-text-color);
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.project-card > div:last-child > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -86,7 +85,18 @@
   gap: 8px;
 }
 
-.project-task-count {
+.project-card > div:last-child > div > span:first-child {
+  font-size: 0.85rem;
+}
+
+.project-card > div:last-child > div > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-task-count,
+.project-member-count {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -101,7 +111,8 @@
   transition: background-color var(--transition), color var(--transition);
 }
 
-.project-task-count:hover {
+.project-task-count:hover,
+.project-member-count:hover {
   background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
   color: var(--accent-color);
 }
@@ -128,7 +139,7 @@
   background-color: var(--sec-background);
 }
 
-.project-task-info {
+.project-task-item > div:first-child {
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -136,7 +147,7 @@
   min-width: 0;
 }
 
-.project-task-title {
+.project-task-item > div:first-child > span:first-child {
   font-size: 0.9rem;
   font-weight: 500;
   white-space: nowrap;
@@ -144,37 +155,11 @@
   text-overflow: ellipsis;
 }
 
-.project-task-meta {
+.project-task-item > div:last-child {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-}
-
-.project-meta-chips {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.project-member-count {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--sec-text-color);
-  background-color: var(--sec-background);
-  padding: 3px 9px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: background-color var(--transition), color var(--transition);
-}
-
-.project-member-count:hover {
-  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
-  color: var(--accent-color);
 }
 
 .members-list {
@@ -188,6 +173,7 @@
 .member-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
@@ -196,6 +182,25 @@
 
 .member-item:hover {
   background-color: var(--sec-background);
+}
+
+.member-clickable-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+}
+
+.member-clickable-area:hover > div:nth-child(2) > span:first-child {
+  color: var(--accent-color);
 }
 
 .member-avatar {
@@ -243,57 +248,6 @@
   text-overflow: ellipsis;
 }
 
-.add-member-form {
-  border-top: 1px solid var(--border-color);
-  padding-top: 16px;
-  margin-top: 4px;
-}
-
-.add-member-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: var(--sec-text-color);
-}
-
-.add-member-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.add-member-input-group {
-  display: flex;
-  gap: 8px;
-}
-
-.add-member-input-group .form-control {
-  flex: 1;
-}
-
-.member-item {
-  justify-content: space-between;
-}
-
-.member-clickable-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition);
-}
-
-.member-clickable-area:hover .member-name {
-  color: var(--accent-color);
-}
-
 .member-actions {
   display: flex;
   align-items: center;
@@ -334,4 +288,42 @@
   font-size: 0.75rem;
   color: var(--sec-text-color);
   margin-top: 2px;
+}
+
+.add-member-form {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.add-member-form > h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--sec-text-color);
+}
+
+.add-member-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.add-member-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.add-member-input-group .form-control {
+  flex: 1;
+}
+
+.badge-owner {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+.badge-member {
+  background-color: var(--sec-background);
+  color: var(--sec-text-color);
 }

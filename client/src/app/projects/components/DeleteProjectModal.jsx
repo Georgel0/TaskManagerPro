@@ -7,7 +7,7 @@ export function DeleteProjectModal({ project, onConfirm, onClose, isSubmitting }
         </div>
 
         <div className="modal-body">
-          <p className="mb-3 text-secondary">
+          <p>
             Are you sure you want to delete <strong>{project?.name}</strong>?
             This action is permanent and all tasks will be removed.
           </p>
