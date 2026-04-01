@@ -33,10 +33,13 @@ export function TaskItem({ task, onDetail, onEdit, onDelete, isProjectOwner }) {
           </span>
 
           {task.assigned_user_name && (
-            <span className="task-assigned-user" title={`Assigned to ${task.assigned_user_name}`}>
-              <i className="fas fa-user"></i>
-              {task.assigned_user_name.split(' ')[0]} 
-            </span>
+            <>
+              <span className="task-assigned-user" title={`Assigned to ${task.assigned_user_name}`}>
+                <i className="fas fa-user"></i>
+                {task.assigned_user_name.split(' ')[0]}
+              </span>
+              <span title="Created At">Created at: {formatDate(task.created_at)}</span>
+            </>
           )}
         </div>
       </div>

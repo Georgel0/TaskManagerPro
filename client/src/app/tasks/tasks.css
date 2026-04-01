@@ -151,7 +151,7 @@
 .task-detail-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 15px;
   font-size: 0.9rem;
 }
 
@@ -177,7 +177,7 @@
   word-break: break-word;
 }
 
-.task-assigned-user {
+.task-assigned-user, .task-comment-count, .task-deadline-info {
   display: flex;
   align-items: center;
   gap: 5px;
