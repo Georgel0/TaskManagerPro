@@ -69,14 +69,15 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
     <div className="auth-container">
       <div className="card auth-card">
         <h2>Choose a new password</h2>
+        <p className="text-secondary">Please enter your new security credentials below.</p>
 
         {serverError && (
-          <div className="error-message" style={{ marginBottom: '16px' }}>
+          <div className="error-message auth-form">
             <i className="fas fa-exclamation-circle"></i> {serverError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className={`form-group ${fieldErrors.newPassword ? 'has-error' : ''}`}>
             <label>New Password</label>
             <input
@@ -84,12 +85,13 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
               className="form-control"
               placeholder="At least 4 characters"
               value={newPassword}
-              onChange={(e) => { setNewPassword(e.target.value); setFieldErrors((p) => ({ ...p, newPassword: undefined })); }}
+              onChange={(e) => { 
+                setNewPassword(e.target.value); 
+                setFieldErrors((p) => ({ ...p, newPassword: undefined })); 
+              }}
             />
             {fieldErrors.newPassword && (
-              <span className="field-error">
-                <i className="fas fa-exclamation-circle"></i> {fieldErrors.newPassword}
-              </span>
+              <span className="field-error">{fieldErrors.newPassword}</span>
             )}
           </div>
 
@@ -100,22 +102,23 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
               className="form-control"
               placeholder="Repeat your password"
               value={confirmPassword}
-              onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors((p) => ({ ...p, confirmPassword: undefined })); }}
+              onChange={(e) => { 
+                setConfirmPassword(e.target.value); 
+                setFieldErrors((p) => ({ ...p, confirmPassword: undefined })); 
+              }}
             />
             {fieldErrors.confirmPassword && (
-              <span className="field-error">
-                <i className="fas fa-exclamation-circle"></i> {fieldErrors.confirmPassword}
-              </span>
+              <span className="field-error">{fieldErrors.confirmPassword}</span>
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+          <button type="submit" className="btn btn-primary btn-full" disabled={isLoading}>
             {isLoading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
 
-        <div style={{ marginTop: '16px', textAlign: 'center' }}>
-          <button onClick={onBack} className="text-secondary text-sm">← Back to Login</button>
+        <div className="auth-footer-nav">
+          <button onClick={onBack} className="text-secondary text-sm text-btn">← Back to Login</button>
         </div>
       </div>
     </div>

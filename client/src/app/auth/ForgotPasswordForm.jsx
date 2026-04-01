@@ -25,10 +25,7 @@ export function ForgotPasswordForm({ onBack }) {
         body: JSON.stringify({ email }),
       });
 
-      if (!res.ok) {
-        throw new Error('Server returned an error');
-      }
-
+      if (!res.ok) throw new Error('Server error');
       setSubmitted(true);
     } catch (err) {
       setEmailError('Something went wrong. Please try again.');
@@ -49,7 +46,7 @@ export function ForgotPasswordForm({ onBack }) {
             If an account exists for <strong>{email}</strong>, we've sent a password reset link.
             The link expires in 15 minutes.
           </p>
-          <button onClick={onBack} className="btn btn-secondary">
+          <button onClick={onBack} className="btn btn-secondary btn-full">
             ← Back to Login
           </button>
         </div>
@@ -61,11 +58,11 @@ export function ForgotPasswordForm({ onBack }) {
     <div className="auth-container">
       <div className="card auth-card">
         <h2>Reset your password</h2>
-        <p className="text-secondary" style={{ marginBottom: '20px' }}>
+        <p className="text-secondary">
           Enter your email and we'll send you a reset link.
         </p>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className={`form-group ${emailError ? 'has-error' : ''}`}>
             <label>Email</label>
             <input
@@ -82,13 +79,13 @@ export function ForgotPasswordForm({ onBack }) {
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+          <button type="submit" className="btn btn-primary btn-full" disabled={isLoading}>
             {isLoading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
 
-        <div style={{ marginTop: '16px', textAlign: 'center' }}>
-          <button onClick={onBack} className="text-secondary text-sm">
+        <div className="auth-footer-nav">
+          <button onClick={onBack} className="text-secondary text-sm text-btn">
             ← Back to Login
           </button>
         </div>

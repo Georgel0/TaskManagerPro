@@ -133,3 +133,60 @@
 .text-btn:hover {
   color: var(--accent-hover);
 }
+
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.auth-success-icon {
+  font-size: 3.5rem;
+  color: var(--success-color);
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite;
+}
+
+.auth-card p {
+  margin-bottom: 24px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-footer-nav {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.text-sm {
+  font-size: 0.85rem;
+}
+
+.text-secondary {
+  color: var(--sec-text-color);
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--error-color);
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+.input-error, 
+.has-error .form-control {
+  border-color: var(--error-color) !important;
+  background-color: color-mix(in srgb, var(--error-color) 5%, transparent);
+}

@@ -14,7 +14,6 @@ export function LoginRegisterForm({ onForgotClick }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear the error for this field as the user types
     if (errors[name]) setErrors({ ...errors, [name]: '' });
   };
 
@@ -22,7 +21,6 @@ export function LoginRegisterForm({ onForgotClick }) {
     e.preventDefault();
     setServerError('');
 
-    // Client-side validation before touching the network
     const schema = isLogin ? loginSchema : registerSchema;
     const fieldErrors = validate(schema, formData);
     if (fieldErrors) {
@@ -76,61 +74,65 @@ export function LoginRegisterForm({ onForgotClick }) {
   return (
     <div className="auth-card">
       <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
-      <p>{isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}</p>
+      <p className="text-secondary">
+        {isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}
+      </p>
 
-      <form className="dummy-form" onSubmit={handleSubmit} noValidate>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
         {!isLogin && (
-          <div>
+          <div className="form-group">
             <input
               type="text"
               name="name"
-              placeholder="Name"
+              placeholder="Full Name"
               value={formData.name}
               onChange={handleInputChange}
-              className={errors.name ? 'input-error' : ''}
+              className={`form-control ${errors.name ? 'input-error' : ''}`}
             />
             {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
         )}
 
-        <div>
+        <div className="form-group">
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Address"
             value={formData.email}
             onChange={handleInputChange}
-            className={errors.email ? 'input-error' : ''}
+            className={`form-control ${errors.email ? 'input-error' : ''}`}
           />
           {errors.email && <span className="field-error">{errors.email}</span>}
         </div>
 
-        <div>
+        <div className="form-group">
           <input
             type="password"
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleInputChange}
-            className={errors.password ? 'input-error' : ''}
+            className={`form-control ${errors.password ? 'input-error' : ''}`}
           />
           {errors.password && <span className="field-error">{errors.password}</span>}
         </div>
 
-        <button type="submit" className="login-btn">
+        <button type="submit" className="btn btn-primary btn-full">
           {isLogin ? 'Log In' : 'Register'}
         </button>
       </form>
 
       {serverError && (
-        <p className="error-message">
-          {serverError}
+        <p className="error-message text-sm">
+          <i className="fas fa-exclamation-triangle"></i> {serverError}
         </p>
       )}
 
       {loginFailed && (
-        <div className="btn btn-secondary">
-          <button onClick={onForgotClick}>Forgot your password?</button>
+        <div className="auth-footer-nav">
+          <button onClick={onForgotClick} className="btn btn-secondary btn-sm btn-full">
+            Forgot your password?
+          </button>
         </div>
       )}
 
