@@ -59,7 +59,7 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
             <i className="fas fa-check-circle"></i>
           </div>
           <h2>Password reset!</h2>
-          <p className="text-secondary">Redirecting you to login...</p>
+          <p>Redirecting you to login...</p>
         </div>
       </div>
     );
@@ -69,7 +69,7 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
     <div className="auth-container">
       <div className="card auth-card">
         <h2>Choose a new password</h2>
-        <p className="text-secondary">Please enter your new security credentials below.</p>
+        <p>Please enter your new security credentials below.</p>
 
         {serverError && (
           <div className="error-message auth-form">
@@ -112,13 +112,13 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary btn-full" disabled={isLoading}>
+          <button type="submit" className="btn btn-primary" disabled={isLoading}>
             {isLoading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
 
         <div className="auth-footer-nav">
-          <button onClick={onBack} className="text-secondary text-sm text-btn">← Back to Login</button>
+          <button onClick={onBack} className="back-to-login text-btn">← Back to Login</button>
         </div>
       </div>
     </div>

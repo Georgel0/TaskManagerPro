@@ -42,11 +42,11 @@ export function ForgotPasswordForm({ onBack }) {
             <i className="fas fa-envelope-open-text"></i>
           </div>
           <h2>Check your email</h2>
-          <p className="text-secondary">
+          <p>
             If an account exists for <strong>{email}</strong>, we've sent a password reset link.
             The link expires in 15 minutes.
           </p>
-          <button onClick={onBack} className="btn btn-secondary btn-full">
+          <button onClick={onBack} className="btn btn-secondary">
             ← Back to Login
           </button>
         </div>
@@ -58,9 +58,7 @@ export function ForgotPasswordForm({ onBack }) {
     <div className="auth-container">
       <div className="card auth-card">
         <h2>Reset your password</h2>
-        <p className="text-secondary">
-          Enter your email and we'll send you a reset link.
-        </p>
+        <p>Enter your email and we'll send you a reset link.</p>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className={`form-group ${emailError ? 'has-error' : ''}`}>
@@ -79,13 +77,13 @@ export function ForgotPasswordForm({ onBack }) {
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary btn-full" disabled={isLoading}>
+          <button type="submit" className="btn btn-primary" disabled={isLoading}>
             {isLoading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
 
         <div className="auth-footer-nav">
-          <button onClick={onBack} className="text-secondary text-sm text-btn">
+          <button onClick={onBack} className="back-to-login text-btn">
             ← Back to Login
           </button>
         </div>

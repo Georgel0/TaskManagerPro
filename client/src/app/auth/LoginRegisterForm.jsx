@@ -74,7 +74,7 @@ export function LoginRegisterForm({ onForgotClick }) {
   return (
     <div className="auth-card">
       <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
-      <p className="text-secondary">
+      <p className="login-signup-text">
         {isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}
       </p>
 
@@ -117,7 +117,7 @@ export function LoginRegisterForm({ onForgotClick }) {
           {errors.password && <span className="field-error">{errors.password}</span>}
         </div>
 
-        <button type="submit" className="btn btn-primary btn-full">
+        <button type="submit" className="btn btn-primary">
           {isLogin ? 'Log In' : 'Register'}
         </button>
       </form>
@@ -130,7 +130,7 @@ export function LoginRegisterForm({ onForgotClick }) {
 
       {loginFailed && (
         <div className="auth-footer-nav">
-          <button onClick={onForgotClick} className="btn btn-secondary btn-sm btn-full">
+          <button onClick={onForgotClick}>
             Forgot your password?
           </button>
         </div>

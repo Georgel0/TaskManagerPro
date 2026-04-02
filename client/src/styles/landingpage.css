@@ -67,6 +67,19 @@
   z-index: 1;
 }
 
+.login-signup-text {
+  color: var(--sec-text-color);
+  margin-bottom: 20px;
+}
+
+.card.auth-card > p {
+  color: var(--sec-text-color);
+}
+
+.card.auth-card > button {
+  width: 100%;
+}
+
 .auth-card h2 {
   margin-bottom: 10px;
   color: var(--pri-text-color);
@@ -109,6 +122,12 @@
   background-color: var(--accent-hover);
 }
 
+.back-to-login {
+  color: var(--sec-text-color);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
 .landing-footer {
   background-color: var(--pri-text-color);
   color: white;
@@ -129,7 +148,6 @@
   color: var(--accent-color);
   cursor: pointer;
   font-size: 0.9rem;
-  text-decoration: underline;
   padding: 0;
   transition: var(--transition);
 }
@@ -153,10 +171,6 @@
   animation: pulse 1.5s infinite;
 }
 
-.auth-card p {
-  margin-bottom: 24px;
-}
-
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -164,20 +178,21 @@
 }
 
 .auth-footer-nav {
-  margin-top: 16px;
   text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
-.btn-full {
-  width: 100%;
+.auth-footer-nav > button {
+  background: none;
+  color: var(--accent-color);
+  border: none;
+  margin: 0;
+  padding: 0;
 }
 
-.text-sm {
-  font-size: 0.85rem;
-}
-
-.text-secondary {
-  color: var(--sec-text-color);
+.auth-footer-nav > button:hover {
+  color: var(--accent-hover);
 }
 
 .field-error {

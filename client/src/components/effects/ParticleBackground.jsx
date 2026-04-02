@@ -13,8 +13,8 @@ export function ParticleBackground() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const PARTICLE_DENSITY_AREA = 15000;
-    const MIN_PARTICLES = 40;
+    const PARTICLE_DENSITY_AREA = 6000;
+    const MIN_PARTICLES = 80;
     const MAX_PARTICLES = 260;
 
     let particleCount = 200;
