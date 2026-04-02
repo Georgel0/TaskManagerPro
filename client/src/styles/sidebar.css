@@ -65,7 +65,22 @@
   pointer-events: none;
 }
 
-.nav-link.logout {
+.sidebar-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 15px 25px;
+  margin-top: auto;
+}
+
+.sidebar-footer.collapsed {
+  flex-direction: column;
+  gap: 15px;
+}
+
+.logout-btn {
   border: none;
   background: none;
   color: var(--pri-text-color);
@@ -73,16 +88,28 @@
   flex-direction: row;
   justify-content: flex-start;
   margin-top: auto;
+  cursor: pointer;
 }
 
-.nav-link.logout i {
+.logout-btn i {
   margin-left: 5px;
 }
 
-.nav-link.logout:hover {
+.logout-btn:hover {
   background: none;
   border: none;
   color: red;
+}
+
+.settings-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+}
+
+.settings-btn:hover {
+  color: var(--sec-text-color);
 }
 
 .sidebar.collapsed {

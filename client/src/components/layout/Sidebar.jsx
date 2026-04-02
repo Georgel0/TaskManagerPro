@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import '@/styles/sidebar.css';
 
@@ -10,13 +10,13 @@ const pages = [
   { id: 'projects', label: 'Projects', icon: 'fas fa-folder', path: '/projects' },
   { id: 'tasks', label: 'Tasks', icon: 'fas fa-list-check', path: '/tasks' },
   { id: 'profile', label: 'Profile', icon: 'fas fa-user', path: '/profile' },
-  { id: 'settings', label: 'Settings', icon: 'fas fa-gear', path: '/settings' },
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isCollapsed }) {
 
   const sidebarRef = useRef(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -43,7 +43,7 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/';
+    router.push('/');
   };
 
   return (
@@ -76,9 +76,15 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
             </span>
           </Link>
         ))}
-        <button onClick={handleLogout} className='nav-link logout'  title='Log Out'>
-          {isCollapsed ? '' : 'Log Out'} <i className="fa fa-right-from-bracket"></i>
-        </button>
+        <div className={`sidebar-footer ${isCollapsed ? 'collapsed' : ''}`}>
+          <button onClick={handleLogout} className='logout-btn' title='Log Out'>
+            {isCollapsed ? '' : 'Log Out'} <i className="fa fa-right-from-bracket"></i>
+          </button>
+
+          <Link href="/settings" className='settings-btn' title='Settings'>
+            <i className="fas fa-gear"></i>
+          </Link>
+        </div>
       </nav>
     </aside>
   );
