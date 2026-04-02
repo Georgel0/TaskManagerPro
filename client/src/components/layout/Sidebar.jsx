@@ -40,6 +40,17 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
     }
   }, [isOpen, toggleSidebar]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768 && isCollapsed) {
+        toggleCollapse();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isCollapsed, toggleCollapse]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

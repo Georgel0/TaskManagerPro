@@ -286,12 +286,13 @@
 
 .modal-content {
   background-color: var(--card-background);
-  width: 100%;
+  width: 95%;
   max-width: 500px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   overflow: hidden;
   animation: slideIn 0.2s ease-out;
+  margin: 10px auto;
 }
 
 .modal-header {
@@ -417,5 +418,44 @@
 
   .desktop-only {
     display: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-row .form-group {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    padding: 15px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 12px 16px;
+    font-size: 1rem;
   }
 }
