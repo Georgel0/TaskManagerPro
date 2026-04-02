@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from './auth';
+import { ParticleBackground } from '@/components/effects/ParticleBackground';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
@@ -44,6 +45,8 @@ export default function LandingPage() {
 
 
         <section className="auth-column">
+          <ParticleBackground />
+
           {view === 'login' && (
             <LoginRegisterForm
               onForgotClick={() => setView('forgot')}
