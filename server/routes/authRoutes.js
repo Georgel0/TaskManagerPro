@@ -7,7 +7,8 @@ const {
   changePassword, 
   deleteAccount,
   forgotPassword,
-  resetPassword 
+  resetPassword,
+  searchUsers 
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
@@ -22,6 +23,8 @@ const {
 } = require('../validators/authValidators');
 
 const router = express.Router();
+
+router.get('/users/search', protect, searchUsers);
 
 router.post('/register', validate(registerSchema), registerUser);
 router.post('/login', validate(loginSchema), loginUser);

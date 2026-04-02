@@ -49,7 +49,7 @@ export function useProjects() {
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleCreate = async (e, pendingMembers = []) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -64,9 +64,27 @@ export function useProjects() {
       });
 
       if (!res.ok) throw new Error('Failed to create project');
-
       const newProject = await res.json();
-      setProjects((prev) => [{ ...newProject, task_count: 0, member_count: 1 }, ...prev]);
+
+      if (pendingMembers.length > 0) {
+        await Promise.all(
+          pendingMembers.map((member) =>
+            fetch(`${API}/projects/${newProject.id}/members`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${getToken()}`,
+              },
+              body: JSON.stringify({ email: member.email }),
+            })
+          )
+        );
+      }
+
+      setProjects((prev) => [
+        { ...newProject, task_count: 0, member_count: 1 + pendingMembers.length },
+        ...prev,
+      ]);
       setIsCreateModalOpen(false);
       setCreateForm({ name: '', description: '' });
 
@@ -253,7 +271,7 @@ export function useProjects() {
     projectTasks,
     loadingTasks,
     selectedProject,
-    projectMembers, 
+    projectMembers,
     loadingMembers,
 
     // Forms
@@ -271,7 +289,7 @@ export function useProjects() {
     setIsTasksModalOpen,
     isEditModalOpen,
     setIsEditModalOpen,
-     isMembersModalOpen,
+    isMembersModalOpen,
     setIsMembersModalOpen,
 
     // Actions

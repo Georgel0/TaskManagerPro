@@ -4,9 +4,27 @@ import { createTaskSchema, updateTaskSchema, validate } from '@/lib/validators';
 
 export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, projects, isSubmitting }) {
   const [formData, setFormData] = useState({
-    title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: ''
+    title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '', assigned_user_id: ''
   });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [projectMembers, setProjectMembers] = useState([]);
+
+  useEffect(() => {
+    if (!formData.project_id) { setProjectMembers([]); return; }
+
+    const fetchMembers = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/${formData.project_id}/members`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        );
+
+        if (res.ok) setProjectMembers(await res.json());
+      } catch { setProjectMembers([]); }
+    };
+
+    fetchMembers();
+  }, [formData.project_id]);
 
   useEffect(() => {
     if (initialData && mode === 'edit') {
@@ -16,10 +34,11 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
         status: initialData.status || 'To Do',
         priority: initialData.priority || 'Medium',
         deadline: initialData.deadline ? new Date(initialData.deadline).toISOString().split('T')[0] : '',
-        project_id: initialData.project_id || ''
+        project_id: initialData.project_id || '',
+        assigned_user_id: initialData.assigned_user_id || ''
       });
     } else {
-      setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '' });
+      setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', deadline: '', project_id: '', assigned_user_id: '' });
     }
     setFieldErrors({});
   }, [initialData, mode, isOpen]);
@@ -164,6 +183,22 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
                 )}
               </div>
             </div>
+
+            {projectMembers.length > 0 && (
+              <div className="form-group">
+                <label>Assign To</label>
+                <select
+                  className="form-control"
+                  value={formData.assigned_user_id || ''}
+                  onChange={(e) => handleChange('assigned_user_id', e.target.value || null)}
+                >
+                  <option value="">Unassigned</option>
+                  {projectMembers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name} {m.role === 'owner' ? '(Owner)' : ''}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className={`form-group ${fieldErrors.deadline ? 'has-error' : ''}`}>
               <label>Deadline</label>

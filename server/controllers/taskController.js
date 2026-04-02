@@ -39,10 +39,9 @@ const getTasks = async (req, res) => {
   try {
     let queryText = `
       SELECT DISTINCT t.*, 
-             u.name AS assigned_user_name,
-             u.avatar AS assigned_user_avatar,
-             p.owner_id AS project_owner_id,
-             (SELECT COUNT(*)::int FROM comments WHERE task_id = t.id) AS comment_count
+        u.name AS assigned_user_name,
+        p.name AS project_name,
+        p.owner_id AS project_owner_id
       FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id
@@ -114,7 +113,7 @@ const updateTask = async (req, res) => {
            status = COALESCE($3, status), 
            priority = COALESCE($4, priority), 
            deadline = COALESCE($5, deadline), 
-           assigned_user_id = COALESCE($6, assigned_user_id)
+           assigned_user_id = $6
        WHERE id = $7 RETURNING *`,
       [title, description, status, priority, deadline, assigned_user_id, id]
     );

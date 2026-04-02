@@ -265,13 +265,36 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { 
-  registerUser, 
-  loginUser, 
-  getUserProfile, 
-  changeUsername, 
-  changePassword, 
+const searchUsers = async (req, res) => {
+  const { q } = req.query;
+  const userId = req.user.id;
+
+  if (!q || q.trim().length < 2) {
+    res.status(200).json([]);
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, avatar FROM users
+       WHERE (name ILIKE $1 OR email ILIKE $1) AND id != $2
+       LIMIT 8`,
+      [`%${q.trim()}%`, userId]
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while searching users.' });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  changeUsername,
+  changePassword,
   deleteAccount,
   forgotPassword,
-  resetPassword 
+  resetPassword,
+  searchUsers
 };
