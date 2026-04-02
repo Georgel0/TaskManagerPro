@@ -15,16 +15,16 @@ export default function Tasks() {
     userFilter, setUserFilter,
     usersInSelectedProject,
     hasActiveFilters, clearFilters,
-    createTask, updateTask, deleteTask,
-  } = useTasks(user);
+    createTask, updateTask, deleteTask, handleCommentCountChange
+  } = useTasks();
 
   const [modalState, setModalState] = useState({ type: null, task: null });
   const closeModal = () => setModalState({ type: null, task: null });
 
-  const handleFormSubmit = async (formData) => {
+ const handleFormSubmit = async (formData) => {
     const success = modalState.type === 'create'
       ? await createTask(formData)
-      : await updateTask(modalState.task.id, formData);
+      : await updateTask(modalState.task?.id, formData); 
     if (success) closeModal();
   };
 
@@ -144,6 +144,8 @@ export default function Tasks() {
         onEdit={(t) => setModalState({ type: 'edit', task: t })}
         task={modalState.task}
         onClose={closeModal}
+        onCommentAdded={() => handleCommentCountChange(modalState.task?.id, 1)}   
+        onCommentDeleted={() => handleCommentCountChange(modalState.task?.id, -1)}
         isProjectOwner={
           projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
         }

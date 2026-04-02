@@ -5,8 +5,9 @@ import { useComments } from './useComments';
 import { commentSchema, validate } from '@/lib/validators';
 import { formatDate, formatTime, getInitials, autoResize } from '@/lib';
 
-export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner }) {
+export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner, onCommentAdded, onCommentDeleted }) {
   const { user } = useApp();
+
   const [commentText, setCommentText] = useState('');
   const [commentError, setCommentError] = useState(null);
   const commentsEndRef = useRef(null);
@@ -37,6 +38,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
 
     setCommentError(null);
     await createComment(commentText.trim());
+    onCommentAdded();
     setCommentText('');
   };
 
@@ -47,19 +49,23 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
     }
   };
 
+  const hasEditRights =
+    Number(user?.id) === Number(task.project_owner_id) ||
+    Number(user?.id) === Number(task.assigned_user_id);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-content-lg" onClick={(e) => e.stopPropagation()}>
 
         <div className="modal-header">
           <h3>{task.title}</h3>
-          <button
+          {hasEditRights && (<button
             className="btn-icon edit-btn"
             onClick={(e) => { e.stopPropagation(); onEdit(task); }}
             title="Edit Task"
           >
             <i className="fas fa-pencil-alt"></i>
-          </button>
+          </button>)}
         </div>
 
         <div className="modal-body task-detail-body modal-body-scroll">
@@ -171,7 +177,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner 
                               <button
                                 className="btn-icon delete-btn"
                                 title="Delete comment"
-                                onClick={() => deleteComment(c.id)}
+                                onClick={() => { deleteComment(c.id); onCommentDeleted()}}
                               >
                                 <i className="fas fa-trash"></i>
                               </button>

@@ -2,11 +2,14 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useApp } from '@/context';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
-export function useTasks(user) {
+export function useTasks() {
+  const { user } = useApp();
+
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +75,7 @@ export function useTasks(user) {
 
   const createTask = async (taskData) => {
     setIsSubmitting(true);
-    
+
     try {
       const res = await fetch(`${API}/tasks`, {
         method: 'POST',
@@ -108,7 +111,9 @@ export function useTasks(user) {
       if (!res.ok) throw new Error('Failed to update task');
 
       const updatedTask = await res.json();
-      setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+
+      // Merge the old task (t) with the updatedTask so we don't lose the names
+      setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? { ...t, ...updatedTask } : t)));
 
       toast.success('Task updated successfully!');
       return true;
@@ -146,7 +151,7 @@ export function useTasks(user) {
   // Users from the currently selected project (for the user dropdown)
   const usersInSelectedProject = useMemo(() => {
     if (!projectFilter) return [];
-    
+
     const projectTasks = tasks.filter((t) => String(t.project_id) === String(projectFilter));
 
     const seen = new Set();
@@ -181,6 +186,16 @@ export function useTasks(user) {
 
   const hasActiveFilters = statusFilter !== 'All' || projectFilter !== '' || userFilter !== '';
 
+  const handleCommentCountChange = (taskId, amount) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, comment_count: Math.max(0, (parseInt(t.comment_count) || 0) + amount) }
+          : t
+      )
+    );
+  };
+
   return {
     projects,
     loading,
@@ -200,5 +215,6 @@ export function useTasks(user) {
     createTask,
     updateTask,
     deleteTask,
+    handleCommentCountChange
   };
 }

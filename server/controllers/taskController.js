@@ -41,7 +41,8 @@ const getTasks = async (req, res) => {
       SELECT DISTINCT t.*, 
         u.name AS assigned_user_name,
         p.name AS project_name,
-        p.owner_id AS project_owner_id
+        p.owner_id AS project_owner_id,
+        (SELECT COUNT(*) FROM comments WHERE task_id = t.id) AS comment_count
       FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id

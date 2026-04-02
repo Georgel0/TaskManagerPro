@@ -66,6 +66,12 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
       delete payload.project_id;
     }
 
+    if (payload.assigned_user_id === '') {
+      payload.assigned_user_id = null;
+    } else if (payload.assigned_user_id) {
+      payload.assigned_user_id = Number(payload.assigned_user_id);
+    }
+
     if (payload.deadline === '') payload.deadline = null;
 
     // For edit: skip validating deadline if it hasn't changed
