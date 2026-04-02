@@ -5,6 +5,11 @@
   margin-bottom: 20px;
 }
 
+.project-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .projects-empty-state {
   padding: 40px;
   text-align: center;

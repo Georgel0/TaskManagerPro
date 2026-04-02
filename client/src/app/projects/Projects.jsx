@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './useProjects';
 import { ProjectCard, ProjectFormModal, DeleteProjectModal, TasksModal, MembersModal } from './components';
@@ -35,9 +36,18 @@ export default function Projects() {
     <div className="page-content">
       <div className="projects-header">
         <h2><i className="fas fa-folder-open"></i> My Projects</h2>
-        <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-          <i className="fas fa-plus"></i> New Project
-        </button>
+        <div className="project-header-actions">
+          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+            <i className="fas fa-plus"></i> New Project
+          </button>
+          <Link
+            href='/tasks'
+            className="btn btn-secondary"
+            title="View Tasks"
+          >
+            <i className="fas fa-list-check"></i> Tasks <i className="fas fa-arrow-right"></i>
+          </Link>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}

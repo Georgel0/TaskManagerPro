@@ -18,32 +18,35 @@ const getDashboardSummary = async (req, res) => {
 
     // Get Active Tasks (Not Done)
     const activeTasksQuery = `
-      SELECT id, title, status, priority, deadline, project_id 
-      FROM tasks 
-      WHERE assigned_user_id = $1 AND status != 'Done'
-      ORDER BY deadline ASC NULLS LAST
+      SELECT t.id, t.title, t.status, t.priority, t.deadline, t.project_id, u.name AS assigned_user_name, t.created_at
+      FROM tasks t
+      JOIN users u ON t.assigned_user_id = u.id
+      WHERE t.assigned_user_id = $1 AND t.status != 'Done'
+      ORDER BY t.deadline ASC NULLS LAST
       LIMIT 5
     `;
     const activeTasksResult = await pool.query(activeTasksQuery, [userId]);
 
     // Get Completed Tasks
     const completedTasksQuery = `
-      SELECT id, title, status, priority, deadline, project_id 
-      FROM tasks 
-      WHERE assigned_user_id = $1 AND status = 'Done'
-      ORDER BY deadline DESC NULLS LAST
+      SELECT t.id, t.title, t.status, t.priority, t.deadline, t.project_id, u.name AS assigned_user_name, t.created_at
+      FROM tasks t
+      JOIN users u ON t.assigned_user_id = u.id
+      WHERE t.assigned_user_id = $1 AND t.status = 'Done'
+      ORDER BY t.deadline DESC NULLS LAST
       LIMIT 5
     `;
     const completedTasksResult = await pool.query(completedTasksQuery, [userId]);
 
     // Get Tasks with Upcoming Deadlines (Due in the next 7 days)
     const upcomingDeadlinesQuery = `
-      SELECT id, title, status, priority, deadline, project_id 
-      FROM tasks 
-      WHERE assigned_user_id = $1 
-        AND status != 'Done'
-        AND deadline BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
-      ORDER BY deadline ASC
+      SELECT t.id, t.title, t.status, t.priority, t.deadline, t.project_id, u.name AS assigned_user_name, t.created_at
+      FROM tasks t
+      JOIN users u ON t.assigned_user_id = u.id
+      WHERE t.assigned_user_id = $1 
+        AND t.status != 'Done'
+        AND t.deadline BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+      ORDER BY t.deadline ASC
     `;
     const upcomingDeadlinesResult = await pool.query(upcomingDeadlinesQuery, [userId]);
 
