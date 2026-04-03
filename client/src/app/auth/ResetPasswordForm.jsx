@@ -18,7 +18,7 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!token || !userId) onBack;
+    if (!token || !userId) onBack();
   }, [token, userId]);
 
   const handleSubmit = async (e) => {
@@ -43,7 +43,7 @@ export function ResetPasswordForm({ onSuccess, onBack }) {
       if (!res.ok) throw new Error(data.error);
 
       setSuccess(true);
-      setTimeout(() => router.push('/'), 2500);
+      setTimeout(() => onSuccess(), 2500);
     } catch (err) {
       setServerError(err.message);
     } finally {

@@ -34,22 +34,24 @@ export function MainLayout({ children }) {
       )}
 
       <main className="main-content">
-        <header className="topbar">
-          {!isLandingPage && (<button className='sidebar-toggle mobile-only' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>)}
-          <div className="logo-group">
-            <div className="logo-image"></div>
-            <h3>Task Manager Pro</h3>
-          </div>
-          {!isLandingPage && (
-            <Link href='/profile' className='topbar-profile-link' title='Profile'>
-              {user?.avatar ? (
-                <img src={user.avatar} alt="User Avatar" className="topbar-avatar" />
-              ) : (
-                <i className="fas fa-user"></i>
-              )}
-            </Link>
-          )}
-        </header>
+        {!isLandingPage && (
+          <header className="topbar">
+            <button className='sidebar-toggle mobile-only' onClick={toggleSidebar} title='Toggle Sidebar'>☰</button>
+            <div className="logo-group">
+              <div className="logo-image"></div>
+              <h3>Task Manager Pro</h3>
+            </div>
+            {!isLandingPage && (
+              <Link href='/profile' className='topbar-profile-link' title='Profile'>
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="User Avatar" className="topbar-avatar" />
+                ) : (
+                  <i className="fas fa-user"></i>
+                )}
+              </Link>
+            )}
+          </header>
+        )}
 
         {children}
       </main>

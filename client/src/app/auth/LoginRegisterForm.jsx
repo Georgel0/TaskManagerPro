@@ -72,7 +72,7 @@ export function LoginRegisterForm({ onForgotClick }) {
   };
 
   return (
-    <div className="auth-card">
+    <div className="card auth-card">
       <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
       <p className="login-signup-text">
         {isLogin ? 'Log in to access your dashboard.' : 'Sign up to get started.'}

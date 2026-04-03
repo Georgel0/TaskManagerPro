@@ -15,7 +15,8 @@ export default function Tasks() {
     userFilter, setUserFilter,
     usersInSelectedProject,
     hasActiveFilters, clearFilters,
-    createTask, updateTask, deleteTask, handleCommentCountChange
+    createTask, updateTask, deleteTask, 
+    handleCommentCountChange
   } = useTasks();
 
   const [modalState, setModalState] = useState({ type: null, task: null });
