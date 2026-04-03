@@ -41,6 +41,14 @@ export const changeUsernameSchema = z.object({
     ),
 });
 
+export const changeEmailSchema = z.object({
+  newEmail: emailField,
+});
+
+export const changeAvatarSchema = z.object({
+  newAvatarUrl: z.string().url('Please enter a valid image URL.'),
+});
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Current password is required.'),
@@ -72,10 +80,6 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   });
 
-/**
- * Runs a Zod schema against data and returns a flat { field: message } map.
- * Returns null if validation passes.
- */
 export const validate = (schema, data) => {
   const result = schema.safeParse(data);
   if (result.success) return null;
