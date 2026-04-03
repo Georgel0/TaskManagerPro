@@ -1,4 +1,5 @@
-html[data-theme="light-default"], :root {
+html[data-theme="light-default"],
+:root {
   --pri-text-color: #2d3436;
   --sec-text-color: #636e72;
   --accent-color: #0984e3;
@@ -16,6 +17,7 @@ html[data-theme="light-default"], :root {
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --transition: 0.2s ease-in-out;
+  --app-gradient: linear-gradient(-145deg, #f8fafcea 0%, #e2e8f0 60%, #e2e4e4f0 80%, #e2e8f0 100%);
 }
 
 * {
@@ -40,7 +42,9 @@ hr {
   margin: 20px 0;
 }
 
-::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar {
+  display: none;
+}
 
 .app-wrapper {
   display: flex;
@@ -60,88 +64,112 @@ hr {
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.7; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.7; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
 }
 
 @keyframes taskHighlight {
-  0%   { background-color: color-mix(in srgb, var(--accent-color) 20%, transparent); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: color-mix(in srgb, var(--accent-color) 20%, transparent);
+  }
+
+  100% {
+    background-color: transparent;
+  }
 }
 
 html[data-theme="light-nature"] {
-  --pri-text-color: #2c3e50;
-  --sec-text-color: #5c6a5e;
-  --accent-color: #27ae60;
-  --accent-hover: #2ecc71;
-  --pri-background: #f9fbf9;
-  --sec-background: #eef2eb;
+  --pri-text-color: #1a4b41;
+  --sec-text-color: #4a7c76;
+  --accent-color: #20b2aa;
+  --accent-hover: #008b8b;
+  --pri-background: #f8fffd;
+  --sec-background: #edfaf8;
   --card-background: #ffffff;
-  --border-color: #d1d8d0;
-  --input-focus: #a3cbab;
+  --border-color: #cdeae6;
+  --app-gradient: linear-gradient(-145deg, #f8fffd 0%, #edfaf8 60%, #eaf9f6 80%, #edfaf8 100%);
+}
+
+html[data-theme="dark-ocean"] {
+  --pri-text-color: #e0e6ff;
+  --sec-text-color: #8a95c9;
+  --accent-color: #3182ce;
+  --accent-hover: #5e35b1;
+  --pri-background: #10153c;
+  --sec-background: #1b2355;
+  --card-background: #111b44;
+  --border-color: #2a2e4a;
+  --app-gradient: linear-gradient(-145deg, #0a0e2a 0%, #121a40 60%, #19234b 80%, #121a40 100%);
+}
+
+html[data-theme="dark-neon"] {
+  --pri-text-color: #c9d1d9;
+  --sec-text-color: #8b949e;
+  --accent-color: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --pri-background: #000000;
+  --sec-background: #000000;
+  --card-background: #000000;
+  --border-color: #343437;
+  --app-gradient: linear-gradient(-145deg, #000000 0%, #000000 60%, #272729 80%, #000000 100%);
+}
+
+html[data-theme="dark-crimson"] {
+  --pri-text-color: #ffffff;
+  --sec-text-color: #888888;
+  --accent-color: #ff0000;
+  --accent-hover: #ff4d4d;
+  --pri-background: #000000;
+  --sec-background: #000000;
+  --card-background: #000000;
+  --border-color: #330000;
+  --app-gradient: linear-gradient(-145deg, #000000 0%, #000000 60%, #2c0303 80%, #000000 100%);
 }
 
 html[data-theme="light-pastel"] {
-  --pri-text-color: #4a4a4a;
-  --sec-text-color: #8c8c8c;
+  --pri-text-color: #4a4453;
+  --sec-text-color: #8e849b;
   --accent-color: #9b59b6;
   --accent-hover: #be90d4;
   --pri-background: #fdfbfd;
   --sec-background: #f5f0f6;
   --card-background: #ffffff;
   --border-color: #e8dfea;
-  --input-focus: #d2b4de;
-}
-
-html[data-theme="dark-crimson"] {
-  --pri-text-color: #ffffff;
-  --sec-text-color: #b3b3b3;
-  --accent-color: #ff0033;
-  --accent-hover: #ff4d79;
-  --pri-background: #000000;
-  --sec-background: #0a0a0a;
-  --card-background: #141414;
-  --border-color: #330000;
-  --input-focus: #ff4d79;
-  --shadow-sm: 0 2px 4px rgba(255, 0, 0, 0.15);
-  --shadow-md: 0 10px 15px -3px rgba(255, 0, 0, 0.25);
-}
-
-html[data-theme="dark-ocean"] {
-  --pri-text-color: #e0f2fe;
-  --sec-text-color: #94a3b8;
-  --accent-color: #0ea5e9;
-  --accent-hover: #38bdf8;
-  --pri-background: #0f172a;
-  --sec-background: #020617;
-  --card-background: #1e293b;
-  --border-color: #334155;
-  --input-focus: #38bdf8;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-}
-
-html[data-theme="dark-neon"] {
-  --pri-text-color: #f8f8f2;
-  --sec-text-color: #a2a8ba;
-  --accent-color: #ff79c6;
-  --accent-hover: #ff92d0;
-  --pri-background: #282a36;
-  --sec-background: #1e1f29;
-  --card-background: #44475a;
-  --border-color: #6272a4;
-  --input-focus: #ff79c6;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --app-gradient: linear-gradient(-145deg, #fdfbfd 0%, #f5f0f6 60%, #f7eff9 80%, #f5f0f6 100%);
 }

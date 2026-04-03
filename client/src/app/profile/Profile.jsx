@@ -7,6 +7,7 @@ import {
   changeAvatarSchema, changePasswordSchema,
   deleteAccountSchema, validate
 } from '@/lib/validators';
+import { generateIdenticonBase64 } from '@/lib';
 import './profile.css';
 
 export default function ProfilePage() {
@@ -81,6 +82,7 @@ export default function ProfilePage() {
 
     try {
       await fetchWithAuth('email', { newEmail, password: emailPassword });
+
       toast.success('Email updated successfully!');
       setUser((prev) => ({ ...prev, email: newEmail }));
       setNewEmail('');
@@ -162,6 +164,13 @@ export default function ProfilePage() {
     window.location.href = '/';
   };
 
+  const handleNewIdenticon = (seed) => {
+    const newIdenticon = generateIdenticonBase64(seed, 64);
+
+    setNewAvatarUrl(newIdenticon);
+    setAvatarError('');
+  };
+
   if (loading) return (
     <div className='loading-state profile-loading'>
       <div className="pulse-ring"></div>
@@ -173,7 +182,7 @@ export default function ProfilePage() {
     <div className="profile-page-container">
       <div className="profile-header-banner">
         <div className="profile-header-content">
-          <h1>Account Settings</h1>
+          <h1>Account</h1>
           <p>Manage your profile details, security preferences, and account data.</p>
         </div>
       </div>
@@ -253,6 +262,13 @@ export default function ProfilePage() {
                 </div>
                 {avatarError && <span className="field-error">{avatarError}</span>}
               </div>
+
+              <button className="new-identicon-btn" onClick={() => handleNewIdenticon(Math.random().toString(36), 64)}>
+                Generate a new identicon <i className="fas fa-wand-magic-sparkles"></i>
+              </button>
+              <button className="new-identicon-btn" onClick={() => handleNewIdenticon(user.email, 64)}>
+                Get your original identicon back <i className="fas fa-arrow-rotate-left"></i>
+              </button>
             </form>
           </div>
 

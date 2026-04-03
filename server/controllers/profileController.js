@@ -96,37 +96,43 @@ const changeAvatar = async (req, res) => {
   const { newAvatarUrl } = req.body;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    if (newAvatarUrl.startsWith('data:image/')) {
+      const sizeInBytes = (newAvatarUrl.length * 0.75); 
+      if (sizeInBytes > 2 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Base64 image is too large (max 2MB).' });
+      }
+    } else {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
 
-    let response;
-    try {
-      response = await fetch(newAvatarUrl, {
-        method: 'GET',
-        signal: controller.signal,
-        headers: { Range: 'bytes=0-1023' },
-      });
-    } finally {
-      clearTimeout(timeout);
-    }
+      try {
+        const response = await fetch(newAvatarUrl, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: { Range: 'bytes=0-1023' },
+        });
 
-    if (!response.ok) {
-      return res.status(400).json({ error: 'Unable to access the provided image URL.' });
-    }
+        if (!response.ok) {
+          return res.status(400).json({ error: 'Unable to access the provided image URL.' });
+        }
 
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.startsWith('image/')) {
-      return res.status(400).json({ error: 'The URL must point directly to an image file.' });
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.startsWith('image/')) {
+          return res.status(400).json({ error: 'The URL must point directly to an image file.' });
+        }
+      } finally {
+        clearTimeout(timeout);
+      }
     }
 
     await pool.query('UPDATE users SET avatar = $1 WHERE id = $2', [newAvatarUrl, req.user.id]);
+
     res.status(200).json({ message: 'Avatar updated successfully.' });
   } catch (err) {
     if (err.name === 'AbortError') {
-      return res.status(400).json({ error: 'Image URL timed out. Make sure it is publicly accessible.' });
+      return res.status(400).json({ error: 'Image URL timed out.' });
     }
-    console.error(err);
-    res.status(400).json({ error: 'Could not validate the image URL.' });
+    res.status(400).json({ error: 'Could not validate the image.' });
   }
 };
 

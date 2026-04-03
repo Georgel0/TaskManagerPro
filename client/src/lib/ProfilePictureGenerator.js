@@ -1,6 +1,6 @@
 'use client';
 
-export const generateIdenticonBase64 = (seed, size = 32) => {
+export const generateIdenticonBase64 = (seed, size = 64) => {
   if (typeof document === 'undefined') return null;
 
   const canvas = document.createElement('canvas');

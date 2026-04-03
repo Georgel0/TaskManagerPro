@@ -208,6 +208,19 @@
   margin-top: 0;
 }
 
+.new-identicon-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  margin-right: 10px;
+  color: var(--pri-text-color);
+  cursor: pointer;
+}
+
+.new-identicon-btn:hover {
+  color: var(--accent-color);
+}
+
 @media (max-width: 1024px) {
   .profile-layout {
     grid-template-columns: 280px 1fr;

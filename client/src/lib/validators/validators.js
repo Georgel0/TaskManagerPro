@@ -55,7 +55,13 @@ export const changeEmailSchema = z.object({
 });
 
 export const changeAvatarSchema = z.object({
-  newAvatarUrl: z.string().url('Please enter a valid image URL.'),
+  newAvatarUrl: z
+    .string({ required_error: 'Avatar URL or Base64 is required.' })
+    .refine((val) => {
+      const isUrl = z.string().url().safeParse(val).success;
+      const isBase64 = val.startsWith('data:image/');
+      return isUrl || isBase64;
+    }, 'Please provide a valid image URL or Base64 string.'),
 });
 
 export const changePasswordSchema = z
