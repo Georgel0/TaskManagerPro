@@ -498,18 +498,6 @@
   color: var(--sec-text-color);
 }
 
-.task-project-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent-color);
-  background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
 
 @media (max-width: 768px) {
   .projects-header {

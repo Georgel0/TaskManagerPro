@@ -207,7 +207,7 @@
 }
 
 .topbar-avatar:hover {
-  border-color: var(--sec-text-color);
+  transform: scale(1.1);
 }
 
 .loading-state {
