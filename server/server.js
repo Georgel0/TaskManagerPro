@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -19,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api', authRoutes);
+app.use('/api', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/tasks', taskRoutes);
