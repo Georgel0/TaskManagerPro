@@ -155,185 +155,199 @@ export default function ProfilePage() {
   };
 
   if (loading) return (
-    <div className='loading-state'>
+    <div className='loading-state profile-loading'>
       <div className="pulse-ring"></div>
       <p>Loading Profile...</p>
     </div>
   );
 
   return (
-    <div className="profile-layout page-content">
-      
-      <div className="profile-sidebar">
-        {user && (
-          <div className="card profile-overview">
-            <div className="profile-avatar-wrapper">
-              <img className="profile-avatar-large" src={user.avatar} alt={`${user.name}'s avatar`} />
-            </div>
-            <h2 className="profile-name-large" title={`Name: ${user.name}`}>{user.name}</h2>
-            <p className="profile-email-badge" title={`Email: ${user.email}`}>{user.email}</p>
-            <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
-              <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
-            </p>
-            <button onClick={handleLogout} className="btn btn-secondary" title="Log Out">Log Out</button>
-          </div>
-        )}
-
-        <div className="card danger-zone">
-          <h3 className="profile-danger-title">Danger Zone</h3>
-          <p className="profile-danger-desc">
-            Permanently remove your account and all related data. This action is irreversible.
-          </p>
-          <button
-            className="btn btn-danger btn-full"
-            title="Delete Account"
-            onClick={() => { setIsDeleteModalOpen(true); setDeletePassword(''); setDeleteError(''); }}
-          >
-            Delete Account
-          </button>
+    <div className="profile-page-container">
+      <div className="profile-header-banner">
+        <div className="profile-header-content">
+          <h1>Account Settings</h1>
+          <p>Manage your profile details, security preferences, and account data.</p>
         </div>
       </div>
 
-      <div className="profile-settings-grid">
-        <div className="card settings-card">
-          <div className="settings-header">
-            <h3>Public Profile</h3>
-            <p>Update your identifying information.</p>
-          </div>
-          
-          <form onSubmit={handleUsernameChange} className="settings-form" noValidate>
-            <div className="form-group">
-              <label>Username</label>
-              <div className="input-with-button">
-                <input
-                  className={`form-control ${usernameError ? 'input-error' : ''}`}
-                  type="text"
-                  placeholder={user?.name || "New Username"}
-                  value={newUsername}
-                  onChange={(e) => { setNewUsername(e.target.value); setUsernameError(''); }}
-                />
-                <button type="submit" className="btn btn-primary" title="Save">Save</button>
+      <div className="profile-layout page-content">
+        <div className="profile-sidebar">
+          {user && (
+            <div className="card profile-overview">
+              <div className="profile-avatar-wrapper">
+                <img className="profile-avatar-large" src={user.avatar} alt={`${user.name}'s avatar`} />
               </div>
-              {usernameError && <span className="field-error">{usernameError}</span>}
+              <h2 className="profile-name-large" title={`Name: ${user.name}`}>{user.name}</h2>
+              <p className="profile-email-badge" title={`Email: ${user.email}`}>{user.email}</p>
+              <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
+                <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
+              </p>
+              <button onClick={handleLogout} className="btn btn-secondary btn-logout" title="Log Out">Log Out</button>
             </div>
-          </form>
+          )}
 
-          <form onSubmit={handleAvatarChange} className="settings-form" noValidate>
-            <div className="form-group">
-              <label>Avatar URL</label>
-              <div className="input-with-button">
-                <input
-                  className={`form-control ${avatarError ? 'input-error' : ''}`}
-                  type="url"
-                  placeholder="https://example.com/my-image.jpg"
-                  value={newAvatarUrl}
-                  onChange={(e) => { setNewAvatarUrl(e.target.value); setAvatarError(''); }}
-                />
-                <button type="submit" className="btn btn-primary" title="Update">Update</button>
-              </div>
-              {avatarError && <span className="field-error">{avatarError}</span>}
+          <div className="card danger-zone">
+            <div className="danger-icon-wrapper">
+              <i className="fas fa-exclamation-triangle"></i>
             </div>
-          </form>
+            <div className="danger-text">
+              <h3 className="profile-danger-title">Danger Zone</h3>
+              <p className="profile-danger-desc">
+                Permanently remove your account and all related data. This action is irreversible.
+              </p>
+            </div>
+            <button
+              className="btn btn-danger btn-full"
+              title="Delete Account"
+              onClick={() => { setIsDeleteModalOpen(true); setDeletePassword(''); setDeleteError(''); }}
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
 
-        <div className="card settings-card">
-          <div className="settings-header">
-            <h3>Account Security</h3>
-            <p>Manage your email address and password credentials.</p>
+        <div className="profile-settings-grid">
+          <div className="card settings-card">
+            <div className="settings-header">
+              <h3>Public Profile</h3>
+              <p>Update your identifying information visible to others.</p>
+            </div>
+            
+            <form onSubmit={handleUsernameChange} className="settings-form" noValidate>
+              <div className="form-group">
+                <label>Username</label>
+                <div className="input-with-button">
+                  <input
+                    className={`form-control ${usernameError ? 'input-error' : ''}`}
+                    type="text"
+                    placeholder={user?.name || "New Username"}
+                    value={newUsername}
+                    onChange={(e) => { setNewUsername(e.target.value); setUsernameError(''); }}
+                  />
+                  <button type="submit" className="btn btn-primary" title="Save">Save</button>
+                </div>
+                {usernameError && <span className="field-error">{usernameError}</span>}
+              </div>
+            </form>
+
+            <form onSubmit={handleAvatarChange} className="settings-form" noValidate>
+              <div className="form-group">
+                <label>Avatar URL</label>
+                <div className="input-with-button">
+                  <input
+                    className={`form-control ${avatarError ? 'input-error' : ''}`}
+                    type="url"
+                    placeholder="https://example.com/my-image.jpg"
+                    value={newAvatarUrl}
+                    onChange={(e) => { setNewAvatarUrl(e.target.value); setAvatarError(''); }}
+                  />
+                  <button type="submit" className="btn btn-primary" title="Update">Update</button>
+                </div>
+                {avatarError && <span className="field-error">{avatarError}</span>}
+              </div>
+            </form>
           </div>
 
-          <form onSubmit={handleEmailChange} className="settings-form" noValidate>
-            <div className="form-group">
-              <label>Email Address</label>
-              <div className="input-with-button">
-                <input
-                  className={`form-control ${emailError ? 'input-error' : ''}`}
-                  type="email"
-                  placeholder={user?.email || "New Email Address"}
-                  value={newEmail}
-                  onChange={(e) => { setNewEmail(e.target.value); setEmailError(''); }}
-                />
-                <button type="submit" className="btn btn-primary" title="Save">Save</button>
+          <div className="card settings-card">
+            <div className="settings-header">
+              <h3>Account Security</h3>
+              <p>Manage your email address and password credentials.</p>
+            </div>
+
+            <form onSubmit={handleEmailChange} className="settings-form" noValidate>
+              <div className="form-group">
+                <label>Email Address</label>
+                <div className="input-with-button">
+                  <input
+                    className={`form-control ${emailError ? 'input-error' : ''}`}
+                    type="email"
+                    placeholder={user?.email || "New Email Address"}
+                    value={newEmail}
+                    onChange={(e) => { setNewEmail(e.target.value); setEmailError(''); }}
+                  />
+                  <button type="submit" className="btn btn-primary" title="Save">Save</button>
+                </div>
+                {emailError && <span className="field-error">{emailError}</span>}
               </div>
-              {emailError && <span className="field-error">{emailError}</span>}
-            </div>
-          </form>
+            </form>
 
-          <form onSubmit={handlePasswordChange} className="settings-form" noValidate>
-            <div className="form-group">
-              <label>Current Password</label>
-              <input
-                className={`form-control ${passwordErrors.currentPassword ? 'input-error' : ''}`}
-                type="password"
-                placeholder="Enter current password"
-                value={currentPassword}
-                onChange={(e) => {
-                  setCurrentPassword(e.target.value);
-                  setPasswordErrors(p => ({ ...p, currentPassword: '' }));
-                }}
-              />
-              {passwordErrors.currentPassword && <span className="field-error">{passwordErrors.currentPassword}</span>}
-            </div>
-
-            <div className="form-group mt-3">
-              <label>New Password</label>
-              <div className="input-with-button">
+            <form onSubmit={handlePasswordChange} className="settings-form" noValidate>
+              <div className="form-group">
+                <label>Current Password</label>
                 <input
-                  className={`form-control ${passwordErrors.newPassword ? 'input-error' : ''}`}
+                  className={`form-control ${passwordErrors.currentPassword ? 'input-error' : ''}`}
                   type="password"
-                  placeholder="Enter new password"
-                  value={newPassword}
+                  placeholder="Enter current password"
+                  value={currentPassword}
                   onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    setPasswordErrors(p => ({ ...p, newPassword: '' }));
+                    setCurrentPassword(e.target.value);
+                    setPasswordErrors(p => ({ ...p, currentPassword: '' }));
                   }}
                 />
-                <button type="submit" className="btn btn-primary" title="Update">Update</button>
+                {passwordErrors.currentPassword && <span className="field-error">{passwordErrors.currentPassword}</span>}
               </div>
-              {passwordErrors.newPassword && <span className="field-error">{passwordErrors.newPassword}</span>}
-            </div>
-          </form>
-        </div>
-      </div>
 
-      {isDeleteModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="profile-danger-title">Confirm Deletion</h2>
-              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <form onSubmit={confirmDeleteAccount} noValidate>
-              <div className="modal-body">
-                <p className="profile-modal-desc">
-                  This action is permanent. All your projects and tasks will be permanently removed.
-                </p>
-                <div className="form-group">
+              <div className="form-group mt-4">
+                <label>New Password</label>
+                <div className="input-with-button">
                   <input
-                    className={`form-control ${deleteError ? 'input-error' : ''}`}
+                    className={`form-control ${passwordErrors.newPassword ? 'input-error' : ''}`}
                     type="password"
-                    placeholder="Enter your password to confirm"
-                    value={deletePassword}
-                    onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(''); }}
-                    autoFocus
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordErrors(p => ({ ...p, newPassword: '' }));
+                    }}
                   />
-                  {deleteError && <span className="field-error">{deleteError}</span>}
+                  <button type="submit" className="btn btn-primary" title="Update">Update</button>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)} title="Close">
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-danger" title="Delete">
-                  Permanently Delete
-                </button>
+                {passwordErrors.newPassword && <span className="field-error">{passwordErrors.newPassword}</span>}
               </div>
             </form>
           </div>
         </div>
-      )}
+
+        {isDeleteModalOpen && (
+          <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+            <div className="modal-content danger-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="profile-danger-title">Confirm Deletion</h2>
+                <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
+                  <i className="fas fa-times">&#x2715;</i>
+                </button>
+              </div>
+              <form onSubmit={confirmDeleteAccount} noValidate>
+                <div className="modal-body">
+                  <p className="profile-modal-desc">
+                    This action is permanent. All your projects, tasks, and data will be completely wiped from our servers. <strong>You cannot undo this.</strong>
+                  </p>
+                  <div className="form-group">
+                    <label>Confirm your password</label>
+                    <input
+                      className={`form-control ${deleteError ? 'input-error' : ''}`}
+                      type="password"
+                      placeholder="Enter your password to confirm"
+                      value={deletePassword}
+                      onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(''); }}
+                      autoFocus
+                    />
+                    {deleteError && <span className="field-error">{deleteError}</span>}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)} title="Close">
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-danger" title="Delete">
+                    Permanently Delete
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 .sidebar {
   width: 250px;
-  background-color: var(--sec-background);
+  background: linear-gradient(-145deg, #f8fafcea 0%, #e2e8f0 60%, #d2d4d5f0 80%, #7f7f8bf0 100%);
   color: var(--pri-text-color);
   display: flex;
   flex-direction: column;

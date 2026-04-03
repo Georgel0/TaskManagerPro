@@ -42,7 +42,7 @@ export function MainLayout({ children }) {
               <h3>Task Manager Pro</h3>
             </div>
             {!isLandingPage && (
-              <Link href='/profile' className='topbar-profile-link' title={`Account \n ${user.name} \n ${user.email}`}>
+              <Link href='/profile' className='topbar-profile-link' title={`Account \n ${user?.name} \n ${user?.email}`}>
                 {user?.avatar ? (
                   <img src={user.avatar} alt="User Avatar" className="topbar-avatar" />
                 ) : (
