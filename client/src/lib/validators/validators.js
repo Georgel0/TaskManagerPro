@@ -7,10 +7,11 @@ const nameField = z
   .max(20, 'Name must be at most 50 characters.');
 
 const emailField = z
-  .string()
+  .string({ required_error: 'New email is required.' })
   .trim()
   .toLowerCase()
-  .email('Please enter a valid email address.');
+  .email('Please provide a valid email address.')
+  .max(150, 'Email must be at most 150 characters.');
 
 const passwordField = z
   .string()
@@ -42,7 +43,15 @@ export const changeUsernameSchema = z.object({
 });
 
 export const changeEmailSchema = z.object({
-  newEmail: emailField,
+  newEmail: z
+    .string({ required_error: 'New email is required.' })
+    .trim()
+    .toLowerCase()
+    .email('Please provide a valid email address.')
+    .max(150, 'Email must be at most 150 characters.'),
+  password: z
+    .string({ required_error: 'Password is required to change your email.' })
+    .min(1, 'Password is required to change your email.'),
 });
 
 export const changeAvatarSchema = z.object({

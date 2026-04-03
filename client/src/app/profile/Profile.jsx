@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useApp } from '@/context';
-import { 
-  changeUsernameSchema, changeEmailSchema, 
-  changeAvatarSchema, changePasswordSchema, 
-  deleteAccountSchema, validate 
+import {
+  changeUsernameSchema, changeEmailSchema,
+  changeAvatarSchema, changePasswordSchema,
+  deleteAccountSchema, validate
 } from '@/lib/validators';
 import './profile.css';
 
@@ -28,6 +28,9 @@ export default function ProfilePage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
+
+  const [emailPassword, setEmailPassword] = useState('');
+  const [emailPasswordError, setEmailPasswordError] = useState('');
 
   const fetchWithAuth = async (endpoint, payload) => {
     const token = localStorage.getItem('token');
@@ -67,16 +70,21 @@ export default function ProfilePage() {
   const handleEmailChange = async (e) => {
     e.preventDefault();
     setEmailError('');
+    setEmailPasswordError('');
 
-    const errors = validate(changeEmailSchema, { newEmail });
-    if (errors) return setEmailError(errors.newEmail);
+    const errors = validate(changeEmailSchema, { newEmail, password: emailPassword });
+    if (errors) {
+      if (errors.newEmail) setEmailError(errors.newEmail);
+      if (errors.password) setEmailPasswordError(errors.password);
+      return;
+    }
 
     try {
-      await fetchWithAuth('email', { newEmail });
-
-      toast.success('Email updated! Verification sent.');
+      await fetchWithAuth('email', { newEmail, password: emailPassword });
+      toast.success('Email updated successfully!');
       setUser((prev) => ({ ...prev, email: newEmail }));
       setNewEmail('');
+      setEmailPassword('');
     } catch (err) {
       toast.error(err.message);
     }
@@ -212,7 +220,7 @@ export default function ProfilePage() {
               <h3>Public Profile</h3>
               <p>Update your identifying information visible to others.</p>
             </div>
-            
+
             <form onSubmit={handleUsernameChange} className="settings-form" noValidate>
               <div className="form-group">
                 <label>Username</label>
@@ -256,18 +264,30 @@ export default function ProfilePage() {
 
             <form onSubmit={handleEmailChange} className="settings-form" noValidate>
               <div className="form-group">
-                <label>Email Address</label>
+                <label>New Email Address</label>
+                <input
+                  className={`form-control ${emailError ? 'input-error' : ''}`}
+                  type="email"
+                  placeholder={user?.email || 'New Email Address'}
+                  value={newEmail}
+                  onChange={(e) => { setNewEmail(e.target.value); setEmailError(''); }}
+                />
+                {emailError && <span className="field-error">{emailError}</span>}
+              </div>
+
+              <div className="form-group mt-4">
+                <label>Confirm with your password</label>
                 <div className="input-with-button">
                   <input
-                    className={`form-control ${emailError ? 'input-error' : ''}`}
-                    type="email"
-                    placeholder={user?.email || "New Email Address"}
-                    value={newEmail}
-                    onChange={(e) => { setNewEmail(e.target.value); setEmailError(''); }}
+                    className={`form-control ${emailPasswordError ? 'input-error' : ''}`}
+                    type="password"
+                    placeholder="Enter your password to confirm"
+                    value={emailPassword}
+                    onChange={(e) => { setEmailPassword(e.target.value); setEmailPasswordError(''); }}
                   />
-                  <button type="submit" className="btn btn-primary" title="Save">Save</button>
+                  <button type="submit" className="btn btn-primary" title="Update">Update</button>
                 </div>
-                {emailError && <span className="field-error">{emailError}</span>}
+                {emailPasswordError && <span className="field-error">{emailPasswordError}</span>}
               </div>
             </form>
 
@@ -314,7 +334,7 @@ export default function ProfilePage() {
               <div className="modal-header">
                 <h2 className="profile-danger-title">Confirm Deletion</h2>
                 <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
-                  <i className="fas fa-times">&#x2715;</i>
+                  <i className="fas fa-times"></i>
                 </button>
               </div>
               <form onSubmit={confirmDeleteAccount} noValidate>

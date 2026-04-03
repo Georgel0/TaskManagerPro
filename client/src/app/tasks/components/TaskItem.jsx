@@ -41,11 +41,17 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
       </div>
 
       <div className="task-meta-group">
-        <div className="task-badges-wrapper" style={{ display: 'flex', gap: '8px' }}>
+        <div className="task-badges-wrapper">
           <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title={`Priority: ${task.priority || 'Medium'}`}>
             {task.priority || 'Medium'}
           </span>
-          <span className="badge status-badge" title={`Status: ${task.status || 'To Do'}`}>{task.status || 'To Do'}</span>
+          <span className="badge status-badge" title={`Status: ${task.status || 'To Do'}`}>
+            {task.status || 'To Do'}
+          </span>
+          <span className="task-created-at" title={`Created At: ${formatDate(task.created_at)}`}>
+            <i className="fas fa-calendar-plus"></i>
+            {formatDate(task.created_at)}
+          </span>
         </div>
 
         {hasEditRights && (

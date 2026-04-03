@@ -24,69 +24,109 @@ const getUserProfile = async (req, res) => {
 
 const changeUsername = async (req, res) => {
   const { newUsername } = req.body;
+  const userId = req.user.id;
 
   try {
-    const existingUser = await pool.query('SELECT id FROM users WHERE name = $1', [newUsername]);
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: "That username is already taken." });
+    // Guard against changing to the same name
+    const currentUser = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
+    if (currentUser.rows[0]?.name === newUsername) {
+      return res.status(400).json({ error: 'New username must be different from your current one.' });
     }
 
-    await pool.query('UPDATE users SET name = $1 WHERE id = $2', [newUsername, req.user.id]);
+    const existing = await pool.query('SELECT id FROM users WHERE name = $1', [newUsername]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'That username is already taken.' });
+    }
 
-    res.status(200).json({ message: "Username updated successfully." });
+    await pool.query('UPDATE users SET name = $1 WHERE id = $2', [newUsername, userId]);
+    res.status(200).json({ message: 'Username updated successfully.' });
   } catch (err) {
-    res.status(500).json({ error: "Server error while updating username." });
     console.error(err);
+    res.status(500).json({ error: 'Server error while updating username.' });
   }
 };
 
 const changeEmail = async (req, res) => {
-  const { newEmail } = req.body;
+  const { newEmail, password } = req.body;
+  const userId = req.user.id;
+
   try {
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [newEmail]);
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: "That email is already registered." });
+    const userResult = await pool.query('SELECT email, password FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    await pool.query('UPDATE users SET email = $1 WHERE id = $2', [newEmail, req.user.id]);
+    const { email: oldEmail, password: hashedPassword } = userResult.rows[0];
+
+    // Verify password before allowing the change
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Incorrect password.' });
+    }
+
+    if (oldEmail === newEmail) {
+      return res.status(400).json({ error: 'New email must be different from your current one.' });
+    }
+
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [newEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'That email is already registered.' });
+    }
+
+    await pool.query('UPDATE users SET email = $1 WHERE id = $2', [newEmail, userId]);
+
     await resend.emails.send({
-      from: 'Task Manager <onboarding@resend.dev>',
-      to: newEmail,
-      subject: 'Email Address Updated',
-      html: `<p>Your account email has been successfully changed to <strong>${newEmail}</strong>.</p>`
+      from: 'Task Manager <noreply@yourdomain.com>',
+      to: oldEmail,
+      subject: 'Your email address was changed',
+      html: `
+        <p>Hi,</p>
+        <p>Your account email was changed to <strong>${newEmail}</strong>.</p>
+      `,
     });
 
-    res.status(200).json({ message: "Email updated successfully." });
+    res.status(200).json({ message: 'Email updated successfully.' });
   } catch (err) {
-    res.status(500).json({ error: "Server error while updating email." });
     console.error(err);
+    res.status(500).json({ error: 'Server error while updating email.' });
   }
 };
 
 const changeAvatar = async (req, res) => {
   const { newAvatarUrl } = req.body;
+
   try {
-    const response = await fetch(newAvatarUrl, { method: 'HEAD' });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    let response;
+    try {
+      response = await fetch(newAvatarUrl, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { Range: 'bytes=0-1023' },
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
     if (!response.ok) {
-      return res.status(400).json({ error: "Unable to access the provided image URL." });
+      return res.status(400).json({ error: 'Unable to access the provided image URL.' });
     }
 
     const contentType = response.headers.get('content-type');
-    const contentLength = response.headers.get('content-length');
-
     if (!contentType || !contentType.startsWith('image/')) {
-      return res.status(400).json({ error: "The URL must point directly to an image file." });
-    }
-
-    if (contentLength && parseInt(contentLength, 10) > 5 * 1024 * 1024) {
-      return res.status(400).json({ error: "The image size exceeds the 5MB limit." });
+      return res.status(400).json({ error: 'The URL must point directly to an image file.' });
     }
 
     await pool.query('UPDATE users SET avatar = $1 WHERE id = $2', [newAvatarUrl, req.user.id]);
-    res.status(200).json({ message: "Avatar updated successfully." });
+    res.status(200).json({ message: 'Avatar updated successfully.' });
   } catch (err) {
-    res.status(400).json({ error: "Could not validate the image URL. Ensure it is public." });
+    if (err.name === 'AbortError') {
+      return res.status(400).json({ error: 'Image URL timed out. Make sure it is publicly accessible.' });
+    }
     console.error(err);
+    res.status(400).json({ error: 'Could not validate the image URL.' });
   }
 };
 

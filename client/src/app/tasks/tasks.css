@@ -156,6 +156,12 @@
   gap: 16px;
 }
 
+.task-badges-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .task-detail-badges {
   display: flex;
   gap: 8px;
@@ -192,7 +198,9 @@
 
 .task-assigned-user,
 .task-comment-count,
-.task-deadline-info {
+.task-deadline-info,
+.task-created-at {
+  color: var(--sec-text-color);
   display: flex;
   align-items: center;
   gap: 5px;

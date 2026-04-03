@@ -14,7 +14,11 @@ const changeEmailSchema = z.object({
     .string({ required_error: 'New email is required.' })
     .trim()
     .toLowerCase()
-    .email('Please provide a valid email address.'),
+    .email('Please provide a valid email address.')
+    .max(150, 'Email must be at most 150 characters.'),
+  password: z
+    .string({ required_error: 'Password is required to change your email.' })
+    .min(1, 'Password is required to change your email.'),
 });
 
 const changeAvatarSchema = z.object({

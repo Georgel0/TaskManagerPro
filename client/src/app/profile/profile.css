@@ -1,7 +1,6 @@
 .profile-page-container {
   width: 100%;
   min-height: 100vh;
-  background-color: linear-gradient(290deg, var(--pri-background), var(--sec-background));
   padding-bottom: 60px;
 }
 
