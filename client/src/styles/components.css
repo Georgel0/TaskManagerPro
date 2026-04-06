@@ -146,6 +146,7 @@
 .topbar {
   position: sticky;
   top: 0;
+  z-index: 10;
   min-height: 60px;
   background-color: var(--pri-background);
   border-bottom: 1px solid var(--border-color);
