@@ -144,7 +144,8 @@
 }
 
 .topbar {
-  width: 100%;
+  position: sticky;
+  top: 0;
   min-height: 60px;
   background-color: var(--pri-background);
   border-bottom: 1px solid var(--border-color);

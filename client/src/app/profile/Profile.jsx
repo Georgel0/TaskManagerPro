@@ -82,11 +82,9 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page-container">
-      <div className="profile-header-banner">
-        <div className="profile-header-content">
-          <h1>Account</h1>
-          <p>Manage your profile details, security preferences, and account data.</p>
-        </div>
+      <div className="profile-header-content">
+        <h1>Account</h1>
+        <p>Manage your profile details, security preferences, and account data.</p>
       </div>
 
       <div className="profile-layout page-content">
@@ -188,14 +186,14 @@ function ProfileStatsExpanded({ stats }) {
   const [open, setOpen] = useState(false);
 
   const rows = [
-    { icon: 'fa-folder-open',        label: 'Projects Owned',        value: stats?.projects - (stats?.activity?.collaboration ?? 0) },
-    { icon: 'fa-users',              label: 'Projects Joined',         value: stats?.activity?.collaboration ?? 0 },
-    { icon: 'fa-tasks',              label: 'In Progress',           value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
-    { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)',value: stats?.urgent ?? 0,   accent: 'warning' },
-    { icon: 'fa-calendar-times',     label: 'Overdue',               value: stats?.performance?.overdue ?? 0,  accent: 'error' },
-    { icon: 'fa-clock',              label: 'Due This Week',         value: stats?.performance?.upcoming ?? 0, accent: 'accent' },
-    { icon: 'fa-paperclip',          label: 'Attachments',           value: stats?.activity?.resources ?? 0 },
-    { icon: 'fa-bell',               label: 'Unread Notifications',  value: stats?.activity?.unread ?? 0 },
+    { icon: 'fa-folder-open', label: 'Projects Owned', value: stats?.projects - (stats?.activity?.collaboration ?? 0) },
+    { icon: 'fa-users', label: 'Projects Joined', value: stats?.activity?.collaboration ?? 0 },
+    { icon: 'fa-tasks', label: 'In Progress', value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
+    { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)', value: stats?.urgent ?? 0, accent: 'warning' },
+    { icon: 'fa-calendar-times', label: 'Overdue', value: stats?.performance?.overdue ?? 0, accent: 'error' },
+    { icon: 'fa-clock', label: 'Due This Week', value: stats?.performance?.upcoming ?? 0, accent: 'accent' },
+    { icon: 'fa-paperclip', label: 'Attachments', value: stats?.activity?.resources ?? 0 },
+    { icon: 'fa-bell', label: 'Unread Notifications', value: stats?.activity?.unread ?? 0 },
   ];
 
   return (
