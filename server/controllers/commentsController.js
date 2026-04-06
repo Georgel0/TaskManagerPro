@@ -1,4 +1,5 @@
 const pool = require('../database');
+const { createNotification } = require('./notificationController');
 
 const createComment = async (req, res) => {
   const { task_id, comment } = req.body;
@@ -12,6 +13,18 @@ const createComment = async (req, res) => {
                     (SELECT avatar FROM users WHERE id = $2) AS user_avatar`,
       [task_id, userId, comment]
     );
+
+    const taskResult = await pool.query('SELECT title, assigned_user_id FROM tasks WHERE id = $1', [task_id]);
+    const task = taskResult.rows[0];
+
+    if (task && task.assigned_user_id && task.assigned_user_id !== userId) {
+      const commenterName = newComment.rows[0].user_name;
+      await createNotification(
+        task.assigned_user_id,
+        `${commenterName} commented on your task: ${task.title}`
+      );
+    }
+
     res.status(201).json(newComment.rows[0]);
   } catch (err) {
     console.error(err);
@@ -68,6 +81,9 @@ const deleteComment = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    const commentResult = await pool.query('SELECT user_id FROM comments WHERE id = $1', [id]);
+    const commentAuthorId = commentResult.rows[0]?.user_id;
+
     await pool.query(
       `DELETE FROM comments
        WHERE id = $1
@@ -82,6 +98,13 @@ const deleteComment = async (req, res) => {
        )`,
       [id, userId]
     );
+
+    if (commentAuthorId && commentAuthorId !== userId) {
+      await createNotification(
+        commentAuthorId,
+        `Your comment was removed by the project moderator.`
+      );
+    }
 
     res.status(200).json({ message: 'Comment deleted successfully.' });
   } catch (err) {

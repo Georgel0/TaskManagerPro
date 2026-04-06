@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { Resend } = require('resend');
+const { createNotification } = require('./notificationController');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -24,6 +25,8 @@ const registerUser = async (req, res) => {
 
     const user = newUser.rows[0];
     const token = generateToken(user.id);
+
+    await createNotification(user.id, `Welcome ${user.name}`);
 
     res.status(201).json({
       user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },

@@ -25,6 +25,10 @@
   color: var(--border-color);
 }
 
+.projects-empty-state > button {
+  margin-top: 20px;
+}
+
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -1,4 +1,5 @@
 const pool = require('../database');
+const { createNotification } = require('./notificationController');
 
 const createTask = async (req, res) => {
   const { title, description, status, priority, deadline, project_id, assigned_user_id } = req.body;
@@ -23,6 +24,13 @@ const createTask = async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [title, description, status || 'To Do', priority || 'Medium', deadline, project_id, assigned_user_id || null]
     );
+
+    if (assigned_user_id && assigned_user_id !== userId) {
+      await createNotification(
+        assigned_user_id, 
+        `You have been assigned to a new task: ${title}`
+      );
+    }
 
     res.status(201).json(newTask.rows[0]);
   } catch (err) {
@@ -107,6 +115,9 @@ const updateTask = async (req, res) => {
       return res.status(403).json({ error: "Not authorized to update this task or task not found." });
     }
 
+    const oldTaskResult = await pool.query('SELECT title, assigned_user_id FROM tasks WHERE id = $1', [id]);
+    const oldTask = oldTaskResult.rows[0];
+
     const updatedTask = await pool.query(
       `UPDATE tasks 
        SET title = COALESCE($1, title), 
@@ -118,6 +129,16 @@ const updateTask = async (req, res) => {
        WHERE id = $7 RETURNING *`,
       [title, description, status, priority, deadline, assigned_user_id, id]
     );
+
+    const finalTitle = title || oldTask.title;
+    
+    if (assigned_user_id && assigned_user_id !== oldTask.assigned_user_id && assigned_user_id !== userId) {
+      // The task was assigned to someone new
+      await createNotification(assigned_user_id, `You have been assigned to the task: ${finalTitle}`);
+    } else if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
+      // The task was just edited by someone else (like the project owner)
+      await createNotification(oldTask.assigned_user_id, `There was an update to your task: ${finalTitle}`);
+    }
 
     res.status(200).json(updatedTask.rows[0]);
   } catch (err) {
@@ -143,7 +164,17 @@ const deleteTask = async (req, res) => {
       return res.status(403).json({ error: "Not authorized to delete this task or task not found." });
     }
 
+    const taskToDeleteResult = await pool.query('SELECT title, assigned_user_id FROM tasks WHERE id = $1', [id]);
+    const taskToDelete = taskToDeleteResult.rows[0];
+
     await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+
+    if (taskToDelete.assigned_user_id && taskToDelete.assigned_user_id !== userId) {
+      await createNotification(
+        taskToDelete.assigned_user_id, 
+        `The task "${taskToDelete.title}" has been deleted.`
+      );
+    }
 
     res.status(200).json({ message: "Task deleted successfully." });
   } catch (err) {

@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { useApp } from '@/context';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
+import { NotificationsModal } from '../ui/NotificationsModal';
 
 export function MainLayout({ children }) {
   const { user } = useApp();
@@ -41,7 +42,9 @@ export function MainLayout({ children }) {
               <div className="logo-image"></div>
               <h3>Task Manager Pro</h3>
             </div>
-            {!isLandingPage && (
+            <div className="topbar-actions">
+              <NotificationsModal />
+
               <Link href='/profile' className='topbar-profile-link' title={`Account \n ${user?.name} \n ${user?.email}`}>
                 {user?.avatar ? (
                   <img src={user.avatar} alt="User Avatar" className="topbar-avatar" />
@@ -49,7 +52,7 @@ export function MainLayout({ children }) {
                   <i className="fas fa-user"></i>
                 )}
               </Link>
-            )}
+            </div>
           </header>
         )}
 

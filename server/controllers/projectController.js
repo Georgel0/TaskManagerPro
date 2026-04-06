@@ -1,4 +1,5 @@
 const pool = require('../database');
+const { createNotification } = require('./notificationController');
 
 const createProject = async (req, res) => {
   const { name, description } = req.body;
@@ -179,6 +180,11 @@ const addProjectMember = async (req, res) => {
       [id, member.id]
     );
 
+    await createNotification(
+      member.id, 
+      `You have been added to the project: ${project.rows[0].name}`
+    );
+
     res.status(200).json({ ...member, role: 'member' });
   } catch (err) {
     console.error(err);
@@ -203,6 +209,11 @@ const removeProjectMember = async (req, res) => {
     await pool.query(
       'DELETE FROM project_members WHERE project_id = $1 AND user_id = $2',
       [id, memberId]
+    );
+
+    await createNotification(
+      memberId, 
+      `You have been removed from the project: ${project.rows[0].name}`
     );
 
     res.status(200).json({ message: 'Member removed.' });
