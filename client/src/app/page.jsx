@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from './auth';
-import { ParticleBackground } from '@/components/effects/ParticleBackground';
+import { ParticleBackground } from '@/components/effects';
 import '@/styles/landingpage.css';
 
 export default function LandingPage() {
