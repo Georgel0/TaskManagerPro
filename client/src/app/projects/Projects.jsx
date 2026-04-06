@@ -22,7 +22,7 @@ export default function Projects() {
     handleCreate, handleEdit, handleDelete,
     handleAddMember, handleRemoveMember,
     openTasks, openEdit, openDelete,
-    openMembers,
+    openMembers, handleTransferOwnership
   } = useProjects();
 
   if (loading || !user) return (
@@ -124,6 +124,7 @@ export default function Projects() {
           isOwner={selectedProject.owner_id === user.id}
           onAddMember={handleAddMember}
           onRemoveMember={handleRemoveMember}
+          onTransferOwnership={handleTransferOwnership}
           onClose={() => setIsMembersModalOpen(false)}
         />
       )}

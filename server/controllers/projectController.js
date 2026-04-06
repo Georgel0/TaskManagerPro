@@ -223,6 +223,65 @@ const removeProjectMember = async (req, res) => {
   }
 };
 
+const transferOwnership = async (req, res) => {
+  const { id, memberId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const project = await pool.query(
+      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2',
+      [id, userId]
+    );
+
+    if (project.rows.length === 0) {
+      return res.status(403).json({ error: 'Not authorized.' });
+    }
+
+    // Verify the target is actually a member of the project
+    const memberCheck = await pool.query(
+      'SELECT * FROM project_members WHERE project_id = $1 AND user_id = $2',
+      [id, memberId]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'That user is not a member of this project.' });
+    }
+
+    // Transfer ownership in a transaction — atomic, all or nothing
+    await pool.query('BEGIN');
+
+    // Set new owner
+    await pool.query('UPDATE projects SET owner_id = $1 WHERE id = $2', [memberId, id]);
+
+    // Remove new owner from members table (they're now owner)
+    await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, memberId]);
+
+    // Add old owner as a member
+    await pool.query(
+      'INSERT INTO project_members (project_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [id, userId]
+    );
+
+    await pool.query('COMMIT');
+
+    await createNotification(
+      Number(memberId),
+      `You are now the owner of project: ${project.rows[0].name}`
+    );
+
+    await createNotification(
+      userId,
+      `You transferred ownership of "${project.rows[0].name}" and are now a member.`
+    );
+
+    res.status(200).json({ message: 'Ownership transferred successfully.' });
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Server error while transferring ownership.' });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
@@ -231,4 +290,5 @@ module.exports = {
   getProjectMembers,
   addProjectMember,
   removeProjectMember,
+  transferOwnership
 };

@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { addMemberSchema, validate } from '@/lib/validators';
 import { getInitials } from '@/lib';
 
-export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose }) {
+export function MembersModal({ project, members, loading, isOwner, onAddMember, onRemoveMember, onClose, onTransferOwnership }) {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [emailError, setEmailError] = useState(null);
+  const [transferConfirmId, setTransferConfirmId] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+
   const router = useRouter();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (event.target.closest('.menu-btn') || event.target.closest('.action-dropdown-menu')) {
+        return;
+      }
+      setOpenMenuId(null);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleMemberClick = (member) => {
     onClose();
@@ -46,6 +61,13 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
     } finally {
       setIsAdding(false);
     }
+  };
+
+  const toggleMenu = (e, memberId) => {
+    e.preventDefault();
+    e.stopPropagation(); 
+
+    setOpenMenuId((prevId) => (prevId === memberId ? null : memberId));
   };
 
   return (
@@ -108,21 +130,71 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
                     </div>
                   </button>
 
-                  <div className="member-actions">
+                  <div className="member-actions-container">
                     <span className={`badge ${member.role === 'owner' ? 'badge-owner' : 'badge-member'}`}>
                       {member.role === 'owner' ? 'Owner' : 'Member'}
                     </span>
 
                     {isOwner && member.role !== 'owner' && (
-                      <button
-                        className="btn-icon delete-btn"
-                        title="Remove member"
-                        onClick={() => onRemoveMember(member.id)}
-                      >
-                        <i className="fas fa-user-minus"></i>
-                      </button>
+                      <div className="member-actions">
+                        {transferConfirmId === member.id ? (
+                          <div className="transfer-confirm">
+                            <span className="transfer-confirm-text">Make owner?</span>
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => { onTransferOwnership(member.id); setTransferConfirmId(null); }}
+                            >
+                              Yes
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => setTransferConfirmId(null)}
+                            >
+                              No
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="action-dropdown-wrapper">
+                            <button
+                              className="btn-icon menu-btn"
+                              title="More actions"
+                              onClick={(e) => toggleMenu(e, member.id)}
+                            >
+                              <i className="fas fa-bars"></i>
+                            </button>
+
+                            {openMenuId === member.id && (
+                              <div className="action-dropdown-menu">
+                                <button
+                                  className="dropdown-item"
+                                  title="Make Owner"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTransferConfirmId(member.id);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <i className="fas fa-crown"></i>
+                                </button>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  title="Remove Member"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemoveMember(member.id);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <i className="fas fa-user-minus"></i>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
+
                 </li>
               ))}
             </ul>

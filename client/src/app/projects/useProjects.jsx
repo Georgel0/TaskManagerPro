@@ -262,6 +262,42 @@ export function useProjects() {
     }
   };
 
+  const handleTransferOwnership = async (memberId) => {
+    if (!selectedProject?.id) return;
+
+    try {
+      const res = await fetch(
+        `${API}/projects/${selectedProject.id}/members/${memberId}/transfer`,
+        {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
+
+      if (!res.ok) throw new Error('Failed to transfer ownership.');
+
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === selectedProject.id ? { ...p, owner_id: memberId } : p
+        )
+      );
+
+      setProjectMembers((prev) =>
+        prev.map((m) => {
+          if (m.role === 'owner') return { ...m, role: 'member' };
+          if (m.id === memberId) return { ...m, role: 'owner' };
+          return m;
+        })
+      );
+
+      setSelectedProject((prev) => ({ ...prev, owner_id: memberId }));
+
+      toast.success('Ownership transferred successfully.');
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   return {
     // Data
     projects,
@@ -298,6 +334,7 @@ export function useProjects() {
     handleDelete,
     handleAddMember,
     handleRemoveMember,
+    handleTransferOwnership,
     openTasks,
     openEdit,
     openDelete,
