@@ -6,19 +6,80 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const getUserProfile = async (req, res) => {
   try {
-    const userResult = await pool.query(
-      'SELECT id, name, email, avatar, created_at FROM users WHERE id = $1',
-      [req.user.id]
-    );
+    const query = `
+    SELECT 
+      u.id, u.name, u.email, u.avatar, u.created_at,
 
-    if (userResult.rows.length === 0) {
+      -- Project Stats
+      (SELECT COUNT(*) FROM projects WHERE owner_id = u.id) AS projects_owned,
+      (SELECT COUNT(*) FROM project_members WHERE user_id = u.id) AS projects_joined,
+      (SELECT COUNT(*) FROM project_members pm 
+       JOIN projects p ON pm.project_id = p.id 
+       WHERE pm.user_id = u.id AND p.owner_id != u.id) AS collaborative_projects,
+
+      -- Task Basics
+      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id) AS total_tasks,
+      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND status = 'Done') AS completed_tasks,
+      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND status = 'In Progress') AS in_progress_tasks,
+      
+      -- Priority & Deadlines
+      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND priority = 'High' AND status != 'Done') AS urgent_tasks,
+      (SELECT COUNT(*) FROM tasks 
+      WHERE assigned_user_id = u.id 
+      AND deadline < CURRENT_DATE 
+      AND status != 'Done') AS overdue_tasks,
+      (SELECT COUNT(*) FROM tasks 
+      WHERE assigned_user_id = u.id 
+      AND deadline BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '7 days')
+      AND status != 'Done') AS upcoming_tasks,
+
+      -- Interaction Stats
+      (SELECT COUNT(*) FROM comments WHERE user_id = u.id) AS comments_count,
+      (SELECT COUNT(*) FROM attachments a 
+       JOIN tasks t ON a.task_id = t.id 
+       WHERE t.assigned_user_id = u.id) AS task_resources,
+      (SELECT COUNT(*) FROM notifications 
+       WHERE user_id = u.id AND read_status = FALSE) AS unread_alerts
+
+    FROM users u 
+    WHERE u.id = $1;`;
+
+    const result = await pool.query(query, [req.user.id]);
+
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    res.status(200).json(userResult.rows[0]);
+    const row = result.rows[0];
+    
+    // Calculate a 'Productivity Score' percentage
+    const total = parseInt(row.total_tasks) || 0;
+    const completed = parseInt(row.completed_tasks) || 0;
+    const score = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    res.status(200).json({
+      ...row,
+      stats: {
+        projects: parseInt(row.projects_owned) + parseInt(row.projects_joined),
+        tasks: total,
+        completed: completed,
+        urgent: parseInt(row.urgent_tasks),
+        engagement: parseInt(row.comments_count),
+        performance: {
+          score: score,
+          overdue: parseInt(row.overdue_tasks),
+          upcoming: parseInt(row.upcoming_tasks)
+        },
+        activity: {
+          collaboration: parseInt(row.collaborative_projects),
+          resources: parseInt(row.task_resources),
+          unread: parseInt(row.unread_alerts)
+        }
+      }
+    });
   } catch (err) {
-    res.status(500).json({ error: "Server error while fetching profile." });
-    console.error(err);
+    console.error("Profile Stats Error:", err);
+    res.status(500).json({ error: "Server error fetching stats." });
   }
 };
 

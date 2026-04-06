@@ -92,17 +92,52 @@ export default function ProfilePage() {
       <div className="profile-layout page-content">
         <div className="profile-sidebar">
           {user && (
-            <div className="card profile-overview">
-              <div className="profile-avatar-wrapper">
-                <img className="profile-avatar-large" src={user.avatar} alt={`${user.name}'s avatar`} />
+            <>
+              <div className="card profile-overview">
+                <div className="profile-avatar-wrapper">
+                  <img className="profile-avatar-large" src={user.avatar} alt={`${user.name}'s avatar`} />
+                </div>
+                <h2 className="profile-name-large" title={`Name: ${user.name}`}>{user.name}</h2>
+                <p className="profile-email-badge" title={`Email: ${user.email}`}>{user.email}</p>
+                <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
+                  <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
+                </p>
+                <button onClick={handleLogout} className="btn btn-secondary btn-logout" title="Log Out">Log Out</button>
               </div>
-              <h2 className="profile-name-large" title={`Name: ${user.name}`}>{user.name}</h2>
-              <p className="profile-email-badge" title={`Email: ${user.email}`}>{user.email}</p>
-              <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
-                <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
-              </p>
-              <button onClick={handleLogout} className="btn btn-secondary btn-logout" title="Log Out">Log Out</button>
-            </div>
+
+              <div className="card profile-stats-card">
+                <div className="profile-stats-header">
+                  <h3 className="profile-stats-title">
+                    <i className="fas fa-chart-bar"></i> Stats
+                  </h3>
+                  <div className="profile-score-badge" title="Productivity score: tasks completed / total">
+                    <i className="fas fa-bolt"></i>
+                    {user.stats?.performance?.score ?? 0}%
+                  </div>
+                </div>
+
+                <div className="profile-stats-grid">
+                  <div className="profile-stat-item" title="Total Projects">
+                    <span className="profile-stat-value">{user.stats?.projects ?? 0}</span>
+                    <span className="profile-stat-label">Projects</span>
+                  </div>
+                  <div className="profile-stat-item" title="Total Tasks">
+                    <span className="profile-stat-value">{user.stats?.tasks ?? 0}</span>
+                    <span className="profile-stat-label">Tasks</span>
+                  </div>
+                  <div className="profile-stat-item" title="Task Completed">
+                    <span className="profile-stat-value">{user.stats?.completed ?? 0}</span>
+                    <span className="profile-stat-label">Done</span>
+                  </div>
+                  <div className="profile-stat-item" title="Total Comments">
+                    <span className="profile-stat-value">{user.stats?.engagement ?? 0}</span>
+                    <span className="profile-stat-label">Comments</span>
+                  </div>
+                </div>
+
+                <ProfileStatsExpanded stats={user.stats} />
+              </div>
+            </>
           )}
 
           <DangerZone handleLogout={handleLogout} />
@@ -146,5 +181,53 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ProfileStatsExpanded({ stats }) {
+  const [open, setOpen] = useState(false);
+
+  const rows = [
+    { icon: 'fa-folder-open',        label: 'Projects Owned',        value: stats?.projects - (stats?.activity?.collaboration ?? 0) },
+    { icon: 'fa-users',              label: 'Projects Joined',         value: stats?.activity?.collaboration ?? 0 },
+    { icon: 'fa-tasks',              label: 'In Progress',           value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
+    { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)',value: stats?.urgent ?? 0,   accent: 'warning' },
+    { icon: 'fa-calendar-times',     label: 'Overdue',               value: stats?.performance?.overdue ?? 0,  accent: 'error' },
+    { icon: 'fa-clock',              label: 'Due This Week',         value: stats?.performance?.upcoming ?? 0, accent: 'accent' },
+    { icon: 'fa-paperclip',          label: 'Attachments',           value: stats?.activity?.resources ?? 0 },
+    { icon: 'fa-bell',               label: 'Unread Notifications',  value: stats?.activity?.unread ?? 0 },
+  ];
+
+  return (
+    <>
+      <div className={`profile-stats-expanded ${open ? 'profile-stats-expanded-open' : ''}`}>
+        <div className="profile-stats-expanded-inner">
+          <div className="profile-stats-divider" />
+          {rows.map((row) => (
+            <div key={row.label} className="profile-stat-row" title={row.label}>
+              <span className={`profile-stat-row-icon ${row.accent ? `profile-stat-row-icon-${row.accent}` : ''}`}>
+                <i className={`fas ${row.icon}`}></i>
+              </span>
+              <span className="profile-stat-row-label">{row.label}</span>
+              <span className={`profile-stat-row-value ${row.accent ? `profile-stat-row-value-${row.accent}` : ''}`}>
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button
+        className="profile-stats-toggle"
+        onClick={() => setOpen((p) => !p)}
+        title={open ? 'Show less' : 'Show more'}
+      >
+        {open ? (
+          <><i className="fas fa-chevron-up"></i> Show less</>
+        ) : (
+          <><i className="fas fa-chevron-down"></i> Show more</>
+        )}
+      </button>
+    </>
   );
 }
