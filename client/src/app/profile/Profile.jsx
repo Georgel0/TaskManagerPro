@@ -73,7 +73,7 @@ export default function ProfilePage() {
     return { errors, setErrors, handleSubmit };
   };
 
-  if (loading) return (
+  if (loading || !user) return (
     <div className='loading-state profile-loading'>
       <div className="pulse-ring"></div>
       <p>Loading Profile...</p>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const router = useRouter(); 
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 

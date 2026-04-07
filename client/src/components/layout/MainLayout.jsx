@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
 import { useApp } from '@/context';
 import Link from 'next/link';
@@ -9,23 +9,30 @@ import Sidebar from './Sidebar';
 import { NotificationsModal } from '../ui/NotificationsModal';
 
 export function MainLayout({ children }) {
-  const { user } = useApp();
+  const { user, loading } = useApp();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleSidebarCollapse = () => setSidebarCollapsed(!sidebarCollapsed);
 
+  useEffect(() => {
+    if (!loading && !user && !isLandingPage) {
+      router.push('/');
+    }
+  }, [user, loading, isLandingPage, router]);
+
   return (
     <div className="app-wrapper">
 
       <Toaster position="bottom-right" />
 
-      {!isLandingPage && (
+      {!isLandingPage && !loading && user && (
         <Sidebar
           isOpen={sidebarOpen}
           toggleSidebar={toggleSidebar}

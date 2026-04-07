@@ -14,7 +14,7 @@ export function NotificationsModal() {
 
   useEffect(() => {
     fetchNotifications();
-    
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -25,19 +25,33 @@ export function NotificationsModal() {
   }, []);
 
   const fetchNotifications = async () => {
+    const token = getToken();
+
+    if (!token) return;
+
     try {
       const res = await fetch(`${API}/notifications`, {
-        headers: { Authorization: `Bearer ${getToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      const data = await res.json();
-      setNotifications(data);
 
-      const unreadCount = data.filter(n => !n.read_status).length;
-      if (unreadCount > 0) {
-        toast(`You have ${unreadCount} unread notifications.`, { icon: <i className="fas fa-bell" style={{ color: 'var(--pri-text-color' }}></i> });
+      if (!res.ok) {
+        throw new Error('Unauthorized or Server Error');
+      }
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setNotifications(data);
+        const unreadCount = data.filter(n => !n.read_status).length;
+        if (unreadCount > 0) {
+          toast(`You have ${unreadCount} unread notifications.`, {
+            icon: <i className="fas fa-bell" style={{ color: 'var(--pri-text-color)' }}></i>
+          });
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch notifications', err);
+      console.error('Failed to fetch notifications:', err);
+      setNotifications([]);
     }
   };
 
@@ -48,7 +62,7 @@ export function NotificationsModal() {
         method: 'PUT',
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, read_status: true } : n)
       );
     } catch (err) {
@@ -89,8 +103,8 @@ export function NotificationsModal() {
 
   return (
     <div className="notification-wrapper" ref={dropdownRef}>
-      <button 
-        className="bell-icon-btn" 
+      <button
+        className="bell-icon-btn"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle notifications"
       >
@@ -112,20 +126,20 @@ export function NotificationsModal() {
               </button>
             )}
           </div>
-          
+
           <div className="notification-list">
             {notifications.length === 0 ? (
               <p className="empty-notifications">No notifications yet.</p>
             ) : (
               notifications.map(n => (
-                <div 
-                  key={n.id} 
+                <div
+                  key={n.id}
                   onClick={() => markAsRead(n.id, n.read_status)}
                   className={`notification-item ${!n.read_status ? 'unread' : ''}`}
                 >
-                  <i className={n.read_status ? 'fas fa-envelope-open' : 'fas fa-envelope'}></i> 
+                  <i className={n.read_status ? 'fas fa-envelope-open' : 'fas fa-envelope'}></i>
                   <p className="notification-text">{n.message}</p>
-                  <button 
+                  <button
                     onClick={(e) => deleteNotification(n.id, e)}
                     className="btn-delete-notif"
                     title="Delete"

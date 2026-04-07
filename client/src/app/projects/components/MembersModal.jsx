@@ -65,7 +65,7 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
 
   const toggleMenu = (e, memberId) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
 
     setOpenMenuId((prevId) => (prevId === memberId ? null : memberId));
   };
@@ -89,18 +89,20 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
             <ul className="members-list">
               {members.map((member) => (
                 <li key={member.id} className="member-item">
+
+                  <div className="member-avatar">
+                    {member.avatar ? (
+                      <img src={member.avatar} alt={member.name} />
+                    ) : (
+                      <span>{getInitials(member.name)}</span>
+                    )}
+                  </div>
+
                   <button
                     className="member-clickable-area"
                     onClick={() => handleMemberClick(member)}
                     title={`View ${member.name}'s tasks`}
                   >
-                    <div className="member-avatar">
-                      {member.avatar ? (
-                        <img src={member.avatar} alt={member.name} />
-                      ) : (
-                        <span>{getInitials(member.name)}</span>
-                      )}
-                    </div>
 
                     <div className="member-info">
                       <span className="member-name">{member.name}</span>
