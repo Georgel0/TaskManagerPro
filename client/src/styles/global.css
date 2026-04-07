@@ -115,7 +115,7 @@ hr {
   }
 }
 
-html[data-theme="light-nature"] {
+html[data-theme="light-mint"] {
   --pri-text-color: #1a4b41;
   --sec-text-color: #4a7c76;
   --accent-color: #20b2aa;
@@ -152,8 +152,8 @@ html[data-theme="dark-neon"] {
 }
 
 html[data-theme="dark-crimson"] {
-  --pri-text-color: #ffffff;
-  --sec-text-color: #888888;
+  --pri-text-color: #dfd7d7;
+  --sec-text-color: #b6a7a7;
   --accent-color: #ff0000;
   --accent-hover: #ff4d4d;
   --pri-background: #000000;

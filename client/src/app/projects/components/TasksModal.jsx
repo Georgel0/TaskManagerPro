@@ -21,7 +21,7 @@ export function TasksModal({ project, tasks, loading, onClose }) {
 
         <div className="modal-body modal-body-scroll">
           {loading ? (
-            <p className="text-center text-secondary">Loading tasks...</p>
+            <p>Loading tasks...</p>
           ) : tasks.length === 0 ? (
             <>
               <p className="empty-state">No tasks in this project yet.</p>
@@ -38,8 +38,8 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                   onClick={() => handleTaskClick(task.id)}
                 >
                   <div>
-                    <span>{task.title}</span>
-                    <span className="text-xs text-secondary" title='Deadline'>
+                    <span className="project-task-item-title" >{task.title}</span>
+                    <span title="Deadline">
                       <i className="fas fa-calendar"></i>{' '}
                       {task.deadline
                         ? new Date(task.deadline).toLocaleDateString()
@@ -47,11 +47,11 @@ export function TasksModal({ project, tasks, loading, onClose }) {
                     </span>
                   </div>
                   <div>
-                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title='Priority'>
+                    <span className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`} title="Priority">
                       {task.priority || 'Medium'}
                     </span>
-                    <span className="badge status-badge" title='Status'>{task.status}</span>
-                    <i className="fas fa-arrow-right text-secondary"></i>
+                    <span className="badge status-badge" title="Status">{task.status}</span>
+                    <i className="fas fa-arrow-right"></i>
                   </div>
                 </li>
               ))}

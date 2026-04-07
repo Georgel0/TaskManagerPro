@@ -96,9 +96,7 @@ export default function LandingPage() {
 
           {view === 'login' && <LoginRegisterForm onForgotClick={() => setView('forgot')} />}
           {view === 'forgot' && <ForgotPasswordForm onBack={() => setView('login')} />}
-          {view === 'reset' && (
-            <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />
-          )}
+          {view === 'reset' && ( <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />)}
         </section>
 
       </div>

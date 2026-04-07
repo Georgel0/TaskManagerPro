@@ -1,0 +1,111 @@
+.tasks-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.tasks-item:last-child {
+  border-bottom: none;
+}
+
+.tasks-item:hover {
+  background-color: var(--sec-background);
+}
+
+.task-info-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-title {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.task-project-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.task-description-preview {
+  margin-bottom: 4px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+}
+
+.task-meta-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.task-highlight {
+  animation: taskHighlight 1.5s ease-out forwards;
+}
+
+.task-item-details {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+}
+
+.task-badges-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.task-assigned-user,
+.task-comment-count,
+.task-deadline-info,
+.task-created-at {
+  color: var(--sec-text-color);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (max-width: 640px) {
+  .tasks-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-meta-group {
+    width: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 5px;
+  }
+
+  .task-description-preview {
+    max-width: 100%;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .task-item-details {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

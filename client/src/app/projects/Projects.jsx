@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './useProjects';
 import { ProjectCard, ProjectFormModal, DeleteProjectModal, TasksModal, MembersModal } from './components';
-import './projects.css';
+import './styles/project-card.css';
+import './styles/project-modals.css'
+import './styles/projects-layout.css'
 
 export default function Projects() {
   const { user } = useApp();

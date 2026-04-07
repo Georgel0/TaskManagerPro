@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useApp } from '@/context';
 import { useTasks } from './useTasks';
 import { TaskItem, DeleteTaskModal, TaskDetailModal, TaskFormModal } from './components';
-import './tasks.css';
+import './styles/task-item.css';
+import './styles/task-modals.css';
+import './styles/tasks-layout.css';
 
 export default function Tasks() {
   const { user } = useApp();
@@ -45,7 +47,7 @@ export default function Tasks() {
     <div className="page-content">
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> All Tasks</h2>
-        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })}>
+        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })} title="Add New Task">
           <i className="fas fa-plus"></i> New Task
         </button>
       </div>
@@ -56,6 +58,7 @@ export default function Tasks() {
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
+              title={`Filter: ${f}`}
               className={`btn ${statusFilter === f ? 'btn-primary' : 'btn-secondary'}`}
             >
               {f}
@@ -70,7 +73,7 @@ export default function Tasks() {
         >
           <option value="">All Projects</option>
           {projects.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
+            <option key={p.id} value={p.id} title={p.name}>{p.name}</option>
           ))}
         </select>
 
@@ -82,13 +85,13 @@ export default function Tasks() {
           >
             <option value="">All Members</option>
             {usersInSelectedProject.map((u) => (
-              <option key={u.id} value={u.id}>{u.name}</option>
+              <option key={u.id} value={u.id} title={u.name}>{u.name}</option>
             ))}
           </select>
         )}
 
         {hasActiveFilters && (
-          <button className="btn btn-ghost tasks-filter-clear" onClick={clearFilters}>
+          <button className="btn btn-ghost tasks-filter-clear" onClick={clearFilters} title="Clear Filters">
             <i className="fas fa-times"></i> Clear
           </button>
         )}
@@ -103,7 +106,7 @@ export default function Tasks() {
               <i className="fas fa-filter"></i>
               <p>No tasks match the current filters.</p>
               {hasActiveFilters && (
-                <button className="btn btn-secondary tasks-empty-btn" onClick={clearFilters}>Clear Filters</button>
+                <button className="btn btn-secondary tasks-empty-btn" onClick={clearFilters} title="Clear Filters">Clear Filters</button>
               )}
             </div>
           ) : (
