@@ -31,6 +31,10 @@ body {
   background-color: var(--sec-background);
   color: var(--pri-text-color);
   line-height: 1.5;
+
+  scrollbar-color: transparent transparent !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 a {

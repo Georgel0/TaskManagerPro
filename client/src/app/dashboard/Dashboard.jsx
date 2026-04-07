@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { formatDate } from '@/lib';
 import { useDashboard } from './useDashboard';
-import { QuickTaskModal } from './QuickTaskModal'; 
+import { QuickTaskModal } from './QuickTaskModal';
 import './dashboard.css';
 
 const getUrgencyText = (deadlineDate) => {
@@ -49,9 +49,9 @@ export default function Dashboard() {
   }
 
   const { statistics, activeTasks, upcomingDeadlines, overdueTasks = [] } = dashboardData;
-  
-  const completionRate = statistics.totalTasks > 0 
-    ? Math.round((statistics.completedTasks / statistics.totalTasks) * 100) 
+
+  const completionRate = statistics.totalTasks > 0
+    ? Math.round((statistics.completedTasks / statistics.totalTasks) * 100)
     : 0;
 
   const handleCloseModal = () => {
@@ -174,7 +174,7 @@ export default function Dashboard() {
                             {task.status || 'To Do'}
                           </span>
                         </div>
-                        
+
                         {task.project_name && (
                           <span className="dash-task-project" title={`Project: ${task.project_name}`}>
                             <i className="fas fa-folder-open"></i> {task.project_name}
@@ -195,7 +195,7 @@ export default function Dashboard() {
         </section>
 
         <div className="dashboard-side-column">
-          
+
           {overdueTasks.length > 0 && (
             <section className="card">
               <div className="card-header">
@@ -205,7 +205,7 @@ export default function Dashboard() {
                 <ul className="dash-task-list">
                   {overdueTasks.map(task => (
                     <li key={task.id} className="dash-task-link">
-                      <Link href={`/tasks?highlight=${task.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <Link href={`/tasks?highlight=${task.id}`}>
                         <div className="dash-task-item dash-task-overdue">
                           <h4>{task.title}</h4>
                           <span className="dash-task-overdue-text" title="Task is past its deadline">
@@ -232,13 +232,23 @@ export default function Dashboard() {
                 <ul className="dash-task-list">
                   {upcomingDeadlines.map(task => (
                     <li key={task.id} className="dash-task-link">
-                      <div className="dash-task-item dash-task-upcoming">
-                        <h4>{task.title}</h4>
-                        <span className="dash-task-due" title="Approaching deadline">
-                          <i className="fas fa-exclamation-circle"></i>
-                          Due {getUrgencyText(task.deadline)}
-                        </span>
-                      </div>
+                      <Link href={`/tasks?highlight=${task.id}`}>
+                        <div className="dash-task-item dash-task-upcoming">
+                          <div className="dash-task-upcoming-info">
+                            <h4>{task.title}</h4>
+                            <span
+                              className={`badge priority-${task.priority?.toLowerCase() || 'medium'}`}
+                              title={`Priority: ${task.priority}`}
+                            >
+                              {task.priority || 'Medium'}
+                            </span>
+                          </div>
+                          <span className="dash-task-due" title="Approaching deadline">
+                            <i className="fas fa-exclamation-circle"></i>
+                            Due {getUrgencyText(task.deadline)}
+                          </span>
+                        </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -248,7 +258,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <QuickTaskModal 
+      <QuickTaskModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         projects={projects}

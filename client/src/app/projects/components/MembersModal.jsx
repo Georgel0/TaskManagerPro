@@ -177,7 +177,7 @@ export function MembersModal({ project, members, loading, isOwner, onAddMember, 
                                   <i className="fas fa-crown"></i>
                                 </button>
                                 <button
-                                  className="dropdown-item text-danger"
+                                  className="dropdown-item"
                                   title="Remove Member"
                                   onClick={(e) => {
                                     e.stopPropagation();

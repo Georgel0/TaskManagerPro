@@ -80,7 +80,7 @@ export function useTasks() {
       const res = await fetch(`${API}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ ...taskData, assigned_user_id: user.id }),
+        body: JSON.stringify(taskData),
       });
 
       if (!res.ok) throw new Error('Failed to create task');

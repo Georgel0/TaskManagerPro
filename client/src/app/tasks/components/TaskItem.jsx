@@ -17,26 +17,22 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
         )}
 
         <div className="task-detail-row task-item-details">
-          {task.project_name && (
-            <span className="task-project-name" title={`Project: ${task.project_name}`}>
-              <i className="fas fa-folder"></i>
-              {task.project_name}
-            </span>
-          )}
-          <span className="task-deadline-info">
-            <i className="fas fa-calendar" title={`Deadline: ${task.deadline ? formatDate(task.deadline) : 'No deadline'}`}></i>
+          <span className="task-project-name" title={`Project: ${task.project_name}`}>
+            <i className="fas fa-folder"></i>
+            {task.project_name}
+          </span>
+          <span className="task-deadline-info" title={`Deadline: ${task.deadline ? formatDate(task.deadline) : 'No deadline'}`}>
+            <i className="fas fa-calendar"></i>
             {task.deadline ? formatDate(task.deadline) : 'No deadline'}
           </span>
           <span className="task-comment-count" title={`No. Of Comments: ${task.comment_count || 0}`}>
             <i className="fas fa-comment"></i>
             {task.comment_count || 0}
           </span>
-          {task.assigned_user_name && (
-            <span className="task-assigned-user" title={`Assigned User: ${task.assigned_user_name}`}>
-              <i className="fas fa-user"></i>
-              {task.assigned_user_name.split(' ')[0]}
-            </span>
-          )}
+          <span className="task-assigned-user" title={`Assigned User: ${task.assigned_user_name}`}>
+            <i className="fas fa-user"></i>
+            {task.assigned_user_name ? task.assigned_user_name.split(' ')[0] : 'Unassigned'}
+          </span>
         </div>
       </div>
 

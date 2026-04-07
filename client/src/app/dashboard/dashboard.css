@@ -210,6 +210,12 @@
   border-left: 4px solid var(--warning-color);
 }
 
+.dash-task-upcoming-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .dash-task-upcoming h4 {
   margin: 0 0 4px 0;
   font-size: 0.95rem;

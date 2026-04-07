@@ -17,12 +17,28 @@ const createTask = async (req, res) => {
     if (projectCheck.rows.length === 0) {
       return res.status(403).json({ error: "Not authorized to add tasks to this project." });
     }
-
-    // Insert the task
-    const newTask = await pool.query(
+    
+    // Insert the task, but ONLY return the new ID instead of all the raw data
+    const insertResult = await pool.query(
       `INSERT INTO tasks (title, description, status, priority, deadline, project_id, assigned_user_id) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
       [title, description, status || 'To Do', priority || 'Medium', deadline, project_id, assigned_user_id || null]
+    );
+
+    const newTaskId = insertResult.rows[0].id;
+
+    // Fetch that new task, but this time JOIN the tables to get the actual names
+    const newTaskDetails = await pool.query(
+      `SELECT t.*, 
+        u.name AS assigned_user_name,
+        p.name AS project_name,
+        p.owner_id AS project_owner_id,
+        0 AS comment_count
+      FROM tasks t
+      JOIN projects p ON t.project_id = p.id
+      LEFT JOIN users u ON u.id = t.assigned_user_id
+      WHERE t.id = $1`,
+      [newTaskId]
     );
 
     if (assigned_user_id && assigned_user_id !== userId) {
@@ -32,7 +48,7 @@ const createTask = async (req, res) => {
       );
     }
 
-    res.status(201).json(newTask.rows[0]);
+    res.status(201).json(newTaskDetails.rows[0]);
   } catch (err) {
     console.error("Error creating task: ", err);
     res.status(500).json({ error: "Server error while creating task." });

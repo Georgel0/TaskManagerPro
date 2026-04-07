@@ -421,6 +421,11 @@
   color: var(--error-color);
 }
 
+.priority-critical {
+  background-color: color-mix(in srgb, var(--pri-text-color) 15%, transparent);
+  color: var(--pri-text-color);
+}
+
 
 @media (max-width: 768px) {
   .mobile-only {
