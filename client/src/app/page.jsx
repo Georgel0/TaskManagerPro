@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from './auth';
+import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from '../components/auth';
 import { ParticleBackground } from '@/components/effects';
 import '@/styles/landingpage.css';
 
