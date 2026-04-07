@@ -380,6 +380,135 @@
   color: var(--sec-text-color);
 }
 
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.clickable-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.nested-modal-overlay {
+  z-index: 1050;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.member-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.member-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.member-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--sec-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--sec-text-color);
+  flex-shrink: 0;
+}
+
+.member-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-detail-titles h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.4rem;
+  color: var(--pri-text-color);
+}
+
+.member-detail-titles p {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--sec-text-color);
+}
+
+.member-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background-color: var(--sec-background);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pri-text-color);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sec-text-color);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.member-detail-bio {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.bio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.bio-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--pri-text-color);
+}
+
+.bio-text {
+  font-size: 0.95rem;
+  color: var(--sec-text-color);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.bio-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .transfer-btn {
   color: var(--sec-text-color);
 }

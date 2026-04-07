@@ -8,7 +8,7 @@ const getUserProfile = async (req, res) => {
   try {
     const query = `
     SELECT 
-      u.id, u.name, u.email, u.avatar, u.created_at,
+      u.id, u.name, u.email, u.avatar, u.bio, u.created_at,
 
       -- Project Stats
       (SELECT COUNT(*) FROM projects WHERE owner_id = u.id) AS projects_owned,
@@ -221,6 +221,20 @@ const changePassword = async (req, res) => {
   }
 };
 
+const changeBio = async (req, res) => {
+  const { newBio } = req.body;
+  const userId = req.user.id;
+
+  try {
+    await pool.query('UPDATE users SET bio = $1 WHERE id = $2', [newBio, userId]);
+
+    res.status(200).json({ message: 'Bio updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while updating bio.' });
+  }
+};
+
 const deleteAccount = async (req, res) => {
   const { password } = req.body;
 
@@ -267,6 +281,7 @@ module.exports = {
   changeEmail,
   changeAvatar,
   changePassword,
+  changeBio,
   deleteAccount,
   searchUsers
 };

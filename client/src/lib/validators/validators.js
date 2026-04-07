@@ -74,6 +74,13 @@ export const changePasswordSchema = z
     path: ['newPassword'],
   });
 
+export const changeBioSchema = {
+  newBio: (value) => {
+    if (value && value.length > 500) return "Bio must be under 500 characters.";
+    return null;
+  }
+};
+
 export const deleteAccountSchema = z.object({
   password: z.string().min(1, 'Password is required.'),
 });

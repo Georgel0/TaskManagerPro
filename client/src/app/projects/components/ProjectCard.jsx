@@ -5,16 +5,16 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
 
   return (
     <div className="project-card">
-      <div>
-        <div>
+      <div className="project-card-header">
+        <div className="project-card-title-group">
           <h3>{project.name}</h3>
-          <span className={`badge ${isOwner ? 'badge-owner' : 'badge-member'}`} title="Authority">
+          <span className={`badge ${isOwner ? 'badge-owner' : 'badge-member'}`}>
             {isOwner ? 'Owner' : 'Member'}
           </span>
         </div>
 
         {isOwner && (
-          <div>
+          <div className="action-buttons">
             <button
               className="btn-icon edit-btn"
               title="Edit Project"
@@ -33,15 +33,16 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
         )}
       </div>
 
-      <div>
-        <p>{project.description || 'No description provided.'}</p>
-        <div>
-          <span>
-            <i className="fas fa-calendar-alt"></i> Created:{' '}
+      <div className="project-card-body">
+        <p className="project-card-description">
+          {project.description || 'No description provided.'}
+        </p>
+        <div className="project-card-footer">
+          <span className="project-card-date">
+            <i className="fas fa-calendar-alt"></i>{' '}
             {new Date(project.created_at).toLocaleDateString()}
           </span>
-
-          <div>
+          <div className="project-card-chips">
             <button
               className="project-member-count"
               title="View Members"
@@ -49,11 +50,10 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             >
               <i className="fas fa-users"></i> {memberCount}
             </button>
-
-            <button 
-              className="project-task-count" 
-              onClick={() => onOpen(project)}
+            <button
+              className="project-task-count"
               title="View Tasks"
+              onClick={() => onOpen(project)}
             >
               <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
             </button>

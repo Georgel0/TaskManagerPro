@@ -5,7 +5,8 @@ import { useApp } from '@/context';
 import { generateIdenticonBase64 } from '@/lib';
 import { validate } from '@/lib/validators';
 import toast from 'react-hot-toast';
-import { UsernameForm, AvatarForm, EmailForm, PasswordForm, DangerZone } from './ProfileForms';
+import { UsernameForm, AvatarForm, EmailForm, PasswordForm, BioForm } from './ProfileForms';
+import { ProfileStatsExpanded, DangerZone } from './components';
 import './profile.css';
 
 export default function ProfilePage() {
@@ -97,6 +98,7 @@ export default function ProfilePage() {
                 </div>
                 <h2 className="profile-name-large" title={`Name: ${user.name}`}>{user.name}</h2>
                 <p className="profile-email-badge" title={`Email: ${user.email}`}>{user.email}</p>
+                <p className="profile-bio-text" title="Bio">{user.bio}</p>
                 <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
                   <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
                 </p>
@@ -153,6 +155,13 @@ export default function ProfilePage() {
               setUser={setUser}
               useProfileForm={useProfileForm}
             />
+
+            <BioForm
+              user={user}
+              setUser={setUser}
+              useProfileForm={useProfileForm}
+            />
+
             <AvatarForm
               user={user}
               setUser={setUser}
@@ -179,53 +188,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ProfileStatsExpanded({ stats }) {
-  const [open, setOpen] = useState(false);
-
-  const rows = [
-    { icon: 'fa-folder-open', label: 'Projects Owned', value: stats?.projects - (stats?.activity?.collaboration ?? 0) },
-    { icon: 'fa-users', label: 'Projects Joined', value: stats?.activity?.collaboration ?? 0 },
-    { icon: 'fa-tasks', label: 'In Progress', value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
-    { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)', value: stats?.urgent ?? 0, accent: 'warning' },
-    { icon: 'fa-calendar-times', label: 'Overdue', value: stats?.performance?.overdue ?? 0, accent: 'error' },
-    { icon: 'fa-clock', label: 'Due This Week', value: stats?.performance?.upcoming ?? 0, accent: 'accent' },
-    { icon: 'fa-paperclip', label: 'Attachments', value: stats?.activity?.resources ?? 0 },
-    { icon: 'fa-bell', label: 'Unread Notifications', value: stats?.activity?.unread ?? 0 },
-  ];
-
-  return (
-    <>
-      <div className={`profile-stats-expanded ${open ? 'profile-stats-expanded-open' : ''}`}>
-        <div className="profile-stats-expanded-inner">
-          <div className="profile-stats-divider" />
-          {rows.map((row) => (
-            <div key={row.label} className="profile-stat-row" title={row.label}>
-              <span className={`profile-stat-row-icon ${row.accent ? `profile-stat-row-icon-${row.accent}` : ''}`}>
-                <i className={`fas ${row.icon}`}></i>
-              </span>
-              <span className="profile-stat-row-label">{row.label}</span>
-              <span className={`profile-stat-row-value ${row.accent ? `profile-stat-row-value-${row.accent}` : ''}`}>
-                {row.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button
-        className="profile-stats-toggle"
-        onClick={() => setOpen((p) => !p)}
-        title={open ? 'Show less' : 'Show more'}
-      >
-        {open ? (
-          <><i className="fas fa-chevron-up"></i> Show less</>
-        ) : (
-          <><i className="fas fa-chevron-down"></i> Show more</>
-        )}
-      </button>
-    </>
   );
 }

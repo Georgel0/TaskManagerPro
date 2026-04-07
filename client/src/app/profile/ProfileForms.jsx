@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { changeUsernameSchema, changeEmailSchema, changeAvatarSchema, 
-  changePasswordSchema, deleteAccountSchema, validate } from '@/lib/validators';
+import { changeUsernameSchema, changeEmailSchema, changeAvatarSchema,
+  changePasswordSchema, changeBioSchema} from '@/lib/validators';
 
 export function UsernameForm({ user, setUser, useProfileForm }) {
   const [newUsername, setNewUsername] = useState('');
@@ -88,18 +87,18 @@ export function AvatarForm({ user, setUser, useProfileForm, getNewIdenticon }) {
         {errors.newAvatarUrl && <span className="field-error">{errors.newAvatarUrl}</span>}
       </div>
 
-      <button 
-        type="button" 
-        className="new-identicon-btn" 
-        onClick={() => handleNewIdenticon(Math.random().toString(36))} 
+      <button
+        type="button"
+        className="new-identicon-btn"
+        onClick={() => handleNewIdenticon(Math.random().toString(36))}
         title="Generate a new identicon"
       >
         Generate a new identicon <i className="fas fa-wand-magic-sparkles"></i>
       </button>
-      <button 
-        type="button" 
-        className="new-identicon-btn" 
-        onClick={() => handleNewIdenticon(user?.email || '')} 
+      <button
+        type="button"
+        className="new-identicon-btn"
+        onClick={() => handleNewIdenticon(user?.email || '')}
         title="Get your original identicon back"
       >
         Get your original identicon back <i className="fas fa-arrow-rotate-left"></i>
@@ -217,99 +216,38 @@ export function PasswordForm({ useProfileForm }) {
   );
 }
 
-export function DangerZone({ handleLogout }) {
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+export function BioForm({ user, setUser, useProfileForm }) {
+  const [newBio, setNewBio] = useState(user?.bio || '');
 
-  const confirmDeleteAccount = async (e) => {
-    e.preventDefault();
-    setDeleteError('');
-
-    const errors = validate(deleteAccountSchema, { password: deletePassword });
-    if (errors) return setDeleteError(errors.password);
-
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ password: deletePassword }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to delete account.');
-
-      handleLogout();
-    } catch (err) {
-      toast.error(err.message);
+  const { errors, setErrors, handleSubmit } = useProfileForm(
+    'bio',
+    changeBioSchema,
+    'Bio updated successfully!',
+    (payload) => {
+      setUser((prev) => ({ ...prev, bio: payload.newBio }));
     }
+  );
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSubmit({ newBio });
   };
 
   return (
-    <>
-      <div className="card danger-zone">
-        <div className="danger-icon-wrapper">
-          <i className="fas fa-exclamation-triangle"></i>
+    <form onSubmit={onSubmit} className="settings-form" noValidate>
+      <div className="form-group">
+        <label>Bio</label>
+        <div className="input-with-button align-top">
+          <textarea
+            className={`form-control bio ${errors.newBio ? 'input-error' : ''}`}
+            placeholder="Tell others a little about yourself..."
+            value={newBio}
+            onChange={(e) => { setNewBio(e.target.value); setErrors(p => ({ ...p, newBio: '' })); }}
+          />
+          <button type="submit" className="btn btn-primary" title="Save">Save</button>
         </div>
-        <div className="danger-text">
-          <h3 className="profile-danger-title">Danger Zone</h3>
-          <p className="profile-danger-desc">
-            Permanently remove your account and all related data. This action is irreversible.
-          </p>
-        </div>
-        <button
-          className="btn btn-danger btn-full"
-          title="Delete Account"
-          onClick={() => { setIsDeleteModalOpen(true); setDeletePassword(''); setDeleteError(''); }}
-        >
-          Delete Account
-        </button>
+        {errors.newBio && <span className="field-error">{errors.newBio}</span>}
       </div>
-
-      {isDeleteModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-          <div className="modal-content danger-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="profile-danger-title">Confirm Deletion</h2>
-              <button className="btn-icon" onClick={() => setIsDeleteModalOpen(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <form onSubmit={confirmDeleteAccount} noValidate>
-              <div className="modal-body">
-                <p className="profile-modal-desc">
-                  This action is permanent. All your projects, tasks, and data will be completely wiped from our servers. <strong>You cannot undo this.</strong>
-                </p>
-                <div className="form-group">
-                  <label>Confirm your password</label>
-                  <input
-                    className={`form-control ${deleteError ? 'input-error' : ''}`}
-                    type="password"
-                    placeholder="Enter your password to confirm"
-                    value={deletePassword}
-                    onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(''); }}
-                    autoFocus
-                  />
-                  {deleteError && <span className="field-error">{deleteError}</span>}
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)} title="Close">
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-danger" title="Delete">
-                  Permanently Delete
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+    </form>
   );
 }

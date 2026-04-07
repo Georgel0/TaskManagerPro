@@ -46,6 +46,10 @@ hr {
   margin: 20px 0;
 }
 
+textarea {
+  resize: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }

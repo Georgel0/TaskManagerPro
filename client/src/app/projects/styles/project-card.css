@@ -1,7 +1,7 @@
 .project-card {
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
-  width: 100%; 
+  width: 100%;
   background-color: var(--card-background);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -16,7 +16,7 @@
   box-shadow: var(--shadow-md);
 }
 
-.project-card > div:first-child {
+.project-card-header {
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -24,34 +24,33 @@
   padding: 15px 20px;
 }
 
-.project-card > div:first-child > div:first-child {
+.project-card-title-group {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.project-card > div:first-child h3 {
+.project-card-title-group h3 {
   font-size: 1.1rem;
   margin: 0;
 }
 
-.project-card > div:first-child > div:last-child {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.project-card > div:last-child {
+.project-card-body {
   padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.project-card > div:last-child > p {
+.project-card-description {
   color: var(--sec-text-color);
   font-size: 0.95rem;
-  margin-bottom: 15px;
+  margin: 0;
+  flex: 1;
 }
 
-.project-card > div:last-child > div {
+.project-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -59,11 +58,12 @@
   gap: 8px;
 }
 
-.project-card > div:last-child > div > span:first-child {
+.project-card-date {
   font-size: 0.85rem;
+  color: var(--sec-text-color);
 }
 
-.project-card > div:last-child > div > div {
+.project-card-chips {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -92,18 +92,17 @@
 }
 
 @media (max-width: 480px) {
-  .project-card > div:first-child {
+  .project-card-header {
     padding: 12px 15px;
   }
 
-  .project-card > div:last-child > div {
+  .project-card-footer {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .project-card > div:last-child > div > div {
+  .project-card-chips {
     width: 100%;
     justify-content: space-between;
-    margin-top: 5px;
   }
 }
