@@ -482,15 +482,40 @@
 
 .bio-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;  
   margin-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
 }
 
+.bio-header .btn-icon {
+  margin-left: auto;
+}
+
+.bio-info {
+  background: none;
+  border: none;
+  color: var(--sec-text-color);
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+
+.bio-info:hover {
+  color: var(--pri-text-color);
+}
+
+.role-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; 
+}
+
+.role-tooltip {
+  margin-left: 10px;
+}
+
 .bio-header h4 {
-  margin: 0;
+  margin-right: 5px;
   font-size: 1rem;
   color: var(--pri-text-color);
 }

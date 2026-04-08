@@ -8,7 +8,8 @@ const {
   addProjectMember,
   removeProjectMember,
   transferOwnership,
-  updateRoleDescription
+  updateRoleDescription,
+  leaveProject
 } = require('../controllers/projectController');
 const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
@@ -23,14 +24,17 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getProjects);
-router.post('/', validate(createProjectSchema), createProject);
-router.put('/:id', validate(updateProjectSchema), updateProject);
-router.delete('/:id', deleteProject);
-
 router.get('/:id/members', getProjectMembers);
+
+router.post('/', validate(createProjectSchema), createProject);
 router.post('/:id/members', validate(addMemberSchema), addProjectMember);
-router.delete('/:id/members/:memberId', removeProjectMember);
+
+router.put('/:id', validate(updateProjectSchema), updateProject);
 router.put('/:id/members/:memberId/transfer', transferOwnership);
 router.put('/:id/members/:memberId/role', updateRoleDescription);
+
+router.delete('/:id', deleteProject);
+router.delete('/:id/leave', leaveProject);
+router.delete('/:id/members/:memberId', removeProjectMember);
 
 module.exports = router;

@@ -7,13 +7,14 @@ import { MemberDetailModal } from './MemberDetailModal';
 
 export function MembersModal({
   project, members, loading, isOwner, currentUserId,
-  onAddMember, onRemoveMember, onClose,
+  onAddMember, onRemoveMember, onClose, onLeave,
   onTransferOwnership, onUpdateRoleDescription,
 }) {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [emailError, setEmailError] = useState(null);
   const [transferConfirmId, setTransferConfirmId] = useState(null);
+  const [leaveConfirm, setLeaveConfirm] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const router = useRouter();
 
@@ -116,6 +117,23 @@ export function MembersModal({
                             onRemove={onRemoveMember}
                             onTransferClick={(id) => setTransferConfirmId(id)}
                           />
+                        )
+                      )}
+                      {!isOwner && currentUserId === member.id && (
+                        leaveConfirm ? (
+                          <div className="transfer-confirm">
+                            <span className="transfer-confirm-text">Leave project?</span>
+                            <button className="btn btn-danger btn-sm" onClick={onLeave}>Yes</button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => setLeaveConfirm(false)}>No</button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => setLeaveConfirm(true)}
+                            title="Leave Project"
+                          >
+                            <i className="fas fa-right-from-bracket"></i>
+                          </button>
                         )
                       )}
                     </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getInitials } from '@/lib';
+import { Tooltip } from 'react-tooltip';
 
 export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onUpdateRoleDescription }) {
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -65,7 +66,62 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
 
           <div className="member-detail-bio">
             <div className="bio-header">
-              <h4>Role &amp; Responsibilities</h4>
+              <h4>Role &amp; Responsibilities </h4>
+              <button data-tooltip-id="role-tooltip" className="bio-info">
+                <i className="fa-solid fa-circle-info"></i>
+              </button>
+
+              <Tooltip id="role-tooltip">
+                <div className="role-tooltip">
+                  {member.id === currentUserId ? (
+                    <>
+                      <span>{isOwner ? 'What to write as a owner:' : 'What to write as a member:'}</span>
+                      <ul>
+                        {isOwner ? (
+                          <>
+                            <li>Describe the project goals and vision</li>
+                            <li>Outline your responsibilities and decisions you oversee</li>
+                            <li>Mention the team you manage and key stakeholders</li>
+                            <li>Include your availability and preferred communication style</li>
+                          </>
+                        ) : (
+                          <>
+                            <li>Describe your specific role and area of focus</li>
+                            <li>List the main tasks or features you're working on</li>
+                            <li>Mention any skills or tools you're responsible for</li>
+                            <li>Include how you collaborate with the rest of the team</li>
+                          </>
+                        )}
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      <span>
+                        {member.role === 'owner' ? 
+                          `${member.name}'s responsibilities as the owner` : `${member.name}' responsibilities as a member`}
+                      </span>
+                      <ul>
+                        {member.role === 'owner' ? (
+                          <>
+                            <li>Sets the project goals and overall direction</li>
+                            <li>Makes key decisions and oversees progress</li>
+                            <li>Manages the team and coordinates with stakeholders</li>
+                            <li>Ensures the project stays on track and on schedule</li>
+                          </>
+                        ) : (
+                          <>
+                            <li>Works on assigned tasks and features</li>
+                            <li>Collaborates with the team and reports progress</li>
+                            <li>Participates in reviews and standups</li>
+                            <li>Contributes to the project within their area of expertise</li>
+                          </>
+                        )}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </Tooltip>
+
               {canEditBio && !isEditingDesc && (
                 <button className="btn-icon" onClick={() => setIsEditingDesc(true)} title="Edit">
                   <i className="fas fa-pen"></i>

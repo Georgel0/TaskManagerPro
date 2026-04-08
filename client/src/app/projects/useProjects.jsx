@@ -301,6 +301,28 @@ export function useProjects() {
     }
   };
 
+  const handleProjectLeave = async () => {
+    try {
+      const res = await fetch(`${API}/projects/${selectedProject.id}/leave`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to leave.');
+      }
+
+      setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
+      setIsMembersModalOpen(false);
+      setSelectedProject(null);
+
+      toast.success(`You left "${selectedProject.name}".`);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   const handleUpdateRoleDescription = async (memberId, description) => {
     if (!selectedProject?.id) return;
 
@@ -372,6 +394,7 @@ export function useProjects() {
     handleRemoveMember,
     handleTransferOwnership,
     handleUpdateRoleDescription,
+    handleProjectLeave,
     openTasks,
     openEdit,
     openDelete,
