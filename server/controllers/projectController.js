@@ -24,17 +24,17 @@ const getProjects = async (req, res) => {
   try {
     const projects = await pool.query(
       `SELECT p.*,
-       COUNT(DISTINCT t.id)::int AS task_count,
-       COUNT(DISTINCT pm.user_id)::int + 1 AS member_count
-       FROM projects p
-       LEFT JOIN project_members pm ON p.id = pm.project_id
-       LEFT JOIN tasks t ON t.project_id = p.id
-       WHERE p.owner_id = $1 OR EXISTS (
-         SELECT 1 FROM project_members pm_access 
-         WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
-       )
-       GROUP BY p.id
-       ORDER BY p.created_at DESC`,
+        COUNT(DISTINCT t.id)::int AS task_count,
+        COUNT(DISTINCT CASE WHEN pm.user_id != p.owner_id THEN pm.user_id END)::int + 1 AS member_count
+        FROM projects p
+        LEFT JOIN project_members pm ON p.id = pm.project_id
+        LEFT JOIN tasks t ON t.project_id = p.id
+        WHERE p.owner_id = $1 OR EXISTS (
+          SELECT 1 FROM project_members pm_access 
+          WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+        )
+        GROUP BY p.id
+        ORDER BY p.created_at DESC`,
       [userId]
     );
 
@@ -112,35 +112,36 @@ const getProjectMembers = async (req, res) => {
 
     const result = await pool.query(
       `SELECT
-         u.id, u.name, u.email, u.avatar,
-         'owner' AS role,
-         p.owner_role_description AS role_description,
-         COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
-         COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
-         COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
-       FROM projects p
-       JOIN users u ON u.id = p.owner_id
-       LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
-       WHERE p.id = $1
-       GROUP BY u.id, u.name, u.email, u.avatar
+        u.id, u.name, u.email, u.avatar,
+        'owner' AS role,
+        pm_owner.role_description,
+        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
+      FROM projects p
+      JOIN users u ON u.id = p.owner_id
+      LEFT JOIN project_members pm_owner ON pm_owner.project_id = p.id AND pm_owner.user_id = p.owner_id
+      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
+      WHERE p.id = $1
+      GROUP BY u.id, u.name, u.email, u.avatar
 
-       UNION
+      UNION
 
-       SELECT
-         u.id, u.name, u.email, u.avatar,
-         'member' AS role,
-         pm.role_description,
-         COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
-         COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
-         COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
-       FROM project_members pm
-       JOIN users u ON u.id = pm.user_id
-       LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
-       WHERE pm.project_id = $1
-       GROUP BY u.id, u.name, u.email, u.avatar, pm.role_description`,
+      SELECT
+        u.id, u.name, u.email, u.avatar,
+        'member' AS role,
+        pm.role_description,
+        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
+      FROM project_members pm
+      JOIN users u ON u.id = pm.user_id
+      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
+      WHERE pm.project_id = $1
+      AND pm.user_id != (SELECT owner_id FROM projects WHERE id = $1)
+      GROUP BY u.id, u.name, u.email, u.avatar, pm.role_description`,
       [id]
     );
-
     res.status(200).json(result.rows);
   } catch (err) {
     console.error(err);
@@ -313,23 +314,12 @@ const updateRoleDescription = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to edit this role.' });
     }
 
-    const isOwner = projectResult.rows[0].owner_id === parseInt(memberId);
-
-    if (isOwner) {
-      await pool.query(
-        'UPDATE project_members SET owner_role_description = $1 WHERE id = $2 AND user_id = $3',
-        [role_description, projectId, memberId]
-      );
-    } else {
-      await pool.query(
-        'UPDATE project_members SET role_description = $1 WHERE project_id = $2 AND user_id = $3',
-        [role_description, projectId, memberId]
-      );
-    }
-
     await pool.query(
-      'UPDATE project_members SET role_description = $1 WHERE project_id = $2 AND user_id = $3',
-      [role_description, projectId, memberId]
+      `INSERT INTO project_members (project_id, user_id, role_description)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (project_id, user_id)
+       DO UPDATE SET role_description = EXCLUDED.role_description`,
+      [projectId, memberId, role_description]
     );
 
     res.status(200).json({ message: 'Role description updated successfully.' });

@@ -125,6 +125,7 @@ export default function Projects() {
           members={projectMembers}
           loading={loadingMembers}
           isOwner={selectedProject.owner_id === user.id}
+          currentUserId={user.id}
           onAddMember={handleAddMember}
           onRemoveMember={handleRemoveMember}
           onTransferOwnership={handleTransferOwnership}

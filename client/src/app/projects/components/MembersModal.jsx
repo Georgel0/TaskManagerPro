@@ -156,15 +156,18 @@ export function MembersModal({
         </div>
       </div>
 
-      {selectedMember && (
-        <MemberDetailModal
-          member={selectedMember}
-          isOwner={isOwner}
-          currentUserId={currentUserId}
-          onClose={() => setSelectedMember(null)}
-          onUpdateRoleDescription={onUpdateRoleDescription}
-        />
-      )}
+      {selectedMember && (() => {
+        const liveMember = members.find((m) => m.id === selectedMember.id) ?? selectedMember;
+        return (
+          <MemberDetailModal
+            member={liveMember}
+            isOwner={isOwner}
+            currentUserId={currentUserId}
+            onClose={() => setSelectedMember(null)}
+            onUpdateRoleDescription={onUpdateRoleDescription}
+          />
+        );
+      })()}
     </>
   );
 }

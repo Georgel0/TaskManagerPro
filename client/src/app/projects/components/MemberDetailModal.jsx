@@ -11,7 +11,6 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
   const handleSave = async () => {
     if (onUpdateRoleDescription) {
       await onUpdateRoleDescription(member.id, editDescription);
-      member.role_description = editDescription;
     }
     setIsEditingDesc(false);
   };
