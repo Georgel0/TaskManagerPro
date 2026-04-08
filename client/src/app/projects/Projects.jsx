@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './useProjects';
-import { ProjectCard, ProjectFormModal, DeleteProjectModal, TasksModal, MembersModal } from './components';
+import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal } from './components';
 import './styles/project-card.css';
 import './styles/project-modals.css'
 import './styles/projects-layout.css'
@@ -24,7 +24,8 @@ export default function Projects() {
     handleCreate, handleEdit, handleDelete,
     handleAddMember, handleRemoveMember,
     openTasks, openEdit, openDelete,
-    openMembers, handleTransferOwnership
+    openMembers, handleTransferOwnership,
+    handleUpdateRoleDescription
   } = useProjects();
 
   if (loading || !user) return (
@@ -128,6 +129,7 @@ export default function Projects() {
           onRemoveMember={handleRemoveMember}
           onTransferOwnership={handleTransferOwnership}
           onClose={() => setIsMembersModalOpen(false)}
+          onUpdateRoleDescription={handleUpdateRoleDescription}
         />
       )}
     </div>

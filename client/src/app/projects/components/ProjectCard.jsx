@@ -1,3 +1,5 @@
+import { formatDate } from "@/lib";
+
 export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
@@ -14,7 +16,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
         </div>
 
         {isOwner && (
-          <div className="action-buttons">
+          <div className="project-action-buttons">
             <button
               className="btn-icon edit-btn"
               title="Edit Project"
@@ -38,9 +40,9 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
           {project.description || 'No description provided.'}
         </p>
         <div className="project-card-footer">
-          <span className="project-card-date">
-            <i className="fas fa-calendar-alt"></i>{' '}
-            {new Date(project.created_at).toLocaleDateString()}
+          <span className="project-card-date" title={`Created at: ${formatDate(project.created_at)}`}>
+            <i className="fas fa-calendar-plus"></i>{' '}
+            {formatDate(project.created_at)}
           </span>
           <div className="project-card-chips">
             <button

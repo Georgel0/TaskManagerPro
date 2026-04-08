@@ -1,5 +1,50 @@
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+export function MemberActionMenu({ member, onRemove, onTransferClick }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  return (
+    <div className="action-dropdown-wrapper" ref={ref}>
+      <button
+        className="btn-icon"
+        title="More actions"
+        onClick={(e) => { e.stopPropagation(); setOpen((p) => !p); }}
+      >
+        <i className="fas fa-ellipsis-v"></i>
+      </button>
+
+      {open && (
+        <div className="action-dropdown-menu">
+          <button
+            className="dropdown-item"
+            title="Make Owner"
+            onClick={(e) => { e.stopPropagation(); onTransferClick(member.id); setOpen(false); }}
+          >
+            <i className="fas fa-crown"></i>
+          </button>
+          <button
+            className="dropdown-item text-danger"
+            title="Remove Member"
+            onClick={(e) => { e.stopPropagation(); onRemove(member.id); setOpen(false); }}
+          >
+            <i className="fas fa-user-minus"></i>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function TasksModal({ project, tasks, loading, onClose }) {
   const router = useRouter();
@@ -61,6 +106,38 @@ export function TasksModal({ project, tasks, loading, onClose }) {
 
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose} title='Close'>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DeleteProjectModal({ project, onConfirm, onClose, isSubmitting }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="text-error">Confirm Deletion</h2>
+        </div>
+
+        <div className="modal-body">
+          <p>
+            Are you sure you want to delete <strong>{project?.name}</strong>?
+            This action is permanent and all tasks will be removed.
+          </p>
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Deleting...' : 'Delete'}
+          </button>
         </div>
       </div>
     </div>

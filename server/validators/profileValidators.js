@@ -27,12 +27,13 @@ const changeAvatarSchema = z.object({
     .url('Please provide a valid URL.'),
 });
 
-const changeBioSchema = {
-  newBio: (value) => {
-    if (value && value.length > 500) return "Bio must be under 500 characters.";
-    return null;
-  }
-};
+const changeBioSchema = z.object({
+  newBio: z
+    .string()
+    .trim()
+    .max(500, 'Bio must be under 500 characters.')
+    .optional(),
+});
 
 const changePasswordSchema = z
   .object({

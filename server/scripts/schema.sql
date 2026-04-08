@@ -1,10 +1,13 @@
--- 1. Users Table
+-- 1. Users Table (Updated with reset tokens and bio)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     avatar TEXT,
+    bio TEXT,
+    reset_token TEXT,
+    reset_token_expires TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -17,10 +20,12 @@ CREATE TABLE projects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Project Members (For team collaboration)
+-- 3. Project Members (Updated with role descriptions)
 CREATE TABLE project_members (
     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_description TEXT,
+    owner_role_description TEXT,
     PRIMARY KEY (project_id, user_id)
 );
 

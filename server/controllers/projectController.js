@@ -29,7 +29,10 @@ const getProjects = async (req, res) => {
        FROM projects p
        LEFT JOIN project_members pm ON p.id = pm.project_id
        LEFT JOIN tasks t ON t.project_id = p.id
-       WHERE p.owner_id = $1 OR pm.user_id = $1
+       WHERE p.owner_id = $1 OR EXISTS (
+         SELECT 1 FROM project_members pm_access 
+         WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+       )
        GROUP BY p.id
        ORDER BY p.created_at DESC`,
       [userId]
@@ -102,7 +105,7 @@ const getProjectMembers = async (req, res) => {
        WHERE p.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
       [id, userId]
     );
-    
+
     if (access.rows.length === 0) {
       return res.status(403).json({ error: 'Not authorized.' });
     }
@@ -111,6 +114,7 @@ const getProjectMembers = async (req, res) => {
       `SELECT
          u.id, u.name, u.email, u.avatar,
          'owner' AS role,
+         p.owner_role_description AS role_description,
          COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
          COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
          COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
@@ -125,6 +129,7 @@ const getProjectMembers = async (req, res) => {
        SELECT
          u.id, u.name, u.email, u.avatar,
          'member' AS role,
+         pm.role_description,
          COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
          COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
          COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
@@ -132,9 +137,7 @@ const getProjectMembers = async (req, res) => {
        JOIN users u ON u.id = pm.user_id
        LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
        WHERE pm.project_id = $1
-       GROUP BY u.id, u.name, u.email, u.avatar
-
-       ORDER BY role DESC, name ASC`,
+       GROUP BY u.id, u.name, u.email, u.avatar, pm.role_description`,
       [id]
     );
 
@@ -175,13 +178,22 @@ const addProjectMember = async (req, res) => {
       return res.status(400).json({ error: 'You are already the project owner.' });
     }
 
+    const isAlreadyMember = await pool.query(
+      'SELECT 1 FROM project_members WHERE project_id = $1 AND user_id = $2',
+      [id, member.id]
+    );
+
+    if (isAlreadyMember.rows.length > 0) {
+      return res.status(400).json({ error: 'User is already a member of this project.' });
+    }
+
     await pool.query(
       'INSERT INTO project_members (project_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
       [id, member.id]
     );
 
     await createNotification(
-      member.id, 
+      member.id,
       `You have been added to the project: ${project.rows[0].name}`
     );
 
@@ -212,7 +224,7 @@ const removeProjectMember = async (req, res) => {
     );
 
     await createNotification(
-      memberId, 
+      memberId,
       `You have been removed from the project: ${project.rows[0].name}`
     );
 
@@ -282,6 +294,51 @@ const transferOwnership = async (req, res) => {
   }
 };
 
+const updateRoleDescription = async (req, res) => {
+  const { id: projectId, memberId } = req.params;
+  const { role_description } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const projectResult = await pool.query(
+      'SELECT owner_id FROM projects WHERE id = $1',
+      [projectId]
+    );
+
+    if (projectResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Project not found.' });
+    }
+
+    if (projectResult.rows[0].owner_id !== userId && userId !== parseInt(memberId)) {
+      return res.status(403).json({ error: 'Not authorized to edit this role.' });
+    }
+
+    const isOwner = projectResult.rows[0].owner_id === parseInt(memberId);
+
+    if (isOwner) {
+      await pool.query(
+        'UPDATE project_members SET owner_role_description = $1 WHERE id = $2 AND user_id = $3',
+        [role_description, projectId, memberId]
+      );
+    } else {
+      await pool.query(
+        'UPDATE project_members SET role_description = $1 WHERE project_id = $2 AND user_id = $3',
+        [role_description, projectId, memberId]
+      );
+    }
+
+    await pool.query(
+      'UPDATE project_members SET role_description = $1 WHERE project_id = $2 AND user_id = $3',
+      [role_description, projectId, memberId]
+    );
+
+    res.status(200).json({ message: 'Role description updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while updating role description.' });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
@@ -290,5 +347,6 @@ module.exports = {
   getProjectMembers,
   addProjectMember,
   removeProjectMember,
-  transferOwnership
+  transferOwnership,
+  updateRoleDescription
 };

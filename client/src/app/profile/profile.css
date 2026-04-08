@@ -184,18 +184,17 @@
 
 .form-control.bio {
   font-size: 0.88rem;
-  min-height: 36px;
+  height: 37px;
   max-height: 120px;
   overflow-y: auto;
   line-height: 1.5;
   padding-top: 7px;
 }
 
-
 .input-with-button {
   display: flex;
   gap: 16px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 .btn-full { width: 100%; }

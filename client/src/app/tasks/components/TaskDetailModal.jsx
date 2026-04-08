@@ -177,7 +177,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
                               <button
                                 className="btn-icon delete-btn"
                                 title="Delete comment"
-                                onClick={() => { deleteComment(c.id); onCommentDeleted()}}
+                                onClick={() => { deleteComment(c.id); onCommentDeleted() }}
                               >
                                 <i className="fas fa-trash"></i>
                               </button>

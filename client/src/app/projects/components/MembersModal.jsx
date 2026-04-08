@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { addMemberSchema, validate } from '@/lib/validators';
 import { getInitials } from '@/lib';
-import { MemberActionMenu } from './MemberActionMenu';
+import { MemberActionMenu } from './Modals';
 import { MemberDetailModal } from './MemberDetailModal';
 
 export function MembersModal({

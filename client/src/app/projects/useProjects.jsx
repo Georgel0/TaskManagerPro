@@ -33,7 +33,10 @@ export function useProjects() {
 
   const fetchProjects = async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch(`${API}/projects`, {
@@ -298,6 +301,39 @@ export function useProjects() {
     }
   };
 
+  const handleUpdateRoleDescription = async (memberId, description) => {
+    if (!selectedProject?.id) return;
+
+    try {
+      const res = await fetch(
+        `${API}/projects/${selectedProject.id}/members/${memberId}/role`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({ role_description: description }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update role description');
+      }
+
+      setProjectMembers((prev) =>
+        prev.map((m) =>
+          m.id === memberId ? { ...m, role_description: description } : m
+        )
+      );
+
+      toast.success('Role description updated!');
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   return {
     // Data
     projects,
@@ -335,6 +371,7 @@ export function useProjects() {
     handleAddMember,
     handleRemoveMember,
     handleTransferOwnership,
+    handleUpdateRoleDescription,
     openTasks,
     openEdit,
     openDelete,

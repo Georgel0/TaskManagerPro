@@ -23,7 +23,7 @@ router.put('/profile/username', protect, validate(changeUsernameSchema), changeU
 router.put('/profile/email', protect, validate(changeEmailSchema), changeEmail);
 router.put('/profile/avatar', protect, validate(changeAvatarSchema), changeAvatar);
 router.put('/profile/password', protect, validate(changePasswordSchema), changePassword);
-router.put('./profile/bio', protect, validate(changeBioSchema), changeAvatar);
+router.put('/profile/bio', protect, validate(changeBioSchema), changeBio);
 
 router.delete('/profile', protect, validate(deleteAccountSchema), deleteAccount);
 

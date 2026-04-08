@@ -29,7 +29,6 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
         </div>
 
         <div className="modal-body member-detail-body">
-          {/* Header */}
           <div className="member-detail-header">
             <div className="member-avatar-large">
               {member.avatar

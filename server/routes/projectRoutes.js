@@ -7,7 +7,8 @@ const {
   getProjectMembers,
   addProjectMember,
   removeProjectMember,
-  transferOwnership
+  transferOwnership,
+  updateRoleDescription
 } = require('../controllers/projectController');
 const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
@@ -30,5 +31,6 @@ router.get('/:id/members', getProjectMembers);
 router.post('/:id/members', validate(addMemberSchema), addProjectMember);
 router.delete('/:id/members/:memberId', removeProjectMember);
 router.put('/:id/members/:memberId/transfer', transferOwnership);
+router.put('/:id/members/:memberId/role', updateRoleDescription);
 
 module.exports = router;

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from 'react';
-import { changeUsernameSchema, changeEmailSchema, changeAvatarSchema,
-  changePasswordSchema, changeBioSchema} from '@/lib/validators';
+import {
+  changeUsernameSchema, changeEmailSchema, changeAvatarSchema,
+  changePasswordSchema, changeBioSchema
+} from '@/lib/validators';
+import { autoResize } from '@/lib';
 
 export function UsernameForm({ user, setUser, useProfileForm }) {
   const [newUsername, setNewUsername] = useState('');
@@ -233,16 +236,25 @@ export function BioForm({ user, setUser, useProfileForm }) {
     handleSubmit({ newBio });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
     <form onSubmit={onSubmit} className="settings-form" noValidate>
       <div className="form-group">
         <label>Bio</label>
-        <div className="input-with-button align-top">
+        <div className="input-with-button">
           <textarea
             className={`form-control bio ${errors.newBio ? 'input-error' : ''}`}
             placeholder="Tell others a little about yourself..."
             value={newBio}
             onChange={(e) => { setNewBio(e.target.value); setErrors(p => ({ ...p, newBio: '' })); }}
+            onInput={autoResize}
+            onKeyDown={handleKeyDown}
           />
           <button type="submit" className="btn btn-primary" title="Save">Save</button>
         </div>
