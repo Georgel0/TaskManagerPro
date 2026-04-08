@@ -112,9 +112,20 @@ export function useTasks() {
 
       const updatedTask = await res.json();
 
-      // Merge the old task (t) with the updatedTask so we don't lose the names
-      setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? { ...t, ...updatedTask } : t)));
-
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id
+            ? {
+              ...t,
+              ...updatedTask,
+              assigned_user_name: taskData.assigned_user_id
+                ? taskData.assigned_user_name
+                : null,
+            }
+            : t
+        )
+      );
+      
       toast.success('Task updated successfully!');
       return true;
     } catch (err) {

@@ -137,6 +137,7 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Describe this member's role..."
+                  autoFocus
                 />
                 <div className="bio-edit-actions">
                   <button

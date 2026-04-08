@@ -90,6 +90,11 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
       return;
     }
 
+    const selectedMember = projectMembers.find(
+      (m) => String(m.id) === String(payload.assigned_user_id)
+    );
+    payload.assigned_user_name = selectedMember?.name ?? null;
+
     setFieldErrors({});
     onSubmit(payload);
   };
