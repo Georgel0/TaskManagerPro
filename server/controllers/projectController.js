@@ -123,7 +123,7 @@ const getProjectMembers = async (req, res) => {
       LEFT JOIN project_members pm_owner ON pm_owner.project_id = p.id AND pm_owner.user_id = p.owner_id
       LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
       WHERE p.id = $1
-      GROUP BY u.id, u.name, u.email, u.avatar
+      GROUP BY u.id, u.name, u.email, u.avatar, pm_owner.role_description
 
       UNION
 
@@ -142,6 +142,7 @@ const getProjectMembers = async (req, res) => {
       GROUP BY u.id, u.name, u.email, u.avatar, pm.role_description`,
       [id]
     );
+
     res.status(200).json(result.rows);
   } catch (err) {
     console.error(err);
