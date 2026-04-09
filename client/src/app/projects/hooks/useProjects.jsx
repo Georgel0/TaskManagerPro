@@ -20,6 +20,7 @@ export function useProjects() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
 
   const [projectTasks, setProjectTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
@@ -74,7 +75,7 @@ export function useProjects() {
       ]);
       setIsCreateModalOpen(false);
       setCreateForm({ name: '', description: '' });
-      
+
       toast.success('Project created successfully!');
     } catch (err) {
       toast.error(err.message);
@@ -146,6 +147,11 @@ export function useProjects() {
     setIsDeleteModalOpen(true);
   };
 
+  const openAnnouncements = (project) => {
+    setSelectedProject(project);
+    setIsAnnouncementsModalOpen(true);
+  };
+
   const openTasks = async (project) => {
     setSelectedProject(project);
     setIsTasksModalOpen(true);
@@ -180,8 +186,10 @@ export function useProjects() {
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
+    isAnnouncementsModalOpen,
+    setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    openEdit, openDelete, openTasks, openMembers,
+    openEdit, openDelete, openTasks, openMembers, openAnnouncements
   };
 }

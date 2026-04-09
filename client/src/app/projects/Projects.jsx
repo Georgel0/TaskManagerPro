@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
-import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal } from './components';
+import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal, AnnouncementsModal } from './components';
 import './styles/project-members.css';
 import './styles/project-modals.css';
 import './styles/projects-layout.css';
@@ -23,9 +23,10 @@ export default function Projects() {
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
+    isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    openEdit, openDelete, openTasks, openMembers,
+    openEdit, openDelete, openTasks, openMembers, openAnnouncements
   } = useProjects();
 
   const {
@@ -85,6 +86,7 @@ export default function Projects() {
               onDelete={openDelete}
               onMembers={openMembers}
               onLeave={handleProjectLeave}
+              onAnnouncements={openAnnouncements}
             />
           ))}
         </div>
@@ -142,6 +144,14 @@ export default function Projects() {
           onTransferOwnership={handleTransferOwnership}
           onClose={() => setIsMembersModalOpen(false)}
           onUpdateRoleDescription={handleUpdateRoleDescription}
+        />
+      )}
+
+      {isAnnouncementsModalOpen && selectedProject && (
+        <AnnouncementsModal
+          project={selectedProject}
+          isOwner={selectedProject.owner_id === user.id}
+          onClose={() => setIsAnnouncementsModalOpen(false)}
         />
       )}
     </div>

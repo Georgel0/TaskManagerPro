@@ -1,7 +1,7 @@
 import { formatDate } from "@/lib";
 import { ProjectActionMenu } from "./Modals";
 
-export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave }) {
+export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
   const memberCount = project.member_count ?? 1;
@@ -23,6 +23,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             onEdit={onEdit}
             onDelete={onDelete}
             onLeave={onLeave}
+            onAnnouncements={onAnnouncements}
           />
         </div>
       </div>

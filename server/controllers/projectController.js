@@ -425,6 +425,112 @@ const leaveProject = async (req, res) => {
   }
 };
 
+const getAnnouncements = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // Check access
+    const access = await pool.query(
+      `SELECT 1 FROM projects p
+       LEFT JOIN project_members pm ON p.id = pm.project_id
+       WHERE p.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
+      [id, userId]
+    );
+
+    if (access.rows.length === 0) {
+      return res.status(403).json({ error: 'Not authorized to view announcements.' });
+    }
+
+    const result = await pool.query(
+      `SELECT a.*, 
+              u.name as author_name, u.avatar as author_avatar,
+              EXISTS(SELECT 1 FROM announcement_acknowledgments ack WHERE ack.announcement_id = a.id AND ack.user_id = $2) as is_acknowledged,
+              (SELECT COUNT(*)::int FROM announcement_acknowledgments ack WHERE ack.announcement_id = a.id) as ack_count,
+              (SELECT COUNT(DISTINCT user_id)::int FROM project_members pm WHERE pm.project_id = $1) + 1 as total_members
+       FROM project_announcements a
+       LEFT JOIN users u ON u.id = a.author_id
+       WHERE a.project_id = $1
+       ORDER BY a.is_pinned DESC, a.created_at DESC`,
+      [id, userId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while fetching announcements.' });
+  }
+};
+
+const createAnnouncement = async (req, res) => {
+  const { id: projectId } = req.params;
+  const { title, content, type, isPinned } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const project = await pool.query('SELECT owner_id, name FROM projects WHERE id = $1', [projectId]);
+    
+    if (project.rows.length === 0 || project.rows[0].owner_id !== userId) {
+      return res.status(403).json({ error: 'Only the project owner can make announcements.' });
+    }
+
+    // If this is pinned, unpin others to maintain a single pinned post
+    if (isPinned) {
+      await pool.query('UPDATE project_announcements SET is_pinned = false WHERE project_id = $1', [projectId]);
+    }
+
+    const result = await pool.query(
+      `INSERT INTO project_announcements (project_id, author_id, title, content, type, is_pinned)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [projectId, userId, title, content, type, isPinned]
+    );
+
+    const membersResult = await pool.query(
+      'SELECT user_id FROM project_members WHERE project_id = $1', [projectId]
+    );
+
+    await Promise.all(
+      membersResult.rows.map((m) =>
+        createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
+      )
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while creating announcement.' });
+  }
+};
+
+const toggleAcknowledgment = async (req, res) => {
+  const { id: projectId, announcementId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const isAcknowledged = await pool.query(
+      'SELECT 1 FROM announcement_acknowledgments WHERE announcement_id = $1 AND user_id = $2',
+      [announcementId, userId]
+    );
+
+    if (isAcknowledged.rows.length > 0) {
+      await pool.query(
+        'DELETE FROM announcement_acknowledgments WHERE announcement_id = $1 AND user_id = $2',
+        [announcementId, userId]
+      );
+      return res.status(200).json({ acknowledged: false });
+    } else {
+      await pool.query(
+        'INSERT INTO announcement_acknowledgments (announcement_id, user_id) VALUES ($1, $2)',
+        [announcementId, userId]
+      );
+      return res.status(200).json({ acknowledged: true });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while toggling acknowledgment.' });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
@@ -435,5 +541,8 @@ module.exports = {
   removeProjectMember,
   transferOwnership,
   updateRoleDescription,
-  leaveProject
+  leaveProject,
+  getAnnouncements,
+  createAnnouncement,
+  toggleAcknowledgment
 };
