@@ -10,6 +10,9 @@ const taskRoutes = require('./routes/taskRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 
+const { runDeadlineNotifier } = require('./jobs/deadlineNotifier');
+runDeadlineNotifier();
+
 const app = express();
 
 app.use(cors({

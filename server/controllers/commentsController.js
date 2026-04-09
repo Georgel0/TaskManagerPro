@@ -14,14 +14,34 @@ const createComment = async (req, res) => {
       [task_id, userId, comment]
     );
 
-    const taskResult = await pool.query('SELECT title, assigned_user_id FROM tasks WHERE id = $1', [task_id]);
-    const task = taskResult.rows[0];
+    const taskResult = await pool.query(
+      `SELECT t.title, t.assigned_user_id, p.owner_id 
+       FROM tasks t
+       JOIN projects p ON p.id = t.project_id 
+       WHERE t.id = $1`,
+      [task_id]
+    );
 
-    if (task && task.assigned_user_id && task.assigned_user_id !== userId) {
-      const commenterName = newComment.rows[0].user_name;
+    const task = taskResult.rows[0];
+    const commenterName = newComment.rows[0].user_name;
+
+    const notified = new Set([userId]); // Never notify self
+
+    // Notify assigned user
+    if (task?.assigned_user_id && !notified.has(task.assigned_user_id)) {
+      notified.add(task.assigned_user_id);
       await createNotification(
         task.assigned_user_id,
-        `${commenterName} commented on your task: ${task.title}`
+        `${commenterName} commented on your task: "${task.title}"`
+      );
+    }
+
+    // Notify project owner if not already notified
+    if (task?.owner_id && !notified.has(task.owner_id)) {
+      notified.add(task.owner_id);
+      await createNotification(
+        task.owner_id,
+        `${commenterName} commented on task: "${task.title}"`
       );
     }
 

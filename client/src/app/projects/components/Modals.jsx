@@ -64,6 +64,8 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
   );
 }
 
+
+
 export function MemberActionMenu({ member, onRemove, onTransferClick }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -107,6 +109,8 @@ export function MemberActionMenu({ member, onRemove, onTransferClick }) {
     </div>
   );
 }
+
+
 
 export function TasksModal({ project, tasks, loading, onClose }) {
   const router = useRouter();
@@ -173,6 +177,8 @@ export function TasksModal({ project, tasks, loading, onClose }) {
     </div>
   );
 }
+
+
 
 export function DeleteProjectModal({ project, onConfirm, onClose, isSubmitting }) {
   return (

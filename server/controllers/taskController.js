@@ -131,7 +131,7 @@ const updateTask = async (req, res) => {
       return res.status(403).json({ error: "Not authorized to update this task or task not found." });
     }
 
-    const oldTaskResult = await pool.query('SELECT title, assigned_user_id FROM tasks WHERE id = $1', [id]);
+    const oldTaskResult = await pool.query('SELECT title, assigned_user_id, status FROM tasks WHERE id = $1', [id]);
     const oldTask = oldTaskResult.rows[0];
 
     const updatedTask = await pool.query(
@@ -147,14 +147,41 @@ const updateTask = async (req, res) => {
     );
 
     const finalTitle = title || oldTask.title;
+    const newStatus = status || oldTask.status;
     
-    if (assigned_user_id && assigned_user_id !== oldTask.assigned_user_id && assigned_user_id !== userId) {
-      // The task was assigned to someone new
-      await createNotification(assigned_user_id, `You have been assigned to the task: ${finalTitle}`);
+    // Reassigned to someone new
+    if (assigned_user_id && assigned_user_id !== oldTask.assigned_user_id) {
+      // Notify new assignee
+      if (assigned_user_id !== userId) {
+        await createNotification(assigned_user_id, `You have been assigned to the task: "${finalTitle}"`);
+      }
+
+      // Notify old assignee they were unassigned
+      if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
+        await createNotification(oldTask.assigned_user_id, `You are no longer assigned to "${finalTitle}."`);
+      }
     } else if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
-      // The task was just edited by someone else (like the project owner)
-      await createNotification(oldTask.assigned_user_id, `There was an update to your task: ${finalTitle}`);
-    }
+      // Same assignee, task was edited by somone else
+        if (newStatus === 'Done' && oldTask.status !== 'Done') {
+          //Assigneemarked it done - notify owner
+          const taskWithProject = await pool.query(
+            `SELECT p.owner_id, u.name AS user_name
+            FROM tasks t
+            JOIN projects p ON t.project_id = p.id
+            JOIN users u ON u.id = $1
+            WHERE t.id = $2`,
+            [userId, id]
+          );
+
+          const { owner_id, user_name } = taskWithProject.rows[0];
+
+          if (owner_id !== userId) {
+            await createNotification(owner_id, `${user_name} completed the task "${finalTitle}".`);
+          }
+        } else {
+          await createNotification(oldTask.assigned_user_id, `There was an update to your task: "${finalTitle}"`);
+        }
+    } 
 
     res.status(200).json(updatedTask.rows[0]);
   } catch (err) {

@@ -60,10 +60,25 @@ const updateProject = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to update this project or project not found.' });
     }
 
+    const oldName = project.rows[0].name;
+
     const updatedProject = await pool.query(
       'UPDATE projects SET name = $1, description = $2 WHERE id = $3 RETURNING *',
       [name, description, id]
     );
+
+    if (oldName !== name) {
+      const membersResult = await pool.query(
+        'SELECT user_id FROM project_members WHERE project_id = $1',
+        [id]
+      );
+
+      await Promise.all(
+        membersResult.rows.map((m) =>
+          createNotification(m.user_id, `The project "${oldName}" has been renamed to "${name}".`)
+        )
+      );
+    }
 
     res.status(200).json(updatedProject.rows[0]);
   } catch (err) {
@@ -85,6 +100,17 @@ const deleteProject = async (req, res) => {
     if (project.rows.length === 0) {
       return res.status(403).json({ error: 'Not authorized to delete this project or project not found.' });
     }
+
+    const membersResult = await pool.query(
+      'SELECT user_id FROM project_members WHERE project_id = $1',
+      [id]
+    );
+
+    await Promise.all(
+      membersResult.rows.map((m) =>
+        createNotification(m.user_id, `The project "${project.rows[0].name}" has been deleted by the owner.`)
+      )
+    );
 
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
     res.status(200).json({ message: 'Project deleted successfully.' });
@@ -302,10 +328,13 @@ const updateRoleDescription = async (req, res) => {
   const userId = req.user.id;
 
   try {
+
     const projectResult = await pool.query(
-      'SELECT owner_id FROM projects WHERE id = $1',
+      'SELECT owner_id, name FROM projects WHERE id = $1', 
       [projectId]
     );
+
+    const { owner_id, name: projectName } = projectResult.rows[0];
 
     if (projectResult.rows.length === 0) {
       return res.status(404).json({ error: 'Project not found.' });
@@ -322,6 +351,12 @@ const updateRoleDescription = async (req, res) => {
        DO UPDATE SET role_description = EXCLUDED.role_description`,
       [projectId, memberId, role_description]
     );
+
+    if (owner_id === userId && userId !== parseInt(memberId)) {
+      await createNotification(parseInt(memberId),
+        `Your role in "${projectName}" has been updated.`
+      );
+    }
 
     res.status(200).json({ message: 'Role description updated successfully.' });
   } catch (err) {

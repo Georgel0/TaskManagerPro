@@ -8,6 +8,7 @@ export function NotificationsModal() {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const isFirstLoad = useRef(true);
 
   const getToken = () => localStorage.getItem('token');
   const API = process.env.NEXT_PUBLIC_API_URL;
@@ -21,34 +22,49 @@ export function NotificationsModal() {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    // Re-fetch when the user comes back to the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchNotifications = async () => {
     const token = getToken();
-
     if (!token) return;
 
     try {
       const res = await fetch(`${API}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        throw new Error('Unauthorized or Server Error');
-      }
+      if (!res.ok) throw new Error('Unauthorized or Server Error');
 
       const data = await res.json();
 
       if (Array.isArray(data)) {
         setNotifications(data);
-        const unreadCount = data.filter(n => !n.read_status).length;
-        if (unreadCount > 0) {
-          toast(`You have ${unreadCount} unread notifications.`, {
-            icon: <i className="fas fa-bell" style={{ color: 'var(--pri-text-color)' }}></i>
-          });
+
+        // Only toast on first load
+        if (isFirstLoad.current) {
+          isFirstLoad.current = false;
+          const unreadCount = data.filter((n) => !n.read_status).length;
+          if (unreadCount > 0) {
+            toast(`You have ${unreadCount} unread notifications.`, {
+              icon: <i className="fas fa-bell" style={{ color: 'var(--pri-text-color)' }}></i>,
+            });
+          }
         }
-      }      
+      }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setNotifications([]);
