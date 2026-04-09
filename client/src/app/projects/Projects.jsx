@@ -6,6 +6,7 @@ import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksM
 import './styles/project-members.css';
 import './styles/project-modals.css'
 import './styles/projects-layout.css'
+import './styles/member-detail.css';
 
 export default function Projects() {
   const { user } = useApp();
