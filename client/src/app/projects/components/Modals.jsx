@@ -2,6 +2,68 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave }) {
+  const [leaveConfirm, setLeaveConfirm] = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  return (
+    <div className="action-dropdown-wrapper" ref={ref}>
+      <button
+        className="btn-icon"
+        title="More actions"
+        onClick={(e) => { e.stopPropagation(); setOpen((p) => !p); }}
+      >
+        <i className="fas fa-ellipsis-v"></i>
+      </button>
+
+      {open && (
+        <div className="action-dropdown-menu">
+          {isOwner ? (
+            <>
+              <button
+                className="btn-icon edit-btn" title="Edit Project"
+                onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(project); }}
+              >
+                <i className="fas fa-pencil-alt"></i>
+              </button>
+              <button
+                className="btn-icon delete-btn" title="Delete Project"
+                onClick={(e) => { e.stopPropagation(); setOpen(false); onDelete(project); }}
+              >
+                <i className="fas fa-trash"></i>
+              </button>
+            </>
+          ) : (
+            leaveConfirm ? (
+              <div className="transfer-confirm" onClick={(e) => e.stopPropagation()}>
+                <span className="transfer-confirm-text">Leave project?</span>
+                <button className="btn btn-danger btn-sm" onClick={(e) => { e.stopPropagation(); onLeave(project); }}>Yes</button>
+                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.stopPropagation(); setLeaveConfirm(false); }}>No</button>
+              </div>
+            ) : (
+              <button
+                className="btn-icon btn-sm " title="Leave Project"
+                onClick={(e) => { e.stopPropagation(); setLeaveConfirm(true); }}
+              >
+                <i className="fas fa-right-from-bracket"></i>
+              </button>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MemberActionMenu({ member, onRemove, onTransferClick }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);

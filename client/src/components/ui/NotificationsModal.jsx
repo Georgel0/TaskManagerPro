@@ -48,7 +48,7 @@ export function NotificationsModal() {
             icon: <i className="fas fa-bell" style={{ color: 'var(--pri-text-color)' }}></i>
           });
         }
-      }
+      }      
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setNotifications([]);

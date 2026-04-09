@@ -75,6 +75,7 @@ export default function Projects() {
               onEdit={openEdit}
               onDelete={openDelete}
               onMembers={openMembers}
+              onLeave={handleProjectLeave}
             />
           ))}
         </div>
@@ -131,7 +132,6 @@ export default function Projects() {
           onRemoveMember={handleRemoveMember}
           onTransferOwnership={handleTransferOwnership}
           onClose={() => setIsMembersModalOpen(false)}
-          onLeave={handleProjectLeave}
           onUpdateRoleDescription={handleUpdateRoleDescription}
         />
       )}

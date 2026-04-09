@@ -301,9 +301,9 @@ export function useProjects() {
     }
   };
 
-  const handleProjectLeave = async () => {
+  const handleProjectLeave = async (projectToLeave) => {
     try {
-      const res = await fetch(`${API}/projects/${selectedProject.id}/leave`, {
+      const res = await fetch(`${API}/projects/${projectToLeave.id}/leave`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
@@ -313,11 +313,9 @@ export function useProjects() {
         throw new Error(errorData.error || 'Failed to leave.');
       }
 
-      setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
-      setIsMembersModalOpen(false);
-      setSelectedProject(null);
-
-      toast.success(`You left "${selectedProject.name}".`);
+      setProjects((prev) => prev.filter((p) => p.id !== projectToLeave.id));
+      
+      toast.success(`You left "${projectToLeave.name}".`);
     } catch (err) {
       toast.error(err.message);
     }

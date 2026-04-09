@@ -1,6 +1,7 @@
 import { formatDate } from "@/lib";
+import { ProjectActionMenu } from "./Modals";
 
-export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers }) {
+export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
   const memberCount = project.member_count ?? 1;
@@ -15,24 +16,15 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
           </span>
         </div>
 
-        {isOwner && (
-          <div className="project-action-buttons">
-            <button
-              className="btn-icon edit-btn"
-              title="Edit Project"
-              onClick={(e) => { e.stopPropagation(); onEdit(project); }}
-            >
-              <i className="fas fa-pencil-alt"></i>
-            </button>
-            <button
-              className="btn-icon delete-btn"
-              title="Delete Project"
-              onClick={(e) => { e.stopPropagation(); onDelete(project); }}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
-          </div>
-        )}
+        <div className="project-action-buttons">
+          <ProjectActionMenu
+            isOwner={isOwner}
+            project={project}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onLeave={onLeave}
+          />
+        </div>
       </div>
 
       <div className="project-card-body">
