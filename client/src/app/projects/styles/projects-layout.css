@@ -36,26 +36,128 @@
   width: 100%;
 }
 
+.project-card {
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  width: 100%;
+  background-color: var(--card-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.project-card-header {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.project-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-card-title-group h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.project-card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.project-card-description {
+  color: var(--sec-text-color);
+  font-size: 0.95rem;
+  margin: 0;
+  flex: 1;
+}
+
+.project-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-card-date {
+  font-size: 0.85rem;
+  color: var(--sec-text-color);
+}
+
+.project-card-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-task-count,
+.project-member-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sec-text-color);
+  background-color: var(--sec-background);
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.project-task-count:hover,
+.project-member-count:hover {
+  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  color: var(--accent-color);
+}
+
+@media (max-width: 480px) {
+  .project-card-header {
+    padding: 12px 15px;
+  }
+  .project-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .project-card-chips {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .project-header-actions {
+    flex-direction: column; 
+  }
+}
+
 @media (max-width: 768px) {
   .projects-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
-
   .project-header-actions {
     width: 100%;
     justify-content: space-between;
   }
-
   .project-header-actions .btn {
     flex: 1;
     justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .project-header-actions {
-    flex-direction: column; 
   }
 }

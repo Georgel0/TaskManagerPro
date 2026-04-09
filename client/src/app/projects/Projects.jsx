@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './useProjects';
 import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal } from './components';
-import './styles/project-card.css';
+import './styles/project-members.css';
 import './styles/project-modals.css'
 import './styles/projects-layout.css'
 
