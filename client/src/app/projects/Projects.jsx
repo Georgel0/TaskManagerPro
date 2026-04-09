@@ -1,33 +1,46 @@
 'use client';
 import Link from 'next/link';
 import { useApp } from '@/context';
-import { useProjects } from './useProjects';
+import { useProjects } from './hooks/useProjects';
+import { useProjectMembers } from './hooks/useProjectMembers';
 import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal } from './components';
 import './styles/project-members.css';
-import './styles/project-modals.css'
-import './styles/projects-layout.css'
+import './styles/project-modals.css';
+import './styles/projects-layout.css';
 import './styles/member-detail.css';
 
 export default function Projects() {
   const { user } = useApp();
+
   const {
-    projects, loading, error, isSubmitting,
-    projectTasks, loadingTasks,
-    projectMembers, loadingMembers,
-    selectedProject,
+    projects, setProjects,
+    loading, error, isSubmitting,
+    selectedProject, setSelectedProject,
     createForm, setCreateForm,
     editForm, setEditForm,
     isCreateModalOpen, setIsCreateModalOpen,
+    isEditModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
-    isEditModalOpen, setIsEditModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
+    projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    handleAddMember, handleRemoveMember,
-    openTasks, openEdit, openDelete,
-    openMembers, handleTransferOwnership,
-    handleUpdateRoleDescription, handleProjectLeave
+    openEdit, openDelete, openTasks, openMembers,
   } = useProjects();
+
+  const {
+    projectMembers, loadingMembers,
+    handleAddMember, handleRemoveMember,
+    handleUpdateRoleDescription,
+    handleTransferOwnership: _handleTransferOwnership,
+    handleProjectLeave: _handleProjectLeave,
+  } = useProjectMembers(selectedProject, setProjects);
+
+  const handleTransferOwnership = (memberId) =>
+    _handleTransferOwnership(memberId, setSelectedProject);
+
+  const handleProjectLeave = (project) =>
+    _handleProjectLeave(project, setSelectedProject);
 
   if (loading || !user) return (
     <div className="loading-state">
@@ -44,11 +57,7 @@ export default function Projects() {
           <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
             <i className="fas fa-plus"></i> New Project
           </button>
-          <Link
-            href='/tasks'
-            className="btn btn-secondary"
-            title="View Tasks"
-          >
+          <Link href='/tasks' className="btn btn-secondary" title="View Tasks">
             <i className="fas fa-list-check"></i> Tasks <i className="fas fa-arrow-right"></i>
           </Link>
         </div>
