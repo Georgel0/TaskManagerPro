@@ -51,7 +51,7 @@ const getUserProfile = async (req, res) => {
     }
 
     const row = result.rows[0];
-    
+
     // Calculate a 'Productivity Score' percentage
     const total = parseInt(row.total_tasks) || 0;
     const completed = parseInt(row.completed_tasks) || 0;
@@ -60,7 +60,7 @@ const getUserProfile = async (req, res) => {
     res.status(200).json({
       ...row,
       stats: {
-        projects: parseInt(row.projects_owned) + parseInt(row.projects_joined),
+        projects: parseInt(row.projects_owned) + parseInt(row.collaborative_projects),
         tasks: total,
         completed: completed,
         urgent: parseInt(row.urgent_tasks),
@@ -71,6 +71,7 @@ const getUserProfile = async (req, res) => {
           upcoming: parseInt(row.upcoming_tasks)
         },
         activity: {
+          owned: parseInt(row.projects_owned),
           collaboration: parseInt(row.collaborative_projects),
           resources: parseInt(row.task_resources),
           unread: parseInt(row.unread_alerts)
@@ -158,7 +159,7 @@ const changeAvatar = async (req, res) => {
 
   try {
     if (newAvatarUrl.startsWith('data:image/')) {
-      const sizeInBytes = (newAvatarUrl.length * 0.75); 
+      const sizeInBytes = (newAvatarUrl.length * 0.75);
       if (sizeInBytes > 2 * 1024 * 1024) {
         return res.status(400).json({ error: 'Base64 image is too large (max 2MB).' });
       }
@@ -208,12 +209,12 @@ const changePassword = async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, userResult.rows[0].password);
     if (!isMatch) {
-    return res.status(400).json({ error: "Incorrect current password." });
+      return res.status(400).json({ error: "Incorrect current password." });
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, req.user.id]);
-    
+
     res.status(200).json({ message: "Password updated successfully." });
   } catch (err) {
     res.status(500).json({ error: "Server error while updating password." });
@@ -253,7 +254,7 @@ const deleteAccount = async (req, res) => {
     res.status(200).json({ message: "Account deleted successfully." });
   } catch (err) {
     res.status(500).json({ error: "Server error while deleting account." });
-  console.error(err);
+    console.error(err);
   }
 };
 

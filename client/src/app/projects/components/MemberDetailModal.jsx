@@ -75,7 +75,7 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
                 <div className="role-tooltip">
                   {member.id === currentUserId ? (
                     <>
-                      <span>{isOwner ? 'What to write as a owner:' : 'What to write as a member:'}</span>
+                      <span>{isOwner ? 'What to write as the owner:' : 'What to write as a member:'}</span>
                       <ul>
                         {isOwner ? (
                           <>
@@ -98,7 +98,7 @@ export function MemberDetailModal({ member, isOwner, currentUserId, onClose, onU
                     <>
                       <span>
                         {member.role === 'owner' ? 
-                          `${member.name}'s responsibilities as the owner` : `${member.name}' responsibilities as a member`}
+                          `${member.name}'s responsibilities as the owner` : `${member.name}'s responsibilities as a member`}
                       </span>
                       <ul>
                         {member.role === 'owner' ? (

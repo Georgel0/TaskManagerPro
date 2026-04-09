@@ -105,7 +105,7 @@ export function ProfileStatsExpanded({ stats }) {
   const [open, setOpen] = useState(false);
 
   const rows = [
-    { icon: 'fa-folder-open', label: 'Projects Owned', value: stats?.projects - (stats?.activity?.collaboration ?? 0) },
+    { icon: 'fa-folder-open', label: 'Projects Owned', value: stats?.activity?.owned ?? 0 },
     { icon: 'fa-users', label: 'Projects Joined', value: stats?.activity?.collaboration ?? 0 },
     { icon: 'fa-tasks', label: 'In Progress', value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
     { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)', value: stats?.urgent ?? 0, accent: 'warning' },
