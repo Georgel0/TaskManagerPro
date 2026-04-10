@@ -493,9 +493,11 @@ const createAnnouncement = async (req, res) => {
     );
 
     await Promise.all(
-      membersResult.rows.map((m) =>
-        createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
-      )
+      membersResult.rows
+        .filter(m => m.user_id !== userId)
+        .map((m) =>
+          createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
+        )
     );
 
     res.status(201).json(result.rows[0]);
@@ -534,6 +536,25 @@ const toggleAcknowledgment = async (req, res) => {
   }
 };
 
+const deleteAnnouncement = async (req, res) => {
+  const { announcementId } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM project_announcements WHERE id = $1',
+      [announcementId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Announcement not found.' });
+    }
+
+    res.status(200).json({ message: 'Announcement deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete announcement.' });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
@@ -547,5 +568,6 @@ module.exports = {
   leaveProject,
   getAnnouncements,
   createAnnouncement,
-  toggleAcknowledgment
+  toggleAcknowledgment,
+  deleteAnnouncement
 };

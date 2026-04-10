@@ -5,7 +5,7 @@ import { useAnnouncements } from '../hooks/useAnnouncements';
 import { formatDate } from '@/lib';
 
 export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated }) {
-  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge } = useAnnouncements(project.id);
+  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement } = useAnnouncements(project.id);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', content: '', type: 'update', isPinned: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,10 +69,10 @@ export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCr
                 <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
-                
+
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                   {isSubmitting ? 'Posting...' : 'Post Announcement'}
-                </button>              
+                </button>
               </div>
             </form>
           )}
@@ -107,7 +107,14 @@ export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCr
                         <div className="ack-stats">
                           <i className="fas fa-check-double"></i> {a.ack_count} / {Math.max(0, a.total_members - 1)} Read
                         </div>
-                        {!isOwner && (
+                        {isOwner ? (
+                          <button
+                            className="btn-icon delete-btn" title="Delete Announcement"
+                            onClick={(e) => { e.stopPropagation(); deleteAnnouncement(project.id); }}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        ) : (
                           <button
                             className={`btn btn-sm ${a.is_acknowledged ? 'btn-success' : 'btn-outline'}`}
                             onClick={() => handleAcknowledge(a.id)}
