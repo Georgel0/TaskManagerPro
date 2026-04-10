@@ -42,15 +42,7 @@ export function useAnnouncements(projectId) {
       });
 
       if (!res.ok) throw new Error('Failed to post broadcast');
-      
-      const newAnnouncement = await res.json();
-      
-      // Re-fetch to get correct joined data (author name, members count)
-      const fetchRes = await fetch(`${API}/projects/${projectId}/announcements`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      setAnnouncements(await fetchRes.json());
-      
+
       toast.success('Broadcast posted!');
       return true;
     } catch (err) {
@@ -66,9 +58,9 @@ export function useAnnouncements(projectId) {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to update acknowledgment');
-      
+
       const { acknowledged } = await res.json();
-      
+
       setAnnouncements((prev) => prev.map((a) => {
         if (a.id === announcementId) {
           return {

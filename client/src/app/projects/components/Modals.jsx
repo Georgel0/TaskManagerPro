@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave, onAnnouncements }) {
+export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave }) {
   const [leaveConfirm, setLeaveConfirm] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -58,13 +58,6 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave,
               </button>
             )
           )}
-          <button
-            className="project-announcement-count"
-            title="View Broadcasts"
-            onClick={(e) => { e.stopPropagation(); onAnnouncements(project); }}
-          >
-            <i className="fas fa-bullhorn"></i>
-          </button>
         </div>
       )}
     </div>

@@ -328,6 +328,21 @@
   padding-bottom: 8px;
 }
 
+.ann-message-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pin-to-top-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-to-top-check > input{
+  margin-bottom: 4px;
+}
+
 .announcement-meta {
   display: flex;
   align-items: center;

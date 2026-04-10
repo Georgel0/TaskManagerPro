@@ -5,6 +5,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
   const memberCount = project.member_count ?? 1;
+  const announcementCount = project.announcement_count ?? 0;
 
   return (
     <div className="project-card">
@@ -23,7 +24,6 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             onEdit={onEdit}
             onDelete={onDelete}
             onLeave={onLeave}
-            onAnnouncements={onAnnouncements}
           />
         </div>
       </div>
@@ -51,6 +51,13 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
               onClick={() => onOpen(project)}
             >
               <i className="fas fa-tasks"></i> {taskCount} task{taskCount !== 1 ? 's' : ''}
+            </button>
+            <button
+              className="project-announcement-count"
+              title="View Announcements"
+              onClick={(e) => { e.stopPropagation(); onAnnouncements(project); }}
+            >
+              <i className="fas fa-bullhorn"></i> {announcementCount}
             </button>
           </div>
         </div>

@@ -34,7 +34,6 @@ export function NotificationsModal() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(interval);
     };
   }, []);
 

@@ -23,18 +23,21 @@ const getProjects = async (req, res) => {
 
   try {
     const projects = await pool.query(
-      `SELECT p.*,
-        COUNT(DISTINCT t.id)::int AS task_count,
-        COUNT(DISTINCT CASE WHEN pm.user_id != p.owner_id THEN pm.user_id END)::int + 1 AS member_count
+      `SELECT 
+            p.*,
+            COUNT(DISTINCT t.id)::int AS task_count,
+            COUNT(DISTINCT CASE WHEN pm.user_id != p.owner_id THEN pm.user_id END)::int + 1 AS member_count,
+            COUNT(DISTINCT pa.id)::int AS announcement_count
         FROM projects p
         LEFT JOIN project_members pm ON p.id = pm.project_id
         LEFT JOIN tasks t ON t.project_id = p.id
+        LEFT JOIN project_announcements pa ON pa.project_id = p.id
         WHERE p.owner_id = $1 OR EXISTS (
-          SELECT 1 FROM project_members pm_access 
-          WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+            SELECT 1 FROM project_members pm_access 
+            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
         )
         GROUP BY p.id
-        ORDER BY p.created_at DESC`,
+        ORDER BY p.created_at DESC;`,
       [userId]
     );
 
@@ -330,7 +333,7 @@ const updateRoleDescription = async (req, res) => {
   try {
 
     const projectResult = await pool.query(
-      'SELECT owner_id, name FROM projects WHERE id = $1', 
+      'SELECT owner_id, name FROM projects WHERE id = $1',
       [projectId]
     );
 
@@ -447,7 +450,7 @@ const getAnnouncements = async (req, res) => {
               u.name as author_name, u.avatar as author_avatar,
               EXISTS(SELECT 1 FROM announcement_acknowledgments ack WHERE ack.announcement_id = a.id AND ack.user_id = $2) as is_acknowledged,
               (SELECT COUNT(*)::int FROM announcement_acknowledgments ack WHERE ack.announcement_id = a.id) as ack_count,
-              (SELECT COUNT(DISTINCT user_id)::int FROM project_members pm WHERE pm.project_id = $1) + 1 as total_members
+              (SELECT COUNT(DISTINCT user_id)::int FROM project_members pm WHERE pm.project_id = $1) as total_members
        FROM project_announcements a
        LEFT JOIN users u ON u.id = a.author_id
        WHERE a.project_id = $1
@@ -469,7 +472,7 @@ const createAnnouncement = async (req, res) => {
 
   try {
     const project = await pool.query('SELECT owner_id, name FROM projects WHERE id = $1', [projectId]);
-    
+
     if (project.rows.length === 0 || project.rows[0].owner_id !== userId) {
       return res.status(403).json({ error: 'Only the project owner can make announcements.' });
     }
