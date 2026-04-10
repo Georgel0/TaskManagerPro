@@ -152,6 +152,16 @@ export function useProjects() {
     setIsAnnouncementsModalOpen(true);
   };
 
+  const handleAnnouncementCreated = (projectId) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId
+          ? { ...p, announcement_count: (p.announcement_count ?? 0) + 1 }
+          : p
+      )
+    );
+  };
+
   const openTasks = async (project) => {
     setSelectedProject(project);
     setIsTasksModalOpen(true);
@@ -190,6 +200,7 @@ export function useProjects() {
     setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    openEdit, openDelete, openTasks, openMembers, openAnnouncements
+    openEdit, openDelete, openTasks, openMembers, 
+    openAnnouncements, handleAnnouncementCreated
   };
 }

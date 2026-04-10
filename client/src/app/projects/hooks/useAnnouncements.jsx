@@ -5,7 +5,10 @@ import toast from 'react-hot-toast';
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
-export function useAnnouncements(projectId) {
+const sortAnnouncements = (list) =>
+  [...list].sort((a, b) => b.is_pinned - a.is_pinned || new Date(b.created_at) - new Date(a.created_at));
+
+export function useAnnouncements(projectId, onAnnouncementCreated ) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +25,7 @@ export function useAnnouncements(projectId) {
 
         if (!res.ok) throw new Error('Failed to fetch broadcasts');
 
-        setAnnouncements(await res.json());
+        setAnnouncements(sortAnnouncements(await res.json()));
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -43,7 +46,17 @@ export function useAnnouncements(projectId) {
 
       if (!res.ok) throw new Error('Failed to post broadcast');
 
+      // Refetch to get joined data (author_name, ack_count, total_members)
+      const fetchRes = await fetch(`${API}/projects/${projectId}/announcements`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (fetchRes.ok) {
+        const data = await fetchRes.json();
+        setAnnouncements(sortAnnouncements(data));
+      }
+
       toast.success('Broadcast posted!');
+      onAnnouncementCreated?.();
       return true;
     } catch (err) {
       toast.error(err.message);
@@ -66,7 +79,7 @@ export function useAnnouncements(projectId) {
           return {
             ...a,
             is_acknowledged: acknowledged,
-            ack_count: acknowledged ? a.ack_count + 1 : a.ack_count - 1
+            ack_count: acknowledged ? a.ack_count + 1 : Math.max(0, a.ack_count - 1)
           };
         }
         return a;

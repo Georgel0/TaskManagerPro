@@ -4,14 +4,20 @@ import ReactMarkdown from 'react-markdown';
 import { useAnnouncements } from '../hooks/useAnnouncements';
 import { formatDate } from '@/lib';
 
-export function AnnouncementsModal({ project, isOwner, onClose }) {
+export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated }) {
   const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge } = useAnnouncements(project.id);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', content: '', type: 'update', isPinned: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     const success = await handleCreateAnnouncement(formData);
+
+    setIsSubmitting(false);
+
     if (success) {
       setFormData({ title: '', content: '', type: 'update', isPinned: false });
       setShowForm(false);
@@ -60,8 +66,13 @@ export function AnnouncementsModal({ project, isOwner, onClose }) {
                 <textarea className="form-control" rows="4" required value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })}></textarea>
               </div>
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Post Announcement</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
+                  Cancel
+                </button>
+                
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Posting...' : 'Post Announcement'}
+                </button>              
               </div>
             </form>
           )}
@@ -94,7 +105,7 @@ export function AnnouncementsModal({ project, isOwner, onClose }) {
                       </div>
                       <div className="announcement-actions">
                         <div className="ack-stats">
-                          <i className="fas fa-check-double"></i> {a.ack_count} / {a.total_members - 1} Read
+                          <i className="fas fa-check-double"></i> {a.ack_count} / {Math.max(0, a.total_members - 1)} Read
                         </div>
                         {!isOwner && (
                           <button

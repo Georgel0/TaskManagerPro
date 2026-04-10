@@ -26,7 +26,8 @@ export default function Projects() {
     isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    openEdit, openDelete, openTasks, openMembers, openAnnouncements
+    openEdit, openDelete, openTasks, openMembers,
+     openAnnouncements, handleAnnouncementCreated
   } = useProjects();
 
   const {
@@ -152,6 +153,7 @@ export default function Projects() {
           project={selectedProject}
           isOwner={selectedProject.owner_id === user.id}
           onClose={() => setIsAnnouncementsModalOpen(false)}
+          onAnnouncementCreated={() => handleAnnouncementCreated(selectedProject.id)}
         />
       )}
     </div>
