@@ -5,7 +5,7 @@ import { useAnnouncements } from '../hooks/useAnnouncements';
 import { formatDate } from '@/lib';
 
 export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated }) {
-  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement } = useAnnouncements(project.id);
+  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement } = useAnnouncements(project.id, onAnnouncementCreated);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', content: '', type: 'update', isPinned: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,7 +110,7 @@ export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCr
                         {isOwner ? (
                           <button
                             className="btn-icon delete-btn" title="Delete Announcement"
-                            onClick={(e) => { e.stopPropagation(); deleteAnnouncement(project.id); }}
+                            onClick={(e) => { e.stopPropagation(); deleteAnnouncement(a.id); }}
                           >
                             <i className="fas fa-trash"></i>
                           </button>
