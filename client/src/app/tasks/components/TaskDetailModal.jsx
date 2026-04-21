@@ -6,7 +6,7 @@ import { commentSchema, validate } from '@/lib/validators';
 import { formatDate, formatTime, getInitials, autoResize } from '@/lib';
 import { AttachmentsSection } from '.';
 
-export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner, onCommentAdded, onCommentDeleted }) {
+export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner, onCommentAdded, onCommentDeleted, onAttachmentCountChange }) {
   const { user } = useApp();
 
   const [commentText, setCommentText] = useState('');
@@ -90,11 +90,13 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
               {task.description || <span className="task-detail-empty-text">No description provided.</span>}
             </p>
           </div>
-<hr />
+
+          <hr />
           <AttachmentsSection
             taskId={task.id}
             currentUserId={user.id}
             isProjectOwner={isProjectOwner}
+            onAttachmentCountChange={onAttachmentCountChange}
           />
 
           <div className="task-detail-section">

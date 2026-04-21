@@ -125,7 +125,7 @@ export function useTasks() {
             : t
         )
       );
-      
+
       toast.success('Task updated successfully!');
       return true;
     } catch (err) {
@@ -207,6 +207,16 @@ export function useTasks() {
     );
   };
 
+  const handleAttachmentCountChange = (taskId, amount) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, attachment_count: Math.max(0, (parseInt(t.attachment_count) || 0) + amount) }
+          : t
+      )
+    );
+  };
+
   return {
     projects,
     loading,
@@ -226,6 +236,7 @@ export function useTasks() {
     createTask,
     updateTask,
     deleteTask,
-    handleCommentCountChange
+    handleCommentCountChange,
+    handleAttachmentCountChange
   };
 }

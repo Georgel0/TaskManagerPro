@@ -19,7 +19,7 @@ export default function Tasks() {
     usersInSelectedProject,
     hasActiveFilters, clearFilters,
     createTask, updateTask, deleteTask,
-    handleCommentCountChange
+    handleCommentCountChange, handleAttachmentCountChange
   } = useTasks();
 
   const [modalState, setModalState] = useState({ type: null, task: null });
@@ -155,7 +155,8 @@ export default function Tasks() {
         isProjectOwner={
           projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
         }
-      />
+        onAttachmentCountChange={(amount) => handleAttachmentCountChange(modalState.task?.id, amount)}
+      />    
     </div>
   );
 }

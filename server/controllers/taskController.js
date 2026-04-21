@@ -17,7 +17,7 @@ const createTask = async (req, res) => {
     if (projectCheck.rows.length === 0) {
       return res.status(403).json({ error: "Not authorized to add tasks to this project." });
     }
-    
+
     // Insert the task, but ONLY return the new ID instead of all the raw data
     const insertResult = await pool.query(
       `INSERT INTO tasks (title, description, status, priority, deadline, project_id, assigned_user_id) 
@@ -33,7 +33,8 @@ const createTask = async (req, res) => {
         u.name AS assigned_user_name,
         p.name AS project_name,
         p.owner_id AS project_owner_id,
-        0 AS comment_count
+        0 AS comment_count,
+        0 AS attachment_count
       FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN users u ON u.id = t.assigned_user_id
@@ -43,7 +44,7 @@ const createTask = async (req, res) => {
 
     if (assigned_user_id && assigned_user_id !== userId) {
       await createNotification(
-        assigned_user_id, 
+        assigned_user_id,
         `You have been assigned to a new task: ${title}`
       );
     }
@@ -66,7 +67,8 @@ const getTasks = async (req, res) => {
         u.name AS assigned_user_name,
         p.name AS project_name,
         p.owner_id AS project_owner_id,
-        (SELECT COUNT(*) FROM comments WHERE task_id = t.id) AS comment_count
+        (SELECT COUNT(*) FROM comments WHERE task_id = t.id) AS comment_count,
+        (SELECT COUNT(*) FROM attachments WHERE task_id = t.id) AS attachment_count
       FROM tasks t
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id
@@ -148,7 +150,7 @@ const updateTask = async (req, res) => {
 
     const finalTitle = title || oldTask.title;
     const newStatus = status || oldTask.status;
-    
+
     // Reassigned to someone new
     if (assigned_user_id && assigned_user_id !== oldTask.assigned_user_id) {
       // Notify new assignee
@@ -162,26 +164,26 @@ const updateTask = async (req, res) => {
       }
     } else if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
       // Same assignee, task was edited by somone else
-        if (newStatus === 'Done' && oldTask.status !== 'Done') {
-          //Assigneemarked it done - notify owner
-          const taskWithProject = await pool.query(
-            `SELECT p.owner_id, u.name AS user_name
+      if (newStatus === 'Done' && oldTask.status !== 'Done') {
+        //Assigneemarked it done - notify owner
+        const taskWithProject = await pool.query(
+          `SELECT p.owner_id, u.name AS user_name
             FROM tasks t
             JOIN projects p ON t.project_id = p.id
             JOIN users u ON u.id = $1
             WHERE t.id = $2`,
-            [userId, id]
-          );
+          [userId, id]
+        );
 
-          const { owner_id, user_name } = taskWithProject.rows[0];
+        const { owner_id, user_name } = taskWithProject.rows[0];
 
-          if (owner_id !== userId) {
-            await createNotification(owner_id, `${user_name} completed the task "${finalTitle}".`);
-          }
-        } else {
-          await createNotification(oldTask.assigned_user_id, `There was an update to your task: "${finalTitle}"`);
+        if (owner_id !== userId) {
+          await createNotification(owner_id, `${user_name} completed the task "${finalTitle}".`);
         }
-    } 
+      } else {
+        await createNotification(oldTask.assigned_user_id, `There was an update to your task: "${finalTitle}"`);
+      }
+    }
 
     res.status(200).json(updatedTask.rows[0]);
   } catch (err) {
@@ -214,7 +216,7 @@ const deleteTask = async (req, res) => {
 
     if (taskToDelete.assigned_user_id && taskToDelete.assigned_user_id !== userId) {
       await createNotification(
-        taskToDelete.assigned_user_id, 
+        taskToDelete.assigned_user_id,
         `The task "${taskToDelete.title}" has been deleted.`
       );
     }

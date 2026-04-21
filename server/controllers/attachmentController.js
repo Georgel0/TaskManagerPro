@@ -73,18 +73,22 @@ const uploadAttachment = async (req, res) => {
 
     // Upload to Cloudinary from buffer
     const uploadResult = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: `taskmanager/tasks/${taskId}`,
-          resource_type: 'auto',
-          use_filename: true,
-          unique_filename: true,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
+     const stream = cloudinary.uploader.upload_stream(
+  {
+    folder: `taskmanager/tasks/${taskId}`,
+    resource_type: 'auto',
+    use_filename: true,
+    unique_filename: true,
+  },
+  (error, result) => {
+    if (error) {
+      console.error('Cloudinary error:', error);
+      reject(error);
+    } else {
+      resolve(result);
+    }
+  }
+);
       stream.end(req.file.buffer);
     });
 

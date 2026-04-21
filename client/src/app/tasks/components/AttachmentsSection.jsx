@@ -35,8 +35,8 @@ const getIconType = (fileType) => {
   return 'file';
 };
 
-export function AttachmentsSection({ taskId, currentUserId, isProjectOwner }) {
-  const { attachments, loading, isUploading, uploadAttachment, deleteAttachment } = useAttachments(taskId);
+export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAttachmentCountChange }) {
+  const { attachments, loading, isUploading, uploadAttachment, deleteAttachment } = useAttachments(taskId, onAttachmentCountChange);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const fileInputRef = useRef(null);
 

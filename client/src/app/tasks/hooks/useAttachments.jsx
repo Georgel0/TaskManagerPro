@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
-export function useAttachments(taskId) {
+export function useAttachments(taskId, onAttachmentCountChange) {
   const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -49,6 +49,7 @@ export function useAttachments(taskId) {
       if (!res.ok) throw new Error(data.error || 'Upload failed');
 
       setAttachments((prev) => [data, ...prev]);
+      onAttachmentCountChange?.(1);
       toast.success('File uploaded!');
     } catch (err) {
       toast.error(err.message);
@@ -66,6 +67,7 @@ export function useAttachments(taskId) {
       if (!res.ok) throw new Error('Failed to delete attachment');
 
       setAttachments((prev) => prev.filter((a) => a.id !== id));
+      onAttachmentCountChange?.(-1);
       toast.success('Attachment removed.');
     } catch (err) {
       toast.error(err.message);

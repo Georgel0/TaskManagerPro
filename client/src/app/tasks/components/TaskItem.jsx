@@ -33,6 +33,10 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
             <i className="fas fa-user"></i>
             {task.assigned_user_name ? task.assigned_user_name.split(' ')[0] : 'Unassigned'}
           </span>
+          <span className="task-comment-count" title={`Attachments: ${task.attachment_count || 0}`}>
+            <i className="fas fa-paperclip"></i>
+            {task.attachment_count || 0}
+          </span>
         </div>
       </div>
 
