@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
-import { ProjectCard, ProjectFormModal, MembersModal, DeleteProjectModal, TasksModal, AnnouncementsModal } from './components';
+import { ProjectCard, ProjectFormModal, MembersModal, TasksModal, AnnouncementsModal } from './components';
+import { RemovalModal } from '@/components/ui';
 import './styles/project-members.css';
 import './styles/project-modals.css';
 import './styles/projects-layout.css';
@@ -27,7 +28,7 @@ export default function Projects() {
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
     openEdit, openDelete, openTasks, openMembers,
-     openAnnouncements, handleAnnouncementCreated
+    openAnnouncements, handleAnnouncementCreated
   } = useProjects();
 
   const {
@@ -116,8 +117,9 @@ export default function Projects() {
       )}
 
       {isDeleteModalOpen && selectedProject && (
-        <DeleteProjectModal
-          project={selectedProject}
+        <RemovalModal
+          title="Confirm Deletion"
+          message={<>Are you sure you want to delete <strong>{selectedProject?.name}</strong>? This is permanent.</>}
           onConfirm={handleDelete}
           onClose={() => setIsDeleteModalOpen(false)}
           isSubmitting={isSubmitting}
