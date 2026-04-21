@@ -14,6 +14,7 @@ export function MembersModal({
   const [isAdding, setIsAdding] = useState(false);
   const [emailError, setEmailError] = useState(null);
   const [transferConfirmId, setTransferConfirmId] = useState(null);
+  const [removeConfirmId, setRemoveConfirmId] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const router = useRouter();
 
@@ -104,7 +105,13 @@ export function MembersModal({
                       </span>
 
                       {isOwner && member.role !== 'owner' && (
-                        transferConfirmId === member.id ? (
+                        removeConfirmId === member.id ? (
+                          <div className="transfer-confirm">
+                            <span className="transfer-confirm-text">Remove member?</span>
+                            <button className="btn btn-danger btn-sm" onClick={() => { onRemoveMember(member.id); setRemoveConfirmId(null); }}>Yes</button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => setRemoveConfirmId(null)}>No</button>
+                          </div>
+                        ) : transferConfirmId === member.id ? (
                           <div className="transfer-confirm">
                             <span className="transfer-confirm-text">Make owner?</span>
                             <button className="btn btn-primary btn-sm" onClick={() => handleTransferConfirm(member.id)}>Yes</button>
@@ -113,7 +120,7 @@ export function MembersModal({
                         ) : (
                           <MemberActionMenu
                             member={member}
-                            onRemove={onRemoveMember}
+                            onRemove={() => setRemoveConfirmId(member.id)}
                             onTransferClick={(id) => setTransferConfirmId(id)}
                           />
                         )
