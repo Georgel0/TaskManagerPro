@@ -116,15 +116,14 @@ export default function Projects() {
         />
       )}
 
-      {isDeleteModalOpen && selectedProject && (
-        <RemovalModal
-          title="Confirm Deletion"
-          message={<>Are you sure you want to delete <strong>{selectedProject?.name}</strong>? This is permanent.</>}
-          onConfirm={handleDelete}
-          onClose={() => setIsDeleteModalOpen(false)}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <RemovalModal
+        isOpen={isDeleteModalOpen}
+        item={selectedProject}
+        message={<>Are you sure you want to delete <strong>{selectedProject?.name}</strong>?</>}
+        onConfirm={handleDelete}
+        onClose={() => setIsDeleteModalOpen(false)}
+        isSubmitting={isSubmitting}
+      />
 
       {isTasksModalOpen && selectedProject && (
         <TasksModal

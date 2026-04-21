@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useApp } from '@/context';
 import { useTasks } from './useTasks';
-import { TaskItem, DeleteTaskModal, TaskDetailModal, TaskFormModal } from './components';
+import { TaskItem, TaskDetailModal, TaskFormModal } from './components';
+import { RemovalModal } from '@/components/ui';
 import './styles/task-item.css';
 import './styles/task-modals.css';
 import './styles/tasks-layout.css';
@@ -17,22 +18,22 @@ export default function Tasks() {
     userFilter, setUserFilter,
     usersInSelectedProject,
     hasActiveFilters, clearFilters,
-    createTask, updateTask, deleteTask, 
+    createTask, updateTask, deleteTask,
     handleCommentCountChange
   } = useTasks();
 
   const [modalState, setModalState] = useState({ type: null, task: null });
   const closeModal = () => setModalState({ type: null, task: null });
 
- const handleFormSubmit = async (formData) => {
+  const handleFormSubmit = async (formData) => {
     const success = modalState.type === 'create'
       ? await createTask(formData)
-      : await updateTask(modalState.task?.id, formData); 
+      : await updateTask(modalState.task?.id, formData);
     if (success) closeModal();
   };
 
-  const handleDeleteConfirm = async (id) => {
-    const success = await deleteTask(id);
+  const handleDeleteConfirm = async () => {
+    const success = await deleteTask(modalState.task?.id);
     if (success) closeModal();
   };
 
@@ -135,12 +136,13 @@ export default function Tasks() {
         onSubmit={handleFormSubmit}
       />
 
-      <DeleteTaskModal
+      <RemovalModal
         isOpen={modalState.type === 'delete'}
-        task={modalState.task}
+        item={modalState.task}
         isSubmitting={isSubmitting}
         onClose={closeModal}
         onConfirm={handleDeleteConfirm}
+        message={<>Are you sure you want to delete <strong>{modalState.task?.title}</strong>? This action is permanent.</>}
       />
 
       <TaskDetailModal
@@ -148,7 +150,7 @@ export default function Tasks() {
         onEdit={(t) => setModalState({ type: 'edit', task: t })}
         task={modalState.task}
         onClose={closeModal}
-        onCommentAdded={() => handleCommentCountChange(modalState.task?.id, 1)}   
+        onCommentAdded={() => handleCommentCountChange(modalState.task?.id, 1)}
         onCommentDeleted={() => handleCommentCountChange(modalState.task?.id, -1)}
         isProjectOwner={
           projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
