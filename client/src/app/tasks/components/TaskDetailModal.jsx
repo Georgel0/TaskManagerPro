@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context';
-import { useComments } from './useComments';
+import { useComments } from '../hooks/useComments';
 import { commentSchema, validate } from '@/lib/validators';
 import { formatDate, formatTime, getInitials, autoResize } from '@/lib';
+import { AttachmentsSection } from '.';
 
 export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner, onCommentAdded, onCommentDeleted }) {
   const { user } = useApp();
@@ -89,6 +90,12 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
               {task.description || <span className="task-detail-empty-text">No description provided.</span>}
             </p>
           </div>
+<hr />
+          <AttachmentsSection
+            taskId={task.id}
+            currentUserId={user.id}
+            isProjectOwner={isProjectOwner}
+          />
 
           <div className="task-detail-section">
             <hr />

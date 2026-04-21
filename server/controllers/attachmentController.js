@@ -2,6 +2,14 @@ const pool = require('../database');
 const cloudinary = require('../cloudinary');
 const { createNotification } = require('./notificationController');
 
+const getResourceType = (mimeType) => {
+  if (!mimeType) return 'raw';
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType === 'application/pdf') return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  return 'raw';
+};
+
 const getAttachments = async (req, res) => {
   const { taskId } = req.params;
   const userId = req.user.id;
@@ -43,6 +51,8 @@ const uploadAttachment = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file provided.' });
   }
+
+  const safeOriginalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
 
   try {
     // Verify user has access
@@ -87,7 +97,7 @@ const uploadAttachment = async (req, res) => {
         userId,
         uploadResult.secure_url,
         uploadResult.public_id,
-        req.file.originalname,
+        safeOriginalName, 
         req.file.mimetype,
         req.file.size,
       ]
@@ -135,8 +145,10 @@ const deleteAttachment = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to delete this attachment.' });
     }
 
+    const resourceType = getResourceType(attachment.file_type);
+
     await cloudinary.uploader.destroy(attachment.public_id, {
-      resource_type: 'auto',
+      resource_type: resourceType,
     });
 
     await pool.query('DELETE FROM attachments WHERE id = $1', [id]);

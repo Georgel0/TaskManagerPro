@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useApp } from '@/context';
-import { useTasks } from './useTasks';
+import { useTasks } from './hooks/useTasks';
 import { TaskItem, TaskDetailModal, TaskFormModal } from './components';
 import { RemovalModal } from '@/components/ui';
 import './styles/task-item.css';
