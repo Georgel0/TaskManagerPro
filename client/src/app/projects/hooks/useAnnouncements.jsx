@@ -8,7 +8,7 @@ const getToken = () => localStorage.getItem('token');
 const sortAnnouncements = (list) =>
   [...list].sort((a, b) => b.is_pinned - a.is_pinned || new Date(b.created_at) - new Date(a.created_at));
 
-export function useAnnouncements(projectId, onAnnouncementCreated) {
+export function useAnnouncements(projectId, onAnnouncementCreated, onAnnouncementDeleted) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -99,6 +99,7 @@ export function useAnnouncements(projectId, onAnnouncementCreated) {
       if (!res.ok) throw new Error('Failed to delete on the server');
 
       setAnnouncements(prev => prev.filter(n => n.id !== id));
+      onAnnouncementDeleted?.();
       toast.success('Announcement deleted');
     } catch (err) {
       toast.error('Could not delete Announcement.');

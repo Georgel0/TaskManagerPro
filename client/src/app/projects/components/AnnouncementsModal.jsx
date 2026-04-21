@@ -2,135 +2,154 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useAnnouncements } from '../hooks/useAnnouncements';
+import { RemovalModal } from '@/components/ui';
 import { formatDate } from '@/lib';
 
-export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated }) {
-  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement } = useAnnouncements(project.id, onAnnouncementCreated);
+export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated, onAnnouncementDeleted }) {
+  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement 
+  } = useAnnouncements(project.id, onAnnouncementCreated, onAnnouncementDeleted);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', content: '', type: 'update', isPinned: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
+  const pendingAnnouncement = announcements.find((a) => a.id === pendingDeleteId);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     const success = await handleCreateAnnouncement(formData);
-
     setIsSubmitting(false);
-
     if (success) {
       setFormData({ title: '', content: '', type: 'update', isPinned: false });
       setShowForm(false);
     }
   };
 
+  const handleConfirmDelete = async () => {
+    await deleteAnnouncement(pendingDeleteId);
+    setPendingDeleteId(null);
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-large announcements-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2><i className="fas fa-bullhorn"></i> Project Announcements: {project.name}</h2>
-          <button className="btn-icon btn-close" onClick={onClose}><i className="fas fa-times"></i></button>
-        </div>
+    <>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content modal-large announcements-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2><i className="fas fa-bullhorn"></i> Project Announcements: {project.name}</h2>
+            <button className="btn-icon btn-close" onClick={onClose}><i className="fas fa-times"></i></button>
+          </div>
 
-        <div className="modal-body">
-          {isOwner && !showForm && (
-            <button className="btn btn-primary pulse-create-btn" onClick={() => setShowForm(true)}>
-              <i className="fas fa-plus"></i> New Announcement
-            </button>
-          )}
+          <div className="modal-body">
+            {isOwner && !showForm && (
+              <button className="btn btn-primary pulse-create-btn" onClick={() => setShowForm(true)}>
+                <i className="fas fa-plus"></i> New Announcement
+              </button>
+            )}
 
-          {showForm && (
-            <form className="announcement-form" onSubmit={onSubmit}>
-              <div className="form-group row-group">
-                <div className="flex-1">
-                  <label>Title</label>
-                  <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-                </div>
-                <div>
-                  <label>Type</label>
-                  <select className="form-control" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
-                    <option value="update">General Update</option>
-                    <option value="milestone">Milestone</option>
-                    <option value="urgent">Urgent Alert</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <div className="ann-message-title">
-                  <label>Message (Markdown supported)</label>
-                  <div className="pin-to-top-check">
-                    <label htmlFor="isPinned">Pin to top</label>
-                    <input type="checkbox" id="isPinned" checked={formData.isPinned} onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })} />
+            {showForm && (
+              <form className="announcement-form" onSubmit={onSubmit}>
+                <div className="form-group row-group">
+                  <div className="flex-1">
+                    <label>Title</label>
+                    <input type="text" className="form-control" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                  </div>
+                  <div>
+                    <label>Type</label>
+                    <select className="form-control" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
+                      <option value="update">General Update</option>
+                      <option value="milestone">Milestone</option>
+                      <option value="urgent">Urgent Alert</option>
+                    </select>
                   </div>
                 </div>
-                <textarea className="form-control" rows="4" required value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })}></textarea>
-              </div>
-              <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
-                </button>
-
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Posting...' : 'Post Announcement'}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {loadingAnnouncements ? (
-            <div className="loading-state"><div className="pulse-ring"></div></div>
-          ) : (
-            <div className="announcements-feed">
-              {announcements.length === 0 ? (
-                <p className="empty-state">No Announcements posted yet.</p>
-              ) : (
-                announcements.map((a) => (
-                  <div key={a.id} className={`announcement-card type-${a.type} ${a.is_pinned ? 'is-pinned' : ''}`}>
-                    {a.is_pinned && <div className="pinned-badge"><i className="fas fa-thumbtack"></i> Pinned</div>}
-                    <div className="announcement-header">
-                      <div className="announcement-meta">
-                        <span className={`pulse-badge pulse-${a.type}`}>{a.type.toUpperCase()}</span>
-                        <h4>{a.title}</h4>
-                      </div>
-                      <span className="announcement-date">{formatDate(a.created_at)}</span>
+                <div className="form-group">
+                  <div className="ann-message-title">
+                    <label>Message (Markdown supported)</label>
+                    <div className="pin-to-top-check">
+                      <label htmlFor="isPinned">Pin to top</label>
+                      <input type="checkbox" id="isPinned" checked={formData.isPinned} onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })} />
                     </div>
+                  </div>
+                  <textarea className="form-control" rows="4" required value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })}></textarea>
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
+                    Cancel
+                  </button>
 
-                    <div className="announcement-content markdown-body">
-                      <ReactMarkdown>{a.content}</ReactMarkdown>
-                    </div>
+                  <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                    {isSubmitting ? 'Posting...' : 'Post Announcement'}
+                  </button>
+                </div>
+              </form>
+            )}
 
-                    <div className="announcement-footer">
-                      <div className="announcement-author">
-                        Posted by {a.author_name}
-                      </div>
-                      <div className="announcement-actions">
-                        <div className="ack-stats">
-                          <i className="fas fa-check-double"></i> {a.ack_count} / {Math.max(0, a.total_members - 1)} Read
+            {loadingAnnouncements ? (
+              <div className="loading-state"><div className="pulse-ring"></div></div>
+            ) : (
+              <div className="announcements-feed">
+                {announcements.length === 0 ? (
+                  <p className="empty-state">No Announcements posted yet.</p>
+                ) : (
+                  announcements.map((a) => (
+                    <div key={a.id} className={`announcement-card type-${a.type} ${a.is_pinned ? 'is-pinned' : ''}`}>
+                      {a.is_pinned && <div className="pinned-badge"><i className="fas fa-thumbtack"></i> Pinned</div>}
+                      <div className="announcement-header">
+                        <div className="announcement-meta">
+                          <span className={`pulse-badge pulse-${a.type}`}>{a.type.toUpperCase()}</span>
+                          <h4>{a.title}</h4>
                         </div>
-                        {isOwner ? (
-                          <button
-                            className="btn-icon delete-btn" title="Delete Announcement"
-                            onClick={(e) => { e.stopPropagation(); deleteAnnouncement(a.id); }}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        ) : (
-                          <button
-                            className={`btn btn-sm ${a.is_acknowledged ? 'btn-success' : 'btn-outline'}`}
-                            onClick={() => handleAcknowledge(a.id)}
-                          >
-                            {a.is_acknowledged ? <><i className="fas fa-check"></i> Acknowledged</> : 'Acknowledge'}
-                          </button>
-                        )}
+                        <span className="announcement-date">{formatDate(a.created_at)}</span>
+                      </div>
+
+                      <div className="announcement-content markdown-body">
+                        <ReactMarkdown>{a.content}</ReactMarkdown>
+                      </div>
+
+                      <div className="announcement-footer">
+                        <div className="announcement-author">
+                          Posted by {a.author_name}
+                        </div>
+                        <div className="announcement-actions">
+                          <div className="ack-stats">
+                            <i className="fas fa-check-double"></i> {a.ack_count} / {Math.max(0, a.total_members - 1)} Read
+                          </div>
+                          {isOwner ? (
+                            <button
+                              className="btn-icon delete-btn" title="Delete Announcement"
+                              onClick={(e) => { e.stopPropagation(); setPendingDeleteId(a.id); }}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          ) : (
+                            <button
+                              className={`btn btn-sm ${a.is_acknowledged ? 'btn-success' : 'btn-outline'}`}
+                              onClick={() => handleAcknowledge(a.id)}
+                            >
+                              {a.is_acknowledged ? <><i className="fas fa-check"></i> Acknowledged</> : 'Acknowledge'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      <RemovalModal
+        isOpen={!!pendingDeleteId}
+        item={pendingAnnouncement}
+        title="Delete Announcement"
+        message={<>Are you sure you want to delete <strong>{pendingAnnouncement?.title}</strong>? This cannot be undone.</>}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setPendingDeleteId(null)}
+        isSubmitting={false}
+      />
+    </>
   );
 }

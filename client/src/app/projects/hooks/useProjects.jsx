@@ -162,6 +162,16 @@ export function useProjects() {
     );
   };
 
+  const handleAnnouncementDeleted = (projectId) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId
+          ? { ...p, announcement_count: Math.max(0, (p.announcement_count ?? 0) - 1) }
+          : p
+      )
+    );
+  };
+
   const openTasks = async (project) => {
     setSelectedProject(project);
     setIsTasksModalOpen(true);
@@ -200,7 +210,8 @@ export function useProjects() {
     setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
-    openEdit, openDelete, openTasks, openMembers, 
-    openAnnouncements, handleAnnouncementCreated
+    openEdit, openDelete, openTasks, openMembers,
+    openAnnouncements, handleAnnouncementCreated,
+    handleAnnouncementDeleted
   };
 }
