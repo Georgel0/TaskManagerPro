@@ -22,7 +22,8 @@ app.use(cors({
     'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 600
 }));
 
 app.use(express.json());
