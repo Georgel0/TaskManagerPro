@@ -23,7 +23,8 @@ app.use(cors({
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 600
+  maxAge: 600,
+  credentials: true
 }));
 
 app.use(express.json());
