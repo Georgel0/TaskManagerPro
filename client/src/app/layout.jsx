@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { MainLayout } from '@/components/layout';
 import { AppProvider, ThemeProvider } from '@/context';
 import '@/styles/global.css';
@@ -40,6 +42,9 @@ export default function RootLayout({ children }) {
             </MainLayout>
           </AppProvider>
         </ThemeProvider>
+
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
