@@ -1,5 +1,5 @@
 const pool = require('../database');
-const cloudinary = require('../cloudinary');
+const cloudinary = require('../config/cloudinary');
 const { createNotification } = require('./notificationController');
 
 const getResourceType = (mimeType) => {

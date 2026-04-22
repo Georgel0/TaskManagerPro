@@ -1,4 +1,5 @@
-export * from './commentValidator';
+export * from './commentValidators';
 export * from './projectValidators';
 export * from './taskValidators';
-export * from './validators';
+export * from './authValidators';
+export * from './validate';
