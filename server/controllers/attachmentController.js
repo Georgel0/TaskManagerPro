@@ -109,7 +109,7 @@ const uploadAttachment = async (req, res) => {
 
     // Notify task assignee if someone else uploaded
     if (task.assigned_user_id && task.assigned_user_id !== userId) {
-      const allowed = isNotificationAllowed(task.assigned_user_id, 'task_updated');
+      const allowed = await isNotificationAllowed(task.assigned_user_id, 'task_updated');
       if (allowed) {
         await createNotification(
           task.assigned_user_id,

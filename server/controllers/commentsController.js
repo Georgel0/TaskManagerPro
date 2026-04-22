@@ -29,7 +29,7 @@ const createComment = async (req, res) => {
 
     // Notify assigned user
     if (task?.assigned_user_id && !notified.has(task.assigned_user_id)) {
-      const allowed = isNotificationAllowed(task.assigned_user_id, 'comment_added');
+      const allowed = await isNotificationAllowed(task.assigned_user_id, 'comment_added');
       if (allowed) {
         notified.add(task.assigned_user_id);
         await createNotification(
@@ -41,7 +41,7 @@ const createComment = async (req, res) => {
 
     // Notify project owner if not already notified
     if (task?.owner_id && !notified.has(task.owner_id)) {
-      const allowed = isNotificationAllowed(task.owner_id, 'comment_added');
+      const allowed = await isNotificationAllowed(task.owner_id, 'comment_added');
       if (allowed) {
         notified.add(task.owner_id);
         await createNotification(
@@ -126,7 +126,7 @@ const deleteComment = async (req, res) => {
     );
 
     if (commentAuthorId && commentAuthorId !== userId) {
-      const allowed = isNotificationAllowed(commentAuthorId, 'comment_added');
+      const allowed = await isNotificationAllowed(commentAuthorId, 'comment_added');
       if (allowed) {
         await createNotification(
           commentAuthorId,
