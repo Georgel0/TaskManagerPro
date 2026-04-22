@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react'; 
 import { useSearchParams } from 'next/navigation';
 import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from '../components/auth';
 import { ParticleBackground } from '@/components/effects';
 import '@/styles/landingpage.css';
 
-export default function LandingPage() {
+function LandingPageContent() {
   const searchParams = useSearchParams();
   const [view, setView] = useState('login');
 
@@ -101,5 +101,13 @@ export default function LandingPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div className="landing-container">Loading...</div>}>
+      <LandingPageContent />
+    </Suspense>
   );
 }
