@@ -17,7 +17,10 @@ runDeadlineNotifier();
 const app = express();
 
 app.use(cors({
-  origin: '*',
+  origin: [
+    'https://task-manager-pro-demo.vercel.app',
+    'http://localhost:3000'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
