@@ -1,5 +1,5 @@
 const pool = require('../database');
-const { createNotification } = require('./notificationController');
+const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const createProject = async (req, res) => {
   const { name, description } = req.body;
@@ -78,6 +78,7 @@ const updateProject = async (req, res) => {
 
       await Promise.all(
         membersResult.rows.map((m) =>
+          isNotificationAllowed(m.user_id, 'project_changes') &&
           createNotification(m.user_id, `The project "${oldName}" has been renamed to "${name}".`)
         )
       );
@@ -111,6 +112,7 @@ const deleteProject = async (req, res) => {
 
     await Promise.all(
       membersResult.rows.map((m) =>
+        isNotificationAllowed(m.user_id, 'project_changes') &&
         createNotification(m.user_id, `The project "${project.rows[0].name}" has been deleted by the owner.`)
       )
     );
@@ -223,10 +225,13 @@ const addProjectMember = async (req, res) => {
       [id, member.id]
     );
 
-    await createNotification(
-      member.id,
-      `You have been added to the project: ${project.rows[0].name}`
-    );
+    const allowed = isNotificationAllowed(member.id, 'project_changes');
+    if (allowed) {
+      await createNotification(
+        member.id,
+        `You have been added to the project: ${project.rows[0].name}`
+      );
+    }
 
     res.status(200).json({ ...member, role: 'member' });
   } catch (err) {
@@ -254,10 +259,13 @@ const removeProjectMember = async (req, res) => {
       [id, memberId]
     );
 
-    await createNotification(
-      memberId,
-      `You have been removed from the project: ${project.rows[0].name}`
-    );
+    const allowed = isNotificationAllowed(memberId, 'project_changes');
+    if (allowed) {
+      await createNotification(
+        memberId,
+        `You have been removed from the project: ${project.rows[0].name}`
+      );
+    }
 
     res.status(200).json({ message: 'Member removed.' });
   } catch (err) {
@@ -307,14 +315,17 @@ const transferOwnership = async (req, res) => {
 
     await pool.query('COMMIT');
 
+    const allowed = isNotificationAllowed(Number(memberId), 'project_changes');
+    if (allowed) {
+      await createNotification(
+        userId,
+        `You transferred ownership of "${project.rows[0].name}" and are now a member.`
+      );
+    }
+
     await createNotification(
       Number(memberId),
       `You are now the owner of project: ${project.rows[0].name}`
-    );
-
-    await createNotification(
-      userId,
-      `You transferred ownership of "${project.rows[0].name}" and are now a member.`
     );
 
     res.status(200).json({ message: 'Ownership transferred successfully.' });
@@ -356,9 +367,12 @@ const updateRoleDescription = async (req, res) => {
     );
 
     if (owner_id === userId && userId !== parseInt(memberId)) {
-      await createNotification(parseInt(memberId),
-        `Your role in "${projectName}" has been updated.`
-      );
+      const allowed = isNotificationAllowed(parseInt(memberId), 'project_changes');
+      if (allowed) {
+        await createNotification(parseInt(memberId),
+          `Your role in "${projectName}" has been updated.`
+        );
+      }
     }
 
     res.status(200).json({ message: 'Role description updated successfully.' });
@@ -415,11 +429,15 @@ const leaveProject = async (req, res) => {
       membersResult.rows
         .filter((m) => m.id !== userId)
         .map((m) =>
+          isNotificationAllowed(m.id, 'project_changes') &&
           createNotification(m.id, `${userName} left the project "${project.rows[0].name}".`)
         )
     );
 
-    await createNotification(userId, `You left the project "${project.rows[0].name}".`);
+    const allowed = isNotificationAllowed(userId, 'project_changes');
+    if (allowed) {
+      await createNotification(userId, `You left the project "${project.rows[0].name}".`);
+    }
 
     res.status(200).json({ message: 'You have left the project.' });
   } catch (err) {
@@ -496,6 +514,7 @@ const createAnnouncement = async (req, res) => {
       membersResult.rows
         .filter(m => m.user_id !== userId)
         .map((m) =>
+          isNotificationAllowed(m.user_id, 'project_changes') &&
           createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
         )
     );

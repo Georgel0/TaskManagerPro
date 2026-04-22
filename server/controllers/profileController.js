@@ -102,7 +102,7 @@ const changeUsername = async (req, res) => {
     }
 
     await pool.query('UPDATE users SET name = $1 WHERE id = $2', [newUsername, userId]);
-    
+
     await createNotification(userId, `Your username has been changed to "${newUsername}".`);
 
     res.status(200).json({ message: 'Username updated successfully.' });

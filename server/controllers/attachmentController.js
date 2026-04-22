@@ -1,6 +1,6 @@
 const pool = require('../database');
 const cloudinary = require('../config/cloudinary');
-const { createNotification } = require('./notificationController');
+const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const getResourceType = (mimeType) => {
   if (!mimeType) return 'raw';
@@ -73,22 +73,22 @@ const uploadAttachment = async (req, res) => {
 
     // Upload to Cloudinary from buffer
     const uploadResult = await new Promise((resolve, reject) => {
-     const stream = cloudinary.uploader.upload_stream(
-  {
-    folder: `taskmanager/tasks/${taskId}`,
-    resource_type: 'auto',
-    use_filename: true,
-    unique_filename: true,
-  },
-  (error, result) => {
-    if (error) {
-      console.error('Cloudinary error:', error);
-      reject(error);
-    } else {
-      resolve(result);
-    }
-  }
-);
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: `taskmanager/tasks/${taskId}`,
+          resource_type: 'auto',
+          use_filename: true,
+          unique_filename: true,
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary error:', error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
       stream.end(req.file.buffer);
     });
 
@@ -101,7 +101,7 @@ const uploadAttachment = async (req, res) => {
         userId,
         uploadResult.secure_url,
         uploadResult.public_id,
-        safeOriginalName, 
+        safeOriginalName,
         req.file.mimetype,
         req.file.size,
       ]
@@ -109,10 +109,13 @@ const uploadAttachment = async (req, res) => {
 
     // Notify task assignee if someone else uploaded
     if (task.assigned_user_id && task.assigned_user_id !== userId) {
-      await createNotification(
-        task.assigned_user_id,
-        `A file was attached to your task: "${task.title}"`
-      );
+      const allowed = isNotificationAllowed(task.assigned_user_id, 'task_updated');
+      if (allowed) {
+        await createNotification(
+          task.assigned_user_id,
+          `A file was attached to your task: "${task.title}"`
+        );
+      }
     }
 
     res.status(201).json({

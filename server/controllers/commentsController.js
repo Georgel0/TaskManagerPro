@@ -1,5 +1,5 @@
 const pool = require('../database');
-const { createNotification } = require('./notificationController');
+const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const createComment = async (req, res) => {
   const { task_id, comment } = req.body;
@@ -29,20 +29,26 @@ const createComment = async (req, res) => {
 
     // Notify assigned user
     if (task?.assigned_user_id && !notified.has(task.assigned_user_id)) {
-      notified.add(task.assigned_user_id);
-      await createNotification(
-        task.assigned_user_id,
-        `${commenterName} commented on your task: "${task.title}"`
-      );
+      const allowed = isNotificationAllowed(task.assigned_user_id, 'comment_added');
+      if (allowed) {
+        notified.add(task.assigned_user_id);
+        await createNotification(
+          task.assigned_user_id,
+          `${commenterName} commented on your task: "${task.title}"`
+        );
+      }
     }
 
     // Notify project owner if not already notified
     if (task?.owner_id && !notified.has(task.owner_id)) {
-      notified.add(task.owner_id);
-      await createNotification(
-        task.owner_id,
-        `${commenterName} commented on task: "${task.title}"`
-      );
+      const allowed = isNotificationAllowed(task.owner_id, 'comment_added');
+      if (allowed) {
+        notified.add(task.owner_id);
+        await createNotification(
+          task.owner_id,
+          `${commenterName} commented on task: "${task.title}"`
+        );
+      }
     }
 
     res.status(201).json(newComment.rows[0]);
@@ -120,10 +126,13 @@ const deleteComment = async (req, res) => {
     );
 
     if (commentAuthorId && commentAuthorId !== userId) {
-      await createNotification(
-        commentAuthorId,
-        `Your comment was removed by the project moderator.`
-      );
+      const allowed = isNotificationAllowed(commentAuthorId, 'comment_added');
+      if (allowed) {
+        await createNotification(
+          commentAuthorId,
+          `Your comment was removed by the project moderator.`
+        );
+      }
     }
 
     res.status(200).json({ message: 'Comment deleted successfully.' });

@@ -1,5 +1,5 @@
 const pool = require('../database');
-const { createNotification } = require('./notificationController');
+const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const createTask = async (req, res) => {
   const { title, description, status, priority, deadline, project_id, assigned_user_id } = req.body;
@@ -43,10 +43,13 @@ const createTask = async (req, res) => {
     );
 
     if (assigned_user_id && assigned_user_id !== userId) {
-      await createNotification(
-        assigned_user_id,
-        `You have been assigned to a new task: ${title}`
-      );
+      const allowed = isNotificationAllowed(assigned_user_id, 'task_assigned');
+      if (allowed) {
+        await createNotification(
+          assigned_user_id,
+          `You have been assigned to a new task: ${title}`
+        );
+      }
     }
 
     res.status(201).json(newTaskDetails.rows[0]);
@@ -154,12 +157,12 @@ const updateTask = async (req, res) => {
     // Reassigned to someone new
     if (assigned_user_id && assigned_user_id !== oldTask.assigned_user_id) {
       // Notify new assignee
-      if (assigned_user_id !== userId) {
+      if (assigned_user_id !== userId && isNotificationAllowed(assigned_user_id, 'task_assigned')) {
         await createNotification(assigned_user_id, `You have been assigned to the task: "${finalTitle}"`);
       }
 
       // Notify old assignee they were unassigned
-      if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
+      if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId && isNotificationAllowed(oldTask.assigned_user_id, 'task_assigned')) {
         await createNotification(oldTask.assigned_user_id, `You are no longer assigned to "${finalTitle}."`);
       }
     } else if (oldTask.assigned_user_id && oldTask.assigned_user_id !== userId) {
@@ -178,10 +181,16 @@ const updateTask = async (req, res) => {
         const { owner_id, user_name } = taskWithProject.rows[0];
 
         if (owner_id !== userId) {
-          await createNotification(owner_id, `${user_name} completed the task "${finalTitle}".`);
+          const allowed = isNotificationAllowed(owner_id, 'task_completed');
+          if (allowed) {
+            await createNotification(owner_id, `${user_name} completed the task "${finalTitle}".`);
+          }
         }
       } else {
-        await createNotification(oldTask.assigned_user_id, `There was an update to your task: "${finalTitle}"`);
+        const allowed = isNotificationAllowed(oldTask.assigned_user_id, 'task_updated');
+        if (allowed) {
+          await createNotification(oldTask.assigned_user_id, `There was an update to your task: "${finalTitle}"`);
+        }
       }
     }
 
@@ -214,7 +223,7 @@ const deleteTask = async (req, res) => {
 
     await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
 
-    if (taskToDelete.assigned_user_id && taskToDelete.assigned_user_id !== userId) {
+    if (taskToDelete.assigned_user_id && taskToDelete.assigned_user_id !== userId && isNotificationAllowed(taskToDelete.assigned_user_id, 'task_deleted')) {
       await createNotification(
         taskToDelete.assigned_user_id,
         `The task "${taskToDelete.title}" has been deleted.`
