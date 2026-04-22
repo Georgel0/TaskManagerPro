@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { validate } from './authValidators';
+import { validate } from '.';
 
 const projectNameField = z
   .string({ required_error: 'Project name is required.' })

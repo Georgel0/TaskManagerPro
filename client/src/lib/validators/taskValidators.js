@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { validate } from './authValidators';
+import { validate } from '.';
 
 const STATUSES = ['To Do', 'In Progress', 'Done'];
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
