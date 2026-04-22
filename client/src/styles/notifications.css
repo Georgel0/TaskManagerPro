@@ -142,3 +142,9 @@
   color: var(--sec-text-color);
   font-size: 0.9rem;
 }
+
+.push-toggle {
+  display: flex; 
+  gap: 8; 
+  align-items: center;
+}

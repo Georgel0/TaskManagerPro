@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { usePushNotifications } from '@/hooks';
 import '@/styles/notifications.css';
 
 export function NotificationsModal() {
+  const { permission, isSubscribed, subscribe, unsubscribe } = usePushNotifications();
+
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -135,6 +138,19 @@ export function NotificationsModal() {
         <div className="notification-dropdown">
           <div className="notification-header">
             <h4>Notifications</h4>
+
+            <div className="push-toggle">
+              {'Notification' in window && (
+                <button
+                  className="btn-mark-all"
+                  onClick={isSubscribed ? unsubscribe : subscribe}
+                  title={isSubscribed ? 'Disable push notification' : 'Enable push notifications'}
+                >
+                  <i className={`fas ${isSubscribed ? 'fa-bell-slash' : 'fa-bell'}`}></i>
+                </button>
+              )}
+            </div>
+
             {unreadCount > 0 && (
               <button onClick={markAllRead} className="btn-mark-all" title="Mark all as read">
                 <i className="fas fa-check-double"></i>
