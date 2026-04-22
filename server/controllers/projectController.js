@@ -77,10 +77,10 @@ const updateProject = async (req, res) => {
       );
 
       await Promise.all(
-        membersResult.rows.map((m) =>
-          await isNotificationAllowed(m.user_id, 'project_changes') &&
-          createNotification(m.user_id, `The project "${oldName}" has been renamed to "${name}".`)
-        )
+        membersResult.rows.map(async (m) => {
+          const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
+          if (allowed) await createNotification(m.user_id, `The project "${oldName}" has been renamed to "${name}".`);
+        })
       );
     }
 
@@ -111,9 +111,10 @@ const deleteProject = async (req, res) => {
     );
 
     await Promise.all(
-      membersResult.rows.map((m) =>
-        await isNotificationAllowed(m.user_id, 'project_changes') &&
-        createNotification(m.user_id, `The project "${project.rows[0].name}" has been deleted by the owner.`)
+      membersResult.rows.map(async (m) => {
+        const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
+        if (allowed) await createNotification(m.user_id, `The project "${project.rows[0].name}" has been deleted by the owner.`);
+      }
       )
     );
 
@@ -315,18 +316,15 @@ const transferOwnership = async (req, res) => {
 
     await pool.query('COMMIT');
 
-    const allowed = await isNotificationAllowed(Number(memberId), 'project_changes');
-    if (allowed) {
-      await createNotification(
-        userId,
-        `You transferred ownership of "${project.rows[0].name}" and are now a member.`
-      );
+    const oldOwnerAllowed = await isNotificationAllowed(userId, 'project_changes');
+    if (oldOwnerAllowed) {
+      await createNotification(userId, `You transferred ownership of "${project.rows[0].name}" and are now a member.`);
     }
 
-    await createNotification(
-      Number(memberId),
-      `You are now the owner of project: ${project.rows[0].name}`
-    );
+    const newOwnerAllowed = await isNotificationAllowed(Number(memberId), 'project_changes');
+    if (newOwnerAllowed) {
+      await createNotification(Number(memberId), `You are now the owner of project: ${project.rows[0].name}`);
+    }
 
     res.status(200).json({ message: 'Ownership transferred successfully.' });
   } catch (err) {
@@ -348,11 +346,11 @@ const updateRoleDescription = async (req, res) => {
       [projectId]
     );
 
-    const { owner_id, name: projectName } = projectResult.rows[0];
-
     if (projectResult.rows.length === 0) {
       return res.status(404).json({ error: 'Project not found.' });
     }
+
+    const { owner_id, name: projectName } = projectResult.rows[0];
 
     if (projectResult.rows[0].owner_id !== userId && userId !== parseInt(memberId)) {
       return res.status(403).json({ error: 'Not authorized to edit this role.' });
@@ -428,7 +426,7 @@ const leaveProject = async (req, res) => {
     await Promise.all(
       membersResult.rows
         .filter((m) => m.id !== userId)
-        .map((m) =>
+        .map( async (m) =>
           await isNotificationAllowed(m.id, 'project_changes') &&
           createNotification(m.id, `${userName} left the project "${project.rows[0].name}".`)
         )
@@ -513,9 +511,10 @@ const createAnnouncement = async (req, res) => {
     await Promise.all(
       membersResult.rows
         .filter(m => m.user_id !== userId)
-        .map((m) =>
-          await isNotificationAllowed(m.user_id, 'project_changes') &&
-          createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
+        .map(async (m) => {
+          const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
+          if (allowed) await createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
+        }
         )
     );
 
