@@ -1,7 +1,11 @@
+'use client';
+import { Suspense } from 'react';
 import Tasks from './Tasks';
 
-export default function Page() {
+export default function TasksPage() {
   return (
-    <Tasks />
+    <Suspense fallback={<div>Loading your tasks...</div>}>
+      <Tasks />
+    </Suspense>
   );
 }
