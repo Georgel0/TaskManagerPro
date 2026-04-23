@@ -4,7 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-const getToken = () => localStorage.getItem('token');
+const getToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token');
+  }
+  return null;
+};
 
 export function useProjects() {
   const queryClient = useQueryClient();
@@ -20,10 +25,10 @@ export function useProjects() {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
 
-  const { 
-    data: projects = [], 
-    isLoading: loading, 
-    error 
+  const {
+    data: projects = [],
+    isLoading: loading,
+    error
   } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -185,7 +190,7 @@ export function useProjects() {
 
   return {
     projects, setProjects,
-    loading, error: error?.message, 
+    loading, error: error?.message,
     isSubmitting: createMutation.isPending || editMutation.isPending || deleteMutation.isPending,
     selectedProject, setSelectedProject,
     createForm, setCreateForm,
