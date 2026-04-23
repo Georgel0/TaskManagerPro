@@ -1,31 +1,54 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useTasks() {
-
-  const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [projectFilter, setProjectFilter] = useState('');
   const [userFilter, setUserFilter] = useState('');
 
-  const searchParams = useSearchParams();
   const highlightId = searchParams.get('highlight');
   const urlProjectId = searchParams.get('project_id');
   const urlUserId = searchParams.get('user_id');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Fetch Tasks
+  const { 
+    data: tasks = [], 
+    isLoading: isTasksLoading, 
+    error: tasksError 
+  } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/tasks`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      return res.json();
+    },
+  });
+
+  // Fetch Projects
+  const { 
+    data: projects = [], 
+    isLoading: isProjectsLoading,
+    error: projectsError 
+  } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      if (!res.ok) throw new Error('Failed to fetch projects');
+      return res.json();
+    },
+  });
+
+  const loading = isTasksLoading || isProjectsLoading;
+  const error = (tasksError?.message || projectsError?.message) || null;
 
   // Apply URL params once data is loaded
   useEffect(() => {
@@ -48,121 +71,78 @@ export function useTasks() {
         setTimeout(() => el.classList.remove('task-highlight'), 1500);
       }
     }, 150);
-  }, [highlightId, tasks]);
+  }, [highlightId, tasks.length]);
 
-  const fetchData = async () => {
-    const token = getToken();
-    if (!token) return;
-
-    try {
-      const [tasksRes, projectsRes] = await Promise.all([
-        fetch(`${API}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-
-      if (!tasksRes.ok || !projectsRes.ok) throw new Error('Failed to fetch data');
-
-      setTasks(await tasksRes.json());
-      setProjects(await projectsRes.json());
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createTask = async (taskData) => {
-    setIsSubmitting(true);
-
-    try {
+  // Create Task
+  const createMutation = useMutation({
+    mutationFn: async (taskData) => {
       const res = await fetch(`${API}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify(taskData),
       });
-
       if (!res.ok) throw new Error('Failed to create task');
-
-      const newTask = await res.json();
-      setTasks((prev) => [newTask, ...prev]);
-
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Task created successfully!');
-      return true;
-    } catch (err) {
-      toast.error(err.message);
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const updateTask = async (id, taskData) => {
-    setIsSubmitting(true);
-
-    try {
+  // Update Task
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, taskData }) => {
       const res = await fetch(`${API}/tasks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify(taskData),
       });
-
       if (!res.ok) throw new Error('Failed to update task');
-
-      const updatedTask = await res.json();
-
-      setTasks((prev) =>
-        prev.map((t) =>
+      return { updatedTask: await res.json(), taskData };
+    },
+    onSuccess: ({ updatedTask, taskData }) => {
+      // Optimistically update the cache instead of full refetch
+      queryClient.setQueryData(['tasks'], (oldTasks = []) => 
+        oldTasks.map((t) =>
           t.id === updatedTask.id
             ? {
-              ...t,
-              ...updatedTask,
-              assigned_user_name: taskData.assigned_user_id
-                ? taskData.assigned_user_name
-                : null,
-            }
+                ...t,
+                ...updatedTask,
+                assigned_user_name: taskData.assigned_user_id ? taskData.assigned_user_name : null,
+              }
             : t
         )
       );
-
       toast.success('Task updated successfully!');
-      return true;
-    } catch (err) {
-      toast.error(err.message);
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const deleteTask = async (id) => {
-    setIsSubmitting(true);
-
-    try {
+  // Delete Task
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
       const res = await fetch(`${API}/tasks/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       if (!res.ok) throw new Error('Failed to delete task');
-
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-
+      return id;
+    },
+    onSuccess: (deletedId) => {
+      queryClient.setQueryData(['tasks'], (oldTasks = []) => 
+        oldTasks.filter((t) => t.id !== deletedId)
+      );
       toast.success('Task deleted!');
-      return true;
-    } catch (err) {
-      toast.error(err.message);
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  // Users from the currently selected project (for the user dropdown)
+  
   const usersInSelectedProject = useMemo(() => {
     if (!projectFilter) return [];
-
     const projectTasks = tasks.filter((t) => String(t.project_id) === String(projectFilter));
-
     const seen = new Set();
     const users = [];
 
@@ -172,7 +152,6 @@ export function useTasks() {
         users.push({ id: t.assigned_user_id, name: t.assigned_user_name ?? `User #${t.assigned_user_id}` });
       }
     }
-
     return users;
   }, [tasks, projectFilter]);
 
@@ -196,8 +175,8 @@ export function useTasks() {
   const hasActiveFilters = statusFilter !== 'All' || projectFilter !== '' || userFilter !== '';
 
   const handleCommentCountChange = (taskId, amount) => {
-    setTasks((prev) =>
-      prev.map((t) =>
+    queryClient.setQueryData(['tasks'], (oldTasks = []) =>
+      oldTasks.map((t) =>
         t.id === taskId
           ? { ...t, comment_count: Math.max(0, (parseInt(t.comment_count) || 0) + amount) }
           : t
@@ -206,14 +185,37 @@ export function useTasks() {
   };
 
   const handleAttachmentCountChange = (taskId, amount) => {
-    setTasks((prev) =>
-      prev.map((t) =>
+    queryClient.setQueryData(['tasks'], (oldTasks = []) =>
+      oldTasks.map((t) =>
         t.id === taskId
           ? { ...t, attachment_count: Math.max(0, (parseInt(t.attachment_count) || 0) + amount) }
           : t
       )
     );
   };
+
+  const createTask = async (taskData) => {
+    try {
+      await createMutation.mutateAsync(taskData);
+      return true;
+    } catch { return false; }
+  };
+
+  const updateTask = async (id, taskData) => {
+    try {
+      await updateMutation.mutateAsync({ id, taskData });
+      return true;
+    } catch { return false; }
+  };
+
+  const deleteTask = async (id) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      return true;
+    } catch { return false; }
+  };
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   return {
     projects,
@@ -222,7 +224,6 @@ export function useTasks() {
     isSubmitting,
     filteredTasks,
 
-    // filters
     statusFilter, setStatusFilter,
     projectFilter, setProjectFilter,
     userFilter, setUserFilter,
@@ -230,7 +231,6 @@ export function useTasks() {
     hasActiveFilters,
     clearFilters,
 
-    // actions
     createTask,
     updateTask,
     deleteTask,

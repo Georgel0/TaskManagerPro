@@ -1,78 +1,73 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useAttachments(taskId, onAttachmentCountChange) {
-  const [attachments, setAttachments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!taskId) return;
+  // Fetch Attachments
+  const { data: attachments = [], isLoading: loading } = useQuery({
+    queryKey: ['attachments', taskId],
+    queryFn: async () => {
+      const res = await fetch(`${API}/tasks/${taskId}/attachments`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch attachments');
+      return res.json();
+    },
+    enabled: !!taskId,
+  });
 
-    const fetchAttachments = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`${API}/tasks/${taskId}/attachments`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        if (!res.ok) throw new Error('Failed to fetch attachments');
-        setAttachments(await res.json());
-      } catch (err) {
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Upload Attachment
+  const uploadMutation = useMutation({
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
 
-    fetchAttachments();
-  }, [taskId]);
-
-  const uploadAttachment = async (file) => {
-    setIsUploading(true);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
       const res = await fetch(`${API}/tasks/${taskId}/attachments`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${getToken()}` },
         body: formData,
-        // No Content-Type header — let browser set it with the boundary
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
-
-      setAttachments((prev) => [data, ...prev]);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attachments', taskId] });
       onAttachmentCountChange?.(1);
       toast.success('File uploaded!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const deleteAttachment = async (id) => {
-    try {
+  // Delete Attachment
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
       const res = await fetch(`${API}/attachments/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to delete attachment');
-
-      setAttachments((prev) => prev.filter((a) => a.id !== id));
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attachments', taskId] });
       onAttachmentCountChange?.(-1);
       toast.success('Attachment removed.');
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  return { attachments, loading, isUploading, uploadAttachment, deleteAttachment };
+  return {
+    attachments,
+    loading,
+    isUploading: uploadMutation.isPending,
+    uploadAttachment: uploadMutation.mutate,
+    deleteAttachment: deleteMutation.mutate,
+  };
 }

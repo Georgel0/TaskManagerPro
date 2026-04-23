@@ -1,44 +1,32 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useComments(taskId) {
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
 
-  useEffect(() => {
-    if (!taskId) return;
-    fetchComments();
-  }, [taskId]);
-
-  const fetchComments = async () => {
-    setLoading(true);
-
-    try {
+  // Fetch Comments
+  const { data: comments = [], isLoading: loading } = useQuery({
+    queryKey: ['comments', taskId],
+    queryFn: async () => {
       const res = await fetch(`${API}/comments/${taskId}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       if (!res.ok) throw new Error('Failed to fetch comments');
+      return res.json();
+    },
+    enabled: !!taskId,
+  });
 
-      setComments(await res.json());
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createComment = async (comment) => {
-    setIsSubmitting(true);
-
-    try {
+  // Create Comment
+  const createMutation = useMutation({
+    mutationFn: async (comment) => {
       const res = await fetch(`${API}/comments`, {
         method: 'POST',
         headers: {
@@ -47,18 +35,51 @@ export function useComments(taskId) {
         },
         body: JSON.stringify({ task_id: taskId, comment }),
       });
-
       if (!res.ok) throw new Error('Failed to post comment');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', taskId] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-      const newComment = await res.json();
+  // Edit Comment
+  const editMutation = useMutation({
+    mutationFn: async ({ id, text }) => {
+      const res = await fetch(`${API}/comments/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ comment: text }),
+      });
+      if (!res.ok) throw new Error('Failed to update comment');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', taskId] });
+      cancelEdit();
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-      setComments((prev) => [...prev, newComment]);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Delete Comment
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`${API}/comments/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete comment');
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', taskId] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const startEdit = (comment) => {
     setEditingId(comment.id);
@@ -72,51 +93,11 @@ export function useComments(taskId) {
 
   const saveEdit = async (id) => {
     if (!editText.trim()) return;
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch(`${API}/comments/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ comment: editText }),
-      });
-
-      if (!res.ok) throw new Error('Failed to update comment');
-
-      const updated = await res.json();
-
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === updated.id
-            ? { ...c, comment: updated.comment, updated_at: updated.updated_at }
-            : c
-        )
-      );
-      cancelEdit();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    editMutation.mutate({ id, text: editText });
   };
 
-  const deleteComment = async (id) => {
-    try {
-      const res = await fetch(`${API}/comments/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-
-      if (!res.ok) throw new Error('Failed to delete comment');
-
-      setComments((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+  const isSubmitting =
+    createMutation.isPending || editMutation.isPending || deleteMutation.isPending;
 
   return {
     comments,
@@ -125,10 +106,10 @@ export function useComments(taskId) {
     editingId,
     editText,
     setEditText,
-    createComment,
+    createComment: createMutation.mutate,
     startEdit,
     cancelEdit,
     saveEdit,
-    deleteComment,
+    deleteComment: deleteMutation.mutate,
   };
 }
