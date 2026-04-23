@@ -2,13 +2,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { useApp } from '@/context';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useTasks() {
-  const { user } = useApp();
 
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);

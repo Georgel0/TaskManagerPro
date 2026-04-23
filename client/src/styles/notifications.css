@@ -71,6 +71,12 @@
   color: var(--pri-text-color);
 }
 
+.notif-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .btn-mark-all {
   font-size: 1rem;
   cursor: pointer;
