@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -9,109 +9,98 @@ const sortAnnouncements = (list) =>
   [...list].sort((a, b) => b.is_pinned - a.is_pinned || new Date(b.created_at) - new Date(a.created_at));
 
 export function useAnnouncements(projectId, onAnnouncementCreated, onAnnouncementDeleted) {
-  const [announcements, setAnnouncements] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!projectId) return;
+  // Fetch Announcements
+  const { data: announcements = [], isLoading: loadingAnnouncements } = useQuery({
+    queryKey: ['projects', projectId, 'announcements'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/projects/${projectId}/announcements`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch broadcasts');
+      const data = await res.json();
+      return sortAnnouncements(data);
+    },
+    enabled: !!projectId,
+  });
 
-    const fetchAnnouncements = async () => {
-      setLoading(true);
-
-      try {
-        const res = await fetch(`${API}/projects/${projectId}/announcements`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-
-        if (!res.ok) throw new Error('Failed to fetch broadcasts');
-
-        setAnnouncements(sortAnnouncements(await res.json()));
-      } catch (err) {
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnnouncements();
-  }, [projectId]);
-
-  const handleCreateAnnouncement = async (formData) => {
-    try {
+  // Create Announcement
+  const createMutation = useMutation({
+    mutationFn: async (formData) => {
       const res = await fetch(`${API}/projects/${projectId}/announcements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify(formData),
       });
-
       if (!res.ok) throw new Error('Failed to post broadcast');
-
-      // Refetch to get joined data (author_name, ack_count, total_members)
-      const fetchRes = await fetch(`${API}/projects/${projectId}/announcements`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (fetchRes.ok) {
-        const data = await fetchRes.json();
-        setAnnouncements(sortAnnouncements(data));
-      }
-
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'announcements'] });
       toast.success('Broadcast posted!');
       onAnnouncementCreated?.();
-      return true;
-    } catch (err) {
-      toast.error(err.message);
-      return false;
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleAcknowledge = async (announcementId) => {
-    try {
+  // Acknowledge Announcement
+  const acknowledgeMutation = useMutation({
+    mutationFn: async (announcementId) => {
       const res = await fetch(`${API}/projects/${projectId}/announcements/${announcementId}/acknowledge`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to update acknowledgment');
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate to ensure UI reflects new ack_count and is_acknowledged status
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'announcements'] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-      const { acknowledged } = await res.json();
-
-      setAnnouncements((prev) => prev.map((a) => {
-        if (a.id === announcementId) {
-          return {
-            ...a,
-            is_acknowledged: acknowledged,
-            ack_count: acknowledged ? a.ack_count + 1 : Math.max(0, a.ack_count - 1)
-          };
-        }
-        return a;
-      }));
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
-
-  const deleteAnnouncement = async (id) => {
-    try {
+  // Delete Announcement
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
       const res = await fetch(`${API}/projects/${projectId}/announcements/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-
       if (!res.ok) throw new Error('Failed to delete on the server');
-
-      setAnnouncements(prev => prev.filter(n => n.id !== id));
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'announcements'] });
       onAnnouncementDeleted?.();
       toast.success('Announcement deleted');
-    } catch (err) {
-      toast.error('Could not delete Announcement.');
-      console.error(err);
+    },
+    onError: () => toast.error('Could not delete Announcement.'),
+  });
+
+  const handleCreateAnnouncement = async (formData) => {
+    try {
+      await createMutation.mutateAsync(formData);
+      return true;
+    } catch {
+      return false;
     }
+  };
+
+  const handleAcknowledge = (announcementId) => {
+    acknowledgeMutation.mutate(announcementId);
+  };
+
+  const deleteAnnouncement = (id) => {
+    deleteMutation.mutate(id);
   };
 
   return {
     announcements,
-    loadingAnnouncements: loading,
+    loadingAnnouncements,
     handleCreateAnnouncement,
     handleAcknowledge,
-    deleteAnnouncement
+    deleteAnnouncement,
   };
 }

@@ -1,15 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useProjects() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const [selectedProject, setSelectedProject] = useState(null);
   const [createForm, setCreateForm] = useState({ name: '', description: '' });
@@ -22,37 +20,49 @@ export function useProjects() {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
 
-  const [projectTasks, setProjectTasks] = useState([]);
-  const [loadingTasks, setLoadingTasks] = useState(false);
-
-  useEffect(() => { fetchProjects(); }, []);
-
-  const fetchProjects = async () => {
-    const token = getToken();
-    if (!token) { setLoading(false); return; }
-
-    try {
+  const { 
+    data: projects = [], 
+    isLoading: loading, 
+    error 
+  } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
       const res = await fetch(`${API}/projects`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to fetch projects');
-      setProjects(await res.json());
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+      return res.json();
+    },
+    enabled: !!getToken(),
+  });
+
+  // Helper to maintain compatibility with other hooks that call setProjects()
+  const setProjects = (updater) => {
+    queryClient.setQueryData(['projects'], (oldData) => {
+      return typeof updater === 'function' ? updater(oldData || []) : updater;
+    });
   };
 
-  const handleCreate = async (e, pendingMembers = []) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Only fetches when the Tasks modal is open and a project is selected
+  const { data: projectTasks = [], isFetching: loadingTasks } = useQuery({
+    queryKey: ['projects', selectedProject?.id, 'tasks'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/tasks?project_id=${selectedProject.id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      return res.json();
+    },
+    enabled: isTasksModalOpen && !!selectedProject?.id,
+  });
 
-    try {
+  // Create Project
+  const createMutation = useMutation({
+    mutationFn: async ({ form, pendingMembers }) => {
       const res = await fetch(`${API}/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify(createForm),
+        body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Failed to create project');
       const newProject = await res.json();
@@ -68,72 +78,67 @@ export function useProjects() {
           )
         );
       }
-
-      setProjects((prev) => [
-        { ...newProject, task_count: 0, member_count: 1 + pendingMembers.length },
-        ...prev,
-      ]);
+      return newProject;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       setIsCreateModalOpen(false);
       setCreateForm({ name: '', description: '' });
-
       toast.success('Project created successfully!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
+  // Edit Project
+  const editMutation = useMutation({
+    mutationFn: async (form) => {
       const res = await fetch(`${API}/projects/${selectedProject.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Failed to update project');
-
-      const updated = await res.json();
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === updated.id ? { ...p, name: updated.name, description: updated.description } : p
-        )
-      );
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       setIsEditModalOpen(false);
       setSelectedProject(null);
-
       toast.success('Project updated successfully!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleDelete = async () => {
-    if (!selectedProject?.id) return;
-    setIsSubmitting(true);
-
-    try {
+  // Delete Project
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
       const res = await fetch(`${API}/projects/${selectedProject.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to delete project');
-
-      setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       setIsDeleteModalOpen(false);
       setSelectedProject(null);
-
       toast.success('Project deleted!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleCreate = (e, pendingMembers = []) => {
+    e.preventDefault();
+    createMutation.mutate({ form: createForm, pendingMembers });
+  };
+
+  const handleEdit = (e) => {
+    e.preventDefault();
+    editMutation.mutate(editForm);
+  };
+
+  const handleDelete = () => {
+    deleteMutation.mutate();
   };
 
   const openEdit = (project) => {
@@ -152,42 +157,9 @@ export function useProjects() {
     setIsAnnouncementsModalOpen(true);
   };
 
-  const handleAnnouncementCreated = (projectId) => {
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.id === projectId
-          ? { ...p, announcement_count: (p.announcement_count ?? 0) + 1 }
-          : p
-      )
-    );
-  };
-
-  const handleAnnouncementDeleted = (projectId) => {
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.id === projectId
-          ? { ...p, announcement_count: Math.max(0, (p.announcement_count ?? 0) - 1) }
-          : p
-      )
-    );
-  };
-
-  const openTasks = async (project) => {
+  const openTasks = (project) => {
     setSelectedProject(project);
     setIsTasksModalOpen(true);
-    setLoadingTasks(true);
-
-    try {
-      const res = await fetch(`${API}/tasks?project_id=${project.id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error('Failed to fetch tasks');
-      setProjectTasks(await res.json());
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoadingTasks(false);
-    }
   };
 
   const openMembers = (project) => {
@@ -195,9 +167,26 @@ export function useProjects() {
     setIsMembersModalOpen(true);
   };
 
+  const handleAnnouncementCreated = (projectId) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, announcement_count: (p.announcement_count ?? 0) + 1 } : p
+      )
+    );
+  };
+
+  const handleAnnouncementDeleted = (projectId) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, announcement_count: Math.max(0, (p.announcement_count ?? 0) - 1) } : p
+      )
+    );
+  };
+
   return {
     projects, setProjects,
-    loading, error, isSubmitting,
+    loading, error: error?.message, 
+    isSubmitting: createMutation.isPending || editMutation.isPending || deleteMutation.isPending,
     selectedProject, setSelectedProject,
     createForm, setCreateForm,
     editForm, setEditForm,
@@ -206,8 +195,7 @@ export function useProjects() {
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
-    isAnnouncementsModalOpen,
-    setIsAnnouncementsModalOpen,
+    isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete,
     openEdit, openDelete, openTasks, openMembers,

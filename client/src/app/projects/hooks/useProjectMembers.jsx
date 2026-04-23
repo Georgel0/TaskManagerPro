@@ -1,111 +1,92 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 export function useProjectMembers(selectedProject, setProjects) {
-  const [projectMembers, setProjectMembers] = useState([]);
-  const [loadingMembers, setLoadingMembers] = useState(false);
+  const queryClient = useQueryClient();
+  const projectId = selectedProject?.id;
 
-  useEffect(() => {
-    if (!selectedProject?.id) return;
+  // Fetch Members
+  const { data: projectMembers = [], isLoading: loadingMembers } = useQuery({
+    queryKey: ['projects', projectId, 'members'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/projects/${projectId}/members`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch members');
+      return res.json();
+    },
+    enabled: !!projectId,
+  });
 
-    const fetchMembers = async () => {
-      setLoadingMembers(true);
-      try {
-        const res = await fetch(`${API}/projects/${selectedProject.id}/members`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        if (!res.ok) throw new Error('Failed to fetch members');
-        setProjectMembers(await res.json());
-      } catch (err) {
-        toast.error(err.message);
-      } finally {
-        setLoadingMembers(false);
-      }
-    };
-
-    fetchMembers();
-  }, [selectedProject?.id]);
-
-  const handleAddMember = async (email) => {
-    try {
-      const res = await fetch(`${API}/projects/${selectedProject.id}/members`, {
+  // Add Member
+  const addMemberMutation = useMutation({
+    mutationFn: async (email) => {
+      const res = await fetch(`${API}/projects/${projectId}/members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to add member');
-
-      setProjectMembers((prev) => [...prev, data]);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'members'] });
       setProjects((prev) =>
         prev.map((p) =>
-          p.id === selectedProject.id ? { ...p, member_count: (p.member_count ?? 1) + 1 } : p
+          p.id === projectId ? { ...p, member_count: (p.member_count ?? 1) + 1 } : p
         )
       );
-      
       toast.success(`${data.name} added to the project!`);
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleRemoveMember = async (memberId) => {
-    try {
-      const res = await fetch(`${API}/projects/${selectedProject.id}/members/${memberId}`, {
+  // Remove Member
+  const removeMemberMutation = useMutation({
+    mutationFn: async (memberId) => {
+      const res = await fetch(`${API}/projects/${projectId}/members/${memberId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to remove member');
-
-      setProjectMembers((prev) => prev.filter((m) => m.id !== memberId));
+      return memberId;
+    },
+    onSuccess: (memberId) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'members'] });
       setProjects((prev) =>
         prev.map((p) =>
-          p.id === selectedProject.id
+          p.id === projectId
             ? { ...p, member_count: Math.max((p.member_count ?? 1) - 1, 1) }
             : p
         )
       );
-
       toast.success('Member removed.');
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleTransferOwnership = async (memberId, setSelectedProject) => {
-    try {
-      const res = await fetch(
-        `${API}/projects/${selectedProject.id}/members/${memberId}/transfer`,
-        { method: 'PUT', headers: { Authorization: `Bearer ${getToken()}` } }
-      );
+  // Transfer Ownership
+  const transferMutation = useMutation({
+    mutationFn: async ({ memberId }) => {
+      const res = await fetch(`${API}/projects/${projectId}/members/${memberId}/transfer`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       if (!res.ok) throw new Error('Failed to transfer ownership.');
+      return memberId;
+    },
+    // Handle setSelectedProject inside the wrapper to keep the signature same
+    onError: (err) => toast.error(err.message),
+  });
 
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === selectedProject.id ? { ...p, owner_id: memberId } : p
-        )
-      );
-      setProjectMembers((prev) =>
-        prev.map((m) => {
-          if (m.role === 'owner') return { ...m, role: 'member' };
-          if (m.id === memberId) return { ...m, role: 'owner' };
-          return m;
-        })
-      );
-      setSelectedProject((prev) => ({ ...prev, owner_id: memberId }));
-
-      toast.success('Ownership transferred successfully.');
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
-
-  const handleProjectLeave = async (projectToLeave, setSelectedProject) => {
-    try {
+  // Leave Project
+  const leaveMutation = useMutation({
+    mutationFn: async (projectToLeave) => {
       const res = await fetch(`${API}/projects/${projectToLeave.id}/leave`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -114,39 +95,62 @@ export function useProjectMembers(selectedProject, setProjects) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to leave.');
       }
-
+      return projectToLeave;
+    },
+    onSuccess: (projectToLeave) => {
       setProjects((prev) => prev.filter((p) => p.id !== projectToLeave.id));
-      setSelectedProject(null);
-
       toast.success(`You left "${projectToLeave.name}".`);
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleUpdateRoleDescription = async (memberId, description) => {
-    try {
-      const res = await fetch(
-        `${API}/projects/${selectedProject.id}/members/${memberId}/role`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-          body: JSON.stringify({ role_description: description }),
-        }
-      );
+  // Update Role Description 
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ memberId, description }) => {
+      const res = await fetch(`${API}/projects/${projectId}/members/${memberId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({ role_description: description }),
+      });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to update role description');
       }
-
-      setProjectMembers((prev) =>
-        prev.map((m) => m.id === memberId ? { ...m, role_description: description } : m)
-      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'members'] });
       toast.success('Role description updated!');
-    } catch (err) {
-      toast.error(err.message);
-    }
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleAddMember = (email) => addMemberMutation.mutate(email);
+
+  const handleRemoveMember = (memberId) => removeMemberMutation.mutate(memberId);
+
+  const handleTransferOwnership = async (memberId, setSelectedProject) => {
+    transferMutation.mutate({ memberId }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'members'] });
+        setProjects((prev) =>
+          prev.map((p) => (p.id === projectId ? { ...p, owner_id: memberId } : p))
+        );
+        setSelectedProject((prev) => ({ ...prev, owner_id: memberId }));
+        toast.success('Ownership transferred successfully.');
+      }
+    });
   };
+
+  const handleProjectLeave = (projectToLeave, setSelectedProject) => {
+    leaveMutation.mutate(projectToLeave, {
+      onSuccess: () => {
+        setSelectedProject(null);
+      }
+    });
+  };
+
+  const handleUpdateRoleDescription = (memberId, description) => 
+    updateRoleMutation.mutate({ memberId, description });
 
   return {
     projectMembers,
