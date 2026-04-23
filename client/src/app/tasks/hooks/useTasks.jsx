@@ -20,10 +20,10 @@ export function useTasks() {
   const urlUserId = searchParams.get('user_id');
 
   // Fetch Tasks
-  const { 
-    data: tasks = [], 
-    isLoading: isTasksLoading, 
-    error: tasksError 
+  const {
+    data: tasks = [],
+    isLoading: isTasksLoading,
+    error: tasksError
   } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
@@ -34,10 +34,10 @@ export function useTasks() {
   });
 
   // Fetch Projects
-  const { 
-    data: projects = [], 
+  const {
+    data: projects = [],
     isLoading: isProjectsLoading,
-    error: projectsError 
+    error: projectsError
   } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -84,8 +84,8 @@ export function useTasks() {
       if (!res.ok) throw new Error('Failed to create task');
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (newTask) => {
+      queryClient.setQueryData(['tasks'], (oldTasks = []) => [newTask, ...oldTasks]);
       toast.success('Task created successfully!');
     },
     onError: (err) => toast.error(err.message),
@@ -104,14 +104,14 @@ export function useTasks() {
     },
     onSuccess: ({ updatedTask, taskData }) => {
       // Optimistically update the cache instead of full refetch
-      queryClient.setQueryData(['tasks'], (oldTasks = []) => 
+      queryClient.setQueryData(['tasks'], (oldTasks = []) =>
         oldTasks.map((t) =>
           t.id === updatedTask.id
             ? {
-                ...t,
-                ...updatedTask,
-                assigned_user_name: taskData.assigned_user_id ? taskData.assigned_user_name : null,
-              }
+              ...t,
+              ...updatedTask,
+              assigned_user_name: taskData.assigned_user_id ? taskData.assigned_user_name : null,
+            }
             : t
         )
       );
@@ -131,7 +131,7 @@ export function useTasks() {
       return id;
     },
     onSuccess: (deletedId) => {
-      queryClient.setQueryData(['tasks'], (oldTasks = []) => 
+      queryClient.setQueryData(['tasks'], (oldTasks = []) =>
         oldTasks.filter((t) => t.id !== deletedId)
       );
       toast.success('Task deleted!');
@@ -139,7 +139,7 @@ export function useTasks() {
     onError: (err) => toast.error(err.message),
   });
 
-  
+
   const usersInSelectedProject = useMemo(() => {
     if (!projectFilter) return [];
     const projectTasks = tasks.filter((t) => String(t.project_id) === String(projectFilter));

@@ -37,8 +37,8 @@ export function useAttachments(taskId, onAttachmentCountChange) {
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attachments', taskId] });
+    onSuccess: (newAttachment) => {
+      queryClient.setQueryData(['attachments', taskId], (prev = []) => [newAttachment, ...prev]);
       onAttachmentCountChange?.(1);
       toast.success('File uploaded!');
     },
@@ -55,10 +55,13 @@ export function useAttachments(taskId, onAttachmentCountChange) {
       if (!res.ok) throw new Error('Failed to delete attachment');
       return id;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attachments', taskId] });
+    onSuccess: (_, deletedId) => {
+      queryClient.setQueryData(['attachments', taskId], (prev = []) =>
+        prev.filter((a) => a.id !== deletedId)
+      );
       onAttachmentCountChange?.(-1);
       toast.success('Attachment removed.');
+      return id;
     },
     onError: (err) => toast.error(err.message),
   });
