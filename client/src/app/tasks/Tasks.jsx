@@ -8,6 +8,48 @@ import './styles/task-item.css';
 import './styles/task-modals.css';
 import './styles/tasks-layout.css';
 
+const TasksSkeleton = () => (
+  <div className="page-content">
+    <header className="dashboard-header" style={{ padding: '0 20px' }}>
+      <div style={{ width: '100%' }}>
+        <div className="skeleton skeleton-title" style={{ width: '30%' }}></div>
+        <div className="skeleton skeleton-subtitle" style={{ width: '20%' }}></div>
+      </div>
+      <div className="dashboard-header-actions">
+        <div className="skeleton skeleton-btn"></div>
+      </div>
+    </header>
+
+    <div className="skeleton-filter-bar">
+      <div className="skeleton skeleton-filter-item"></div>
+      <div className="skeleton skeleton-filter-item"></div>
+      <div className="skeleton skeleton-filter-item"></div>
+      <div className="skeleton skeleton-btn" style={{ width: '100px' }}></div>
+    </div>
+
+    <div className="tasks-container" style={{ padding: '0 20px' }}>
+      <div className="card">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="skeleton-task-row">
+            <div style={{ flex: 1 }}>
+              <div className="skeleton" style={{ width: '40%', height: '20px', marginBottom: '10px' }}></div>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <div className="skeleton" style={{ width: '80px', height: '12px' }}></div>
+                <div className="skeleton" style={{ width: '80px', height: '12px' }}></div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div className="skeleton" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
+              <div className="skeleton" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
+              <div className="skeleton" style={{ width: '30px', height: '30px', borderRadius: '4px' }}></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default function Tasks() {
   const { user } = useApp();
   const {
@@ -37,12 +79,9 @@ export default function Tasks() {
     if (success) closeModal();
   };
 
-  if (loading || !user) return (
-    <div className="loading-state">
-      <div className="pulse-ring"></div>
-      <p>Loading Tasks...</p>
-    </div>
-  );
+  if (loading) {
+    return <TasksSkeleton />;
+  }
 
   return (
     <div className="page-content">
@@ -156,7 +195,7 @@ export default function Tasks() {
           projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
         }
         onAttachmentCountChange={(amount) => handleAttachmentCountChange(modalState.task?.id, amount)}
-      />    
+      />
     </div>
   );
 }
