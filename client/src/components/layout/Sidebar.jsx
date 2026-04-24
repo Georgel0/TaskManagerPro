@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
             className={`nav-link ${pathname === p.path ? 'active' : ''}`}
             title={p.label}
             onClick={() => {
-              if (window.innerHeight > 768) toggleSidebar();
+              if (window.innerWidth > 768) toggleSidebar();
             }}
           >
             <i className={p.icon}></i>

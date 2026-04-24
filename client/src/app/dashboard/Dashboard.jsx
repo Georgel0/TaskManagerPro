@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { formatDate } from '@/lib';
 import { useDashboard } from './useDashboard';
-import { QuickTaskModal } from './QuickTaskModal';
+import { QuickTaskModal, DashboardSkeleton } from './components';
 import './dashboard.css';
 
 const getUrgencyText = (deadlineDate) => {
@@ -29,12 +29,7 @@ export default function Dashboard() {
   } = useDashboard();
 
   if (loading || !user) {
-    return (
-      <div className='loading-state' title="Loading workspace data">
-        <div className="pulse-ring"></div>
-        <p>Loading Dashboard...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {
