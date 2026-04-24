@@ -220,11 +220,6 @@
   animation-delay: -5s;
 }
 
-@keyframes shapeFloat {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50%       { transform: translateY(-28px) scale(1.04); }
-}
-
 .auth-card {
   background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 60%, #f8fafc 100%);
   backdrop-filter: blur(12px);
@@ -266,7 +261,7 @@
   margin-top: 12px;
 }
 
-.auth-footer-nav > button {
+.auth-footer-nav>button {
   background: none;
   color: var(--accent-color);
   border: none;
@@ -276,7 +271,7 @@
   transition: var(--transition);
 }
 
-.auth-footer-nav > button:hover {
+.auth-footer-nav>button:hover {
   color: var(--accent-hover);
 }
 
@@ -325,6 +320,40 @@
 .has-error .form-control {
   border-color: var(--error-color) !important;
   background-color: color-mix(in srgb, var(--error-color) 5%, transparent);
+}
+
+.lp-form-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 1rem;
+  color: #0f172a;
+  z-index: 10;
+}
+
+.lp-form-loader>i {
+  font-size: 2.5rem;
+  color: #6366f1;
+}
+
+.lp-form-loader>p {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes shapeFloat {
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-28px) scale(1.04);
+  }
 }
 
 @media (max-width: 900px) {

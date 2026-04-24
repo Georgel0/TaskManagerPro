@@ -5,7 +5,7 @@ import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from '@/comp
 import { ParticleBackground } from '@/components/effects';
 import '@/styles/landingpage.css';
 
-function LandingPageContent() {
+function AuthForms() {
   const searchParams = useSearchParams();
   const [view, setView] = useState('login');
 
@@ -13,6 +13,25 @@ function LandingPageContent() {
     if (searchParams.get('token')) setView('reset');
   }, [searchParams]);
 
+  return (
+    <>
+      {view === 'login' && <LoginRegisterForm onForgotClick={() => setView('forgot')} />}
+      {view === 'forgot' && <ForgotPasswordForm onBack={() => setView('login')} />}
+      {view === 'reset' && ( <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />)}
+    </>
+  );
+}
+
+function FormLoader() {
+  return (
+    <div  className="lp-form-loader">
+      <i className="fas fa-circle-notch fa-spin"></i>
+      <p>Preparing workspace...</p>
+    </div>
+  );
+}
+
+export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="landing-content">
@@ -93,21 +112,13 @@ function LandingPageContent() {
 
         <section className="auth-column">
           <ParticleBackground />
-
-          {view === 'login' && <LoginRegisterForm onForgotClick={() => setView('forgot')} />}
-          {view === 'forgot' && <ForgotPasswordForm onBack={() => setView('login')} />}
-          {view === 'reset' && ( <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />)}
+          
+          <Suspense fallback={<FormLoader />}>
+            <AuthForms />
+          </Suspense>
         </section>
 
       </div>
     </div>
-  );
-}
-
-export default function LandingPage() {
-  return (
-    <Suspense fallback={<div className="landing-container">Loading...</div>}>
-      <LandingPageContent />
-    </Suspense>
   );
 }
