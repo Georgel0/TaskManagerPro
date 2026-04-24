@@ -2,10 +2,16 @@ const pool = require('../database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { Resend } = require('resend');
 const { createNotification } = require('./notificationController');
+const nodemailer = require('nodemailer');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -50,7 +56,7 @@ const loginUser = async (req, res) => {
 
     const user = userResult.rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) { 
+    if (!isMatch) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
@@ -68,10 +74,9 @@ const loginUser = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
-
+  
   try {
     const userResult = await pool.query('SELECT id, name FROM users WHERE email = $1', [email]);
-
     if (userResult.rows.length === 0) {
       return res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
     }
@@ -87,34 +92,26 @@ const forgotPassword = async (req, res) => {
     );
 
     const resetLink = `${process.env.CLIENT_URL}/?token=${plainToken}&id=${user.id}`;
-    await resend.emails.send({
-      from: 'Task Manager <onboarding@resend.dev>',
+
+    await transporter.sendMail({
+      from: `"Task Manager Pro" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Reset your password.',
-      html: ` 
+      subject: 'Reset your password',
+      html: `
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
           <h2>Reset your password</h2>
-          <p>Hi ${user.name},</p>
-          <p>We received a request to reset your password. Click the button below to choose a new one.</p>
-          <a href="${resetLink}"
-            style="display: inline-block; padding: 12px 24px; background-color: #0984e3;
-              color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">
+          <p>Hi ${user.name}, click the button below to reset your password.</p>
+          <a href="${resetLink}" style="padding: 12px 24px; background-color: #0984e3; color: white; text-decoration: none; border-radius: 6px;">
             Reset Password
           </a>
-          <p style="color: #666; font-size: 0.85rem;">
-            This link expires in 15 minutes. If you didn't request this, you can safely ignore this email.
-          </p>
-          <p style="color: #666; font-size: 0.85rem;">
-            Or copy this link: ${resetLink}
-          </p>
         </div>
       `
     });
 
     res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
   } catch (err) {
-    res.status(500).json({ error: 'Server error while processing password reset.' });
     console.error(err);
+    res.status(500).json({ error: 'Server error while processing password reset.' });
   }
 };
 
