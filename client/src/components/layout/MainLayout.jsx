@@ -11,7 +11,7 @@ import { NotificationsModal } from '../ui/NotificationsModal';
 export function MainLayout({ children }) {
   const { user, loading } = useApp();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const router = useRouter();
