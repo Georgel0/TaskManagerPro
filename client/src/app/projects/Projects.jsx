@@ -12,15 +12,15 @@ import './styles/member-detail.css';
 
 const ProjectsSkeleton = () => (
   <div className="page-content">
-    <header className="dashboard-header" style={{ padding: '0 20px' }}>
+    <div className="projects-header" style={{ padding: '0 20px' }}>
       <div style={{ width: '100%' }}>
         <div className="skeleton skeleton-title"></div>
         <div className="skeleton skeleton-subtitle" style={{ width: '15%' }}></div>
       </div>
-      <div className="dashboard-header-actions">
+      <div className="project-header-actions">
         <div className="skeleton skeleton-btn"></div>
       </div>
-    </header>
+    </div>
 
     <div className="skeleton-project-grid">
       {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -43,11 +43,11 @@ const ProjectsSkeleton = () => (
 );
 
 export default function Projects() {
-  const { user } = useApp();
+  const { user, loading: appLoading } = useApp();
 
   const {
     projects, setProjects,
-    loading, error, isSubmitting,
+    loading: projectsLoading, error, isSubmitting,
     selectedProject, setSelectedProject,
     createForm, setCreateForm,
     editForm, setEditForm,
@@ -78,11 +78,11 @@ export default function Projects() {
   const handleProjectLeave = (project) =>
     _handleProjectLeave(project, setSelectedProject);
 
-  if (loading) {
+  if (appLoading || projectsLoading || !user) {
     return <ProjectsSkeleton />;
   }
 
-  if (!loading && !projects) {
+  if (!projectsLoading && !projects) {
     return (
       <div className="error-state">
         <i className="fas fa-exclamation-triangle"></i>

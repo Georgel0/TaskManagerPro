@@ -5,9 +5,9 @@
 }
 
 .profile-header-content {
-  max-width: 1600px; 
+  max-width: 1600px;
   padding: 0 5%;
-  margin: 40px auto 0 auto; 
+  margin: 40px auto 20px auto;
 }
 
 .profile-header-content h1 {
@@ -28,7 +28,7 @@
 .profile-layout {
   width: 100%;
   max-width: 1600px;
-  margin: 0px auto 0 auto; 
+  margin: 0px auto 0 auto;
   padding: 5%;
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -197,8 +197,13 @@
   align-items: flex-start;
 }
 
-.btn-full { width: 100%; }
-.mt-4 { margin-top: 24px; }
+.btn-full {
+  width: 100%;
+}
+
+.mt-4 {
+  margin-top: 24px;
+}
 
 .danger-modal .modal-header {
   background-color: color-mix(in srgb, var(--error-color) 10%, transparent);
@@ -344,9 +349,20 @@
   color: var(--sec-text-color);
 }
 
-.profile-stat-row-icon-warning { background: color-mix(in srgb, var(--warning-color) 15%, transparent); color: var(--warning-color); }
-.profile-stat-row-icon-error   { background: color-mix(in srgb, var(--error-color) 15%, transparent);   color: var(--error-color);   }
-.profile-stat-row-icon-accent  { background: color-mix(in srgb, var(--accent-color) 15%, transparent);  color: var(--accent-color);  }
+.profile-stat-row-icon-warning {
+  background: color-mix(in srgb, var(--warning-color) 15%, transparent);
+  color: var(--warning-color);
+}
+
+.profile-stat-row-icon-error {
+  background: color-mix(in srgb, var(--error-color) 15%, transparent);
+  color: var(--error-color);
+}
+
+.profile-stat-row-icon-accent {
+  background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+  color: var(--accent-color);
+}
 
 .profile-stat-row-label {
   flex: 1;
@@ -362,9 +378,17 @@
   text-align: right;
 }
 
-.profile-stat-row-value-warning { color: var(--warning-color); }
-.profile-stat-row-value-error   { color: var(--error-color);   }
-.profile-stat-row-value-accent  { color: var(--accent-color);  }
+.profile-stat-row-value-warning {
+  color: var(--warning-color);
+}
+
+.profile-stat-row-value-error {
+  color: var(--error-color);
+}
+
+.profile-stat-row-value-accent {
+  color: var(--accent-color);
+}
 
 .profile-stats-toggle {
   display: flex;
@@ -402,14 +426,15 @@
     grid-template-columns: 1fr;
     margin-top: -40px;
   }
-  
+
   .profile-sidebar {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
 
-  .profile-overview, .danger-zone {
+  .profile-overview,
+  .danger-zone {
     height: 100%;
     margin: 0;
   }
@@ -419,16 +444,16 @@
   .profile-sidebar {
     grid-template-columns: 1fr;
   }
-  
+
   .input-with-button {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .settings-card {
     padding: 24px 20px;
   }
-  
+
   .settings-form {
     padding: 16px;
   }
