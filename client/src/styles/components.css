@@ -528,6 +528,12 @@
     width: 20px;
     height: 20px;
   }
+
+  .btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 300;
+  }
 }
 
 @media (max-width: 576px) {
