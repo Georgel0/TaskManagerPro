@@ -519,6 +519,15 @@
   .desktop-only {
     display: none !important;
   }
+
+  .logo-group {
+    font-size: 0.8rem;
+  }
+
+  .logo-image {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 @media (max-width: 576px) {
