@@ -59,9 +59,15 @@ export function useAnnouncements(projectId, onAnnouncementCreated, onAnnouncemen
       if (!res.ok) throw new Error('Failed to update acknowledgment');
       return res.json();
     },
-    onSuccess: () => {
-      // Invalidate to ensure UI reflects new ack_count and is_acknowledged status
-      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'announcements'] });
+    onSuccess: ({ acknowledged }, announcementId) => {
+      queryClient.setQueryData(
+        ['projects', projectId, 'announcements'],
+        (prev = []) => prev.map((a) =>
+          a.id === announcementId
+            ? { ...a, is_acknowledged: acknowledged, ack_count: acknowledged ? a.ack_count + 1 : Math.max(0, a.ack_count - 1) }
+            : a
+        )
+      );
     },
     onError: (err) => toast.error(err.message),
   });
