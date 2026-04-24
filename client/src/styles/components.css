@@ -521,12 +521,13 @@
   }
 
   .logo-group {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    gap: 5px;
   }
 
   .logo-image {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
   }
 
   .btn {
@@ -544,6 +545,12 @@
 
   .form-row .form-group {
     margin-bottom: 0;
+  }
+
+    .btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 300;
   }
 }
 
@@ -565,6 +572,12 @@
   .modal-footer .btn {
     width: 100%;
     margin: 0;
+  }
+
+    .btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 300;
   }
 }
 
