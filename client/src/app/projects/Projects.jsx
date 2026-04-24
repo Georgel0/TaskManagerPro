@@ -10,6 +10,38 @@ import './styles/project-modals.css';
 import './styles/projects-layout.css';
 import './styles/member-detail.css';
 
+const ProjectsSkeleton = () => (
+  <div className="page-content">
+    <header className="dashboard-header" style={{ padding: '0 20px' }}>
+      <div style={{ width: '100%' }}>
+        <div className="skeleton skeleton-title"></div>
+        <div className="skeleton skeleton-subtitle" style={{ width: '15%' }}></div>
+      </div>
+      <div className="dashboard-header-actions">
+        <div className="skeleton skeleton-btn"></div>
+      </div>
+    </header>
+
+    <div className="skeleton-project-grid">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="card" style={{ height: '200px', padding: '20px' }}>
+          <div className="skeleton" style={{ width: '60%', height: '24px', marginBottom: '15px' }}></div>
+          <div className="skeleton" style={{ width: '100%', height: '15px', marginBottom: '8px' }}></div>
+          <div className="skeleton" style={{ width: '80%', height: '15px', marginBottom: '20px' }}></div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
+            <div className="skeleton" style={{ width: '30%', height: '12px' }}></div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div className="skeleton" style={{ width: '25px', height: '25px', borderRadius: '50%' }}></div>
+              <div className="skeleton" style={{ width: '25px', height: '25px', borderRadius: '50%' }}></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export default function Projects() {
   const { user } = useApp();
 
@@ -46,12 +78,18 @@ export default function Projects() {
   const handleProjectLeave = (project) =>
     _handleProjectLeave(project, setSelectedProject);
 
-  if (loading || !user) return (
-    <div className="loading-state">
-      <div className="pulse-ring"></div>
-      <p>Loading Projects...</p>
-    </div>
-  );
+  if (loading) {
+    return <ProjectsSkeleton />;
+  }
+
+  if (!loading && !projects) {
+    return (
+      <div className="error-state">
+        <i className="fas fa-exclamation-triangle"></i>
+        <p>Failed to load projects.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="page-content">
