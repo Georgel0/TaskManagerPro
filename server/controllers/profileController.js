@@ -1,7 +1,7 @@
 const pool = require('../database');
 const bcrypt = require('bcrypt');
 const { Resend } = require('resend');
-const { createNotification } = require('./notificationController');
+const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -103,7 +103,10 @@ const changeUsername = async (req, res) => {
 
     await pool.query('UPDATE users SET name = $1 WHERE id = $2', [newUsername, userId]);
 
-    await createNotification(userId, `Your username has been changed to "${newUsername}".`);
+    const allowed = await isNotificationAllowed(userId, 'account_actions');
+    if (allowed) {
+      await createNotification(userId, `Your username has been changed to "${newUsername}".`);
+    }
 
     res.status(200).json({ message: 'Username updated successfully.' });
   } catch (err) {
@@ -151,6 +154,11 @@ const changeEmail = async (req, res) => {
       `,
     });
 
+    const allowed = await isNotificationAllowed(userId, 'account_actions');
+    if (allowed) {
+      await createNotification(userId, 'Your avatar has been updated successfully.');
+    }
+
     res.status(200).json({ message: 'Email updated successfully.' });
   } catch (err) {
     console.error(err);
@@ -193,7 +201,10 @@ const changeAvatar = async (req, res) => {
 
     await pool.query('UPDATE users SET avatar = $1 WHERE id = $2', [newAvatarUrl, req.user.id]);
 
-    await createNotification(req.user.id, 'Your avatar has been updated successfully.');
+    const allowed = await isNotificationAllowed(req.user.id, 'account_actions');
+    if (allowed) {
+      await createNotification(req.user.id, 'Your avatar has been updated successfully.');
+    }
 
     res.status(200).json({ message: 'Avatar updated successfully.' });
   } catch (err) {
@@ -220,6 +231,11 @@ const changePassword = async (req, res) => {
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, req.user.id]);
+
+    const allowed = await isNotificationAllowed(req.user.id, 'account_actions');
+    if (allowed) {
+      await createNotification(req.user.id, 'Your password has been updated successfully.');
+    }
 
     res.status(200).json({ message: "Password updated successfully." });
   } catch (err) {

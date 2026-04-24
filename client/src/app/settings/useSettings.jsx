@@ -14,6 +14,7 @@ const DEFAULT_PREFS = {
   project_changes: true,
   deadline_reminders: true,
   announcements: true,
+  account_actions: true,
 };
 
 export function useSettings() {

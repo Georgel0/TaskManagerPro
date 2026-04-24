@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context';
 import { generateIdenticonBase64 } from '@/lib';
 import { validate } from '@/lib/validators';
@@ -99,7 +100,12 @@ export default function ProfilePage() {
                 <p className="profile-join-date" title={`Joined at: ${new Date(user.created_at).toLocaleDateString()}`}>
                   <i className="fas fa-calendar-alt"></i> Joined {new Date(user.created_at).toLocaleDateString()}
                 </p>
-                <button onClick={handleLogout} className="btn btn-secondary btn-logout" title="Log Out">Log Out</button>
+                <div className="profile-overview-actions">
+                  <button onClick={handleLogout} className="btn btn-secondary btn-logout" title="Log Out">Log Out</button>
+                  <Link href="/settings" className='btn btn-secondary' title='Settings'>
+                    <i className="fas fa-gear"></i>
+                  </Link>
+                </div>
               </div>
 
               <div className="card profile-stats-card">

@@ -165,6 +165,7 @@ const getNotificationPreferences = async (req, res) => {
         project_changes: true,
         deadline_reminders: true,
         announcements: true,
+        account_actions: true,
       });
     }
 
@@ -178,7 +179,7 @@ const updateNotificationPreferences = async (req, res) => {
   const userId = req.user.id;
   const {
     task_assigned, task_updated, task_completed, task_deleted,
-    comment_added, project_changes, deadline_reminders, announcements
+    comment_added, project_changes, deadline_reminders, announcements, account_actions
   } = req.body;
 
   try {
@@ -190,9 +191,9 @@ const updateNotificationPreferences = async (req, res) => {
        ON CONFLICT (user_id) DO UPDATE SET
          task_assigned = $2, task_updated = $3, task_completed = $4,
          task_deleted = $5, comment_added = $6, project_changes = $7,
-         deadline_reminders = $8, announcements = $9`,
+         deadline_reminders = $8, announcements = $9, account_actions = $10,`
       [userId, task_assigned, task_updated, task_completed, task_deleted,
-       comment_added, project_changes, deadline_reminders, announcements]
+       comment_added, project_changes, deadline_reminders, announcements, account_actions]
     );
     res.status(200).json({ message: 'Preferences updated.' });
   } catch (err) {

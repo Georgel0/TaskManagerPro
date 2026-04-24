@@ -58,6 +58,12 @@
   align-items: center;
 }
 
+.profile-overview-actions {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+
 .profile-avatar-wrapper {
   width: 130px;
   height: 130px;
