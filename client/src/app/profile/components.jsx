@@ -148,3 +148,53 @@ export function ProfileStatsExpanded({ stats }) {
     </>
   );
 }
+
+export const ProfileSkeleton = () => (
+  <div className="profile-page-container">
+    <div className="profile-header-content">
+      <div className="skeleton skeleton-title"></div>
+      <div className="skeleton skeleton-subtitle"></div>
+    </div>
+
+    <div className="profile-layout page-content">
+      <div className="profile-sidebar">
+        <div className="card profile-overview">
+          <div className="skeleton skeleton-avatar"></div>
+          <div className="skeleton skeleton-name skeleton-center"></div>
+          <div className="skeleton skeleton-badge skeleton-center"></div>
+          <div className="skeleton skeleton-line"></div>
+          <div className="skeleton skeleton-line"></div>
+          <div className="skeleton skeleton-btn-block"></div>
+        </div>
+
+        <div className="card profile-stats-card">
+          <div className="skeleton skeleton-name" style={{ width: '80px' }}></div>
+          <div className="profile-stats-grid">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="skeleton skeleton-stat-box"></div>
+            ))}
+          </div>
+          <div className="skeleton skeleton-btn-block" style={{ height: '30px', marginTop: '20px' }}></div>
+        </div>
+
+        <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
+      </div>
+
+      <div className="profile-settings-grid">
+        {[1, 2].map(card => (
+          <div key={card} className="card settings-card">
+            <div className="skeleton skeleton-name" style={{ width: '200px' }}></div>
+            <div className="skeleton skeleton-line" style={{ width: '300px', marginBottom: '30px' }}></div>
+
+            {[1, 2].map(form => (
+              <div key={form} style={{ marginBottom: '32px', padding: '24px', background: 'var(--sec-background)', borderRadius: 'var(--radius-md)' }}>
+                <div className="skeleton skeleton-form-label"></div>
+                <div className="skeleton skeleton-input"></div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);

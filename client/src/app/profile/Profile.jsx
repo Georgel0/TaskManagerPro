@@ -6,7 +6,7 @@ import { generateIdenticonBase64 } from '@/lib';
 import { validate } from '@/lib/validators';
 import toast from 'react-hot-toast';
 import { UsernameForm, AvatarForm, EmailForm, PasswordForm, BioForm } from './ProfileForms';
-import { ProfileStatsExpanded, DangerZone } from './components';
+import { ProfileStatsExpanded, DangerZone, ProfileSkeleton } from './components';
 import './profile.css';
 
 export default function ProfilePage() {
@@ -74,12 +74,9 @@ export default function ProfilePage() {
     return { errors, setErrors, handleSubmit };
   };
 
-  if (loading || !user) return (
-    <div className='loading-state profile-loading'>
-      <div className="pulse-ring"></div>
-      <p>Loading Profile...</p>
-    </div>
-  );
+  if (loading || !user) {
+    return <ProfileSkeleton />
+  }
 
   return (
     <div className="profile-page-container">
