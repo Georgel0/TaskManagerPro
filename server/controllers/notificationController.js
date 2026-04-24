@@ -186,17 +186,18 @@ const updateNotificationPreferences = async (req, res) => {
     await pool.query(
       `INSERT INTO notification_preferences 
         (user_id, task_assigned, task_updated, task_completed, task_deleted,
-         comment_added, project_changes, deadline_reminders, announcements)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         comment_added, project_changes, deadline_reminders, announcements, account_actions)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (user_id) DO UPDATE SET
          task_assigned = $2, task_updated = $3, task_completed = $4,
          task_deleted = $5, comment_added = $6, project_changes = $7,
-         deadline_reminders = $8, announcements = $9, account_actions = $10,`
+         deadline_reminders = $8, announcements = $9, account_actions = $10`,
       [userId, task_assigned, task_updated, task_completed, task_deleted,
-       comment_added, project_changes, deadline_reminders, announcements, account_actions]
+        comment_added, project_changes, deadline_reminders, announcements, account_actions]
     );
     res.status(200).json({ message: 'Preferences updated.' });
   } catch (err) {
+    console.error(err.message);
     res.status(500).json({ error: 'Failed to update preferences.' });
   }
 };

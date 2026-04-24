@@ -13,7 +13,7 @@ const PREF_LABELS = [
   { key: 'project_changes',     label: 'Project renamed, members added or removed' },
   { key: 'deadline_reminders',  label: 'Deadline approaching or overdue reminders' },
   { key: 'announcements',       label: 'New project announcements' },
-  { key: 'account_actions ',    label: 'Account actions' },
+  { key: 'account_actions',     label: 'Account actions' },
 ];
 
 export default function Settings() {

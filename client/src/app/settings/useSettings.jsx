@@ -53,8 +53,9 @@ export function useSettings() {
       });
       if (!res.ok) throw new Error();
       toast.success('Preferences saved.');
-    } catch {
+    } catch (err) {
       toast.error('Failed to save preferences.');
+      console.log(err.message);
     } finally {
       setIsSaving(false);
     }
