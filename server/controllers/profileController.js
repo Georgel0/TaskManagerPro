@@ -1,9 +1,6 @@
 const pool = require('../database');
 const bcrypt = require('bcrypt');
-const { Resend } = require('resend');
 const { createNotification, isNotificationAllowed } = require('./notificationController');
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const getUserProfile = async (req, res) => {
   try {
@@ -120,12 +117,12 @@ const changeEmail = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const userResult = await pool.query('SELECT email, password FROM users WHERE id = $1', [userId]);
+    const userResult = await pool.query('SELECT email, password, name FROM users WHERE id = $1', [userId]);
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    const { email: oldEmail, password: hashedPassword } = userResult.rows[0];
+    const { email: oldEmail, password: hashedPassword, name } = userResult.rows[0];
 
     // Verify password before allowing the change
     const isMatch = await bcrypt.compare(password, hashedPassword);
@@ -144,19 +141,23 @@ const changeEmail = async (req, res) => {
 
     await pool.query('UPDATE users SET email = $1 WHERE id = $2', [newEmail, userId]);
 
-    await resend.emails.send({
-      from: 'Task Manager <noreply@yourdomain.com>',
+    await transporter.sendMail({
+      from: `"Task Manager" <${process.env.EMAIL_USER}>`,
       to: oldEmail,
       subject: 'Your email address was changed',
       html: `
-        <p>Hi,</p>
-        <p>Your account email was changed to <strong>${newEmail}</strong>.</p>
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2>Email Updated</h2>
+          <p>Hi ${name},</p>
+          <p>Your account email address was recently changed to: <strong>${newEmail}</strong>.</p>
+          <p>If you did not make this change, please contact support immediately.</p>
+        </div>
       `,
     });
 
     const allowed = await isNotificationAllowed(userId, 'account_actions');
     if (allowed) {
-      await createNotification(userId, 'Your avatar has been updated successfully.');
+      await createNotification(userId, 'Your email address has been updated successfully.');
     }
 
     res.status(200).json({ message: 'Email updated successfully.' });
