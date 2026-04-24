@@ -91,7 +91,7 @@ export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAt
                   <a href={a.file_path} target="_blank" rel="noopener noreferrer" className="attachment-name">
                     {a.original_name}
                   </a>
-                  <span className="attachment-meta">
+                  <span className="attachment-meta" title={`Uploaded by: ${a.uploader_name}`}>
                     {formatSize(a.file_size)} · {a.uploader_name}
                   </span>
                 </div>
