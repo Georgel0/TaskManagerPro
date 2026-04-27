@@ -100,7 +100,7 @@ export default function Archive() {
                   <span className="archive-item-meta">
                     <i className={`fas ${t.project_name ? 'fa-folder' : 'fa-user'}`}></i>{' '}
                     {t.project_name || 'Personal Task'} ·
-                    Archived {formatDate(t.archived_at)}
+                    Archived at: {formatDate(t.archived_at)}
                   </span>
                   {t.description && (
                     <span className="archive-item-desc">{t.description}</span>
