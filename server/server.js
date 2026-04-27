@@ -10,6 +10,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const attachmentRoutes = require('./routes/attachmentRoutes');
+const archiveRoutes = require('./routes/archiveRoutes');
 
 const { runDeadlineNotifier } = require('./jobs/deadlineNotifier');
 runDeadlineNotifier();
@@ -37,6 +38,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api', attachmentRoutes);
+app.use('/api/archive', archiveRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {

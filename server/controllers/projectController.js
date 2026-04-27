@@ -34,7 +34,7 @@ const getProjects = async (req, res) => {
         LEFT JOIN project_announcements pa ON pa.project_id = p.id
         WHERE p.owner_id = $1 OR EXISTS (
             SELECT 1 FROM project_members pm_access 
-            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1 AND p.is_archived = FALSE
         )
         GROUP BY p.id
         ORDER BY p.created_at DESC;`,

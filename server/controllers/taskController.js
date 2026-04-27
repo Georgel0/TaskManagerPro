@@ -76,7 +76,7 @@ const getTasks = async (req, res) => {
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN project_members pm ON p.id = pm.project_id
       LEFT JOIN users u ON u.id = t.assigned_user_id
-      WHERE (p.owner_id = $1 OR pm.user_id = $1)
+      WHERE (p.owner_id = $1 OR pm.user_id = $1) AND t.is_archived = FALSE
     `;
     const queryParams = [userId];
     let paramIndex = 2;
