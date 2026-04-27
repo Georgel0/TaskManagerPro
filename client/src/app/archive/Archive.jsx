@@ -98,10 +98,13 @@ export default function Archive() {
                 <div className="archive-item-info">
                   <span className="archive-item-name">{t.title}</span>
                   <span className="archive-item-meta">
-                    <i className="fas fa-folder"></i> {t.project_name} ·
-                    <span className={`badge priority-${t.priority?.toLowerCase()}`}>{t.priority}</span> ·
+                    <i className={`fas ${t.project_name ? 'fa-folder' : 'fa-user'}`}></i>{' '}
+                    {t.project_name || 'Personal Task'} ·
                     Archived {formatDate(t.archived_at)}
                   </span>
+                  {t.description && (
+                    <span className="archive-item-desc">{t.description}</span>
+                  )}
                 </div>
                 <div className="archive-item-actions">
                   <button

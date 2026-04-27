@@ -15,36 +15,13 @@ const TasksSkeleton = () => (
         <div className="skeleton skeleton-title" style={{ width: '30%' }}></div>
         <div className="skeleton skeleton-subtitle" style={{ width: '20%' }}></div>
       </div>
-      <div className="dashboard-header-actions">
-        <div className="skeleton skeleton-btn"></div>
-      </div>
     </header>
-
     <div className="skeleton-filter-bar">
       <div className="skeleton skeleton-filter-item"></div>
-      <div className="skeleton skeleton-filter-item"></div>
-      <div className="skeleton skeleton-filter-item"></div>
-      <div className="skeleton skeleton-btn" style={{ width: '100px' }}></div>
     </div>
-
     <div className="tasks-container" style={{ padding: '0 20px' }}>
       <div className="card">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="skeleton-task-row">
-            <div style={{ flex: 1 }}>
-              <div className="skeleton" style={{ width: '40%', height: '20px', marginBottom: '10px' }}></div>
-              <div style={{ display: 'flex', gap: '15px' }}>
-                <div className="skeleton" style={{ width: '80px', height: '12px' }}></div>
-                <div className="skeleton" style={{ width: '80px', height: '12px' }}></div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div className="skeleton" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
-              <div className="skeleton" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
-              <div className="skeleton" style={{ width: '30px', height: '30px', borderRadius: '4px' }}></div>
-            </div>
-          </div>
-        ))}
+        {[1, 2, 3].map((i) => <div key={i} className="skeleton-task-row"><div className="skeleton" style={{ width: '100%', height: '60px' }}></div></div>)}
       </div>
     </div>
   </div>
@@ -53,15 +30,11 @@ const TasksSkeleton = () => (
 export default function Tasks() {
   const { user } = useApp();
   const {
-    projects, loading, error, isSubmitting,
-    filteredTasks,
-    statusFilter, setStatusFilter,
-    projectFilter, setProjectFilter,
-    userFilter, setUserFilter,
-    usersInSelectedProject,
-    hasActiveFilters, clearFilters,
-    createTask, updateTask, deleteTask,
-    handleCommentCountChange, handleAttachmentCountChange
+    projects, loading, error, isSubmitting, filteredTasks,
+    activeTab, setActiveTab,
+    statusFilter, setStatusFilter, projectFilter, setProjectFilter, userFilter, setUserFilter,
+    usersInSelectedProject, hasActiveFilters, clearFilters,
+    createTask, updateTask, deleteTask, handleCommentCountChange, handleAttachmentCountChange
   } = useTasks();
 
   const [modalState, setModalState] = useState({ type: null, task: null });
@@ -79,61 +52,52 @@ export default function Tasks() {
     if (success) closeModal();
   };
 
-  if (loading) {
-    return <TasksSkeleton />;
-  }
+  if (loading) return <TasksSkeleton />;
 
   return (
     <div className="page-content">
       <div className="tasks-header">
-        <h2><i className="fas fa-tasks"></i> All Tasks</h2>
-        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })} title="Add New Task">
+        <h2><i className="fas fa-tasks"></i> {activeTab === 'project' ? 'Project Tasks' : 'Personal Tasks'}</h2>
+        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })}>
           <i className="fas fa-plus"></i> New Task
+        </button>
+      </div>
+
+      <div className="tasks-tabs-container">
+        <button className={`task-tab-btn ${activeTab === 'project' ? 'active' : ''}`} onClick={() => setActiveTab('project')}>
+          <i className="fas fa-briefcase"></i> Team Projects
+        </button>
+        <button className={`task-tab-btn ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>
+          <i className="fas fa-user"></i> Personal To-Do
         </button>
       </div>
 
       <div className="tasks-filters">
         <div className="tasks-filter-group">
           {['All', 'Active', 'Completed'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setStatusFilter(f)}
-              title={`Filter: ${f}`}
-              className={`btn ${statusFilter === f ? 'btn-primary' : 'btn-secondary'}`}
-            >
+            <button key={f} onClick={() => setStatusFilter(f)} className={`btn ${statusFilter === f ? 'btn-primary' : 'btn-secondary'}`}>
               {f}
             </button>
           ))}
         </div>
 
-        <select
-          className="form-control tasks-filter-select"
-          value={projectFilter}
-          onChange={(e) => { setProjectFilter(e.target.value); setUserFilter(''); }}
-        >
-          <option value="">All Projects</option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.id} title={p.name}>{p.name}</option>
-          ))}
-        </select>
-
-        {projectFilter && (
-          <select
-            className="form-control tasks-filter-select"
-            value={userFilter}
-            onChange={(e) => setUserFilter(e.target.value)}
-          >
-            <option value="">All Members</option>
-            {usersInSelectedProject.map((u) => (
-              <option key={u.id} value={u.id} title={u.name}>{u.name}</option>
-            ))}
-          </select>
+        {activeTab === 'project' && (
+          <>
+            <select className="form-control tasks-filter-select" value={projectFilter} onChange={(e) => { setProjectFilter(e.target.value); setUserFilter(''); }}>
+              <option value="">All Projects</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            {projectFilter && (
+              <select className="form-control tasks-filter-select" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
+                <option value="">All Members</option>
+                {usersInSelectedProject.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            )}
+          </>
         )}
 
         {hasActiveFilters && (
-          <button className="btn btn-ghost tasks-filter-clear" onClick={clearFilters} title="Clear Filters">
-            <i className="fas fa-times"></i> Clear
-          </button>
+          <button className="btn btn-ghost tasks-filter-clear" onClick={clearFilters}><i className="fas fa-times"></i> Clear</button>
         )}
       </div>
 
@@ -144,17 +108,17 @@ export default function Tasks() {
           {filteredTasks.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-filter"></i>
-              <p>No tasks match the current filters.</p>
-              {hasActiveFilters && (
-                <button className="btn btn-secondary tasks-empty-btn" onClick={clearFilters} title="Clear Filters">Clear Filters</button>
-              )}
+              <p>No {activeTab} tasks found.</p>
+              <br />
+              <button className="btn btn-secondary" onClick={() => setModalState({ type: 'create', task: null })}>
+                <i className="fas fa-plus"></i> New Task
+              </button>
             </div>
           ) : (
             <ul className="tasks-list">
               {filteredTasks.map((task) => (
                 <TaskItem
-                  key={task.id}
-                  task={task}
+                  key={task.id} task={task}
                   onDetail={(t) => setModalState({ type: 'detail', task: t })}
                   onEdit={(t) => setModalState({ type: 'edit', task: t })}
                   onDelete={(t) => setModalState({ type: 'delete', task: t })}
@@ -171,6 +135,7 @@ export default function Tasks() {
         initialData={modalState.task}
         projects={projects}
         isSubmitting={isSubmitting}
+        activeTab={activeTab}
         onClose={closeModal}
         onSubmit={handleFormSubmit}
       />
@@ -181,19 +146,17 @@ export default function Tasks() {
         isSubmitting={isSubmitting}
         onClose={closeModal}
         onConfirm={handleDeleteConfirm}
-        message={<>Are you sure you want to delete <strong>{modalState.task?.title}</strong>? This action is permanent.</>}
+        message={<>Are you sure you want to delete <strong>{modalState.task?.title}</strong>?</>}
       />
 
       <TaskDetailModal
         isOpen={modalState.type === 'detail'}
-        onEdit={(t) => setModalState({ type: 'edit', task: t })}
         task={modalState.task}
+        onEdit={(t) => setModalState({ type: 'edit', task: t })}
         onClose={closeModal}
         onCommentAdded={() => handleCommentCountChange(modalState.task?.id, 1)}
         onCommentDeleted={() => handleCommentCountChange(modalState.task?.id, -1)}
-        isProjectOwner={
-          projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id
-        }
+        isProjectOwner={projects.find((p) => p.id === modalState.task?.project_id)?.owner_id === user?.id}
         onAttachmentCountChange={(amount) => handleAttachmentCountChange(modalState.task?.id, amount)}
       />
     </div>

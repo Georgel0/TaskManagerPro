@@ -47,7 +47,7 @@ export const createTaskSchema = z.object({
     .union([z.string(), z.number()])
     .refine((val) => val !== '' && val !== null && val !== undefined, {
       message: 'Please select a project.',
-    }),
+    }).optional(),
 });
 
 // For edit: all fields optional, deadline allowed to be unchanged (stripped before submit in TaskFormModal)

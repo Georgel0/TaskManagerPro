@@ -134,26 +134,24 @@ const getArchivedTasks = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT t.*,
-        u.name AS assigned_user_name,
-        p.name AS project_name,
-        p.owner_id AS project_owner_id,
-        (SELECT COUNT(*) FROM comments WHERE task_id = t.id) AS comment_count,
-        (SELECT COUNT(*) FROM attachments WHERE task_id = t.id) AS attachment_count
+      `SELECT t.*, 
+              p.name AS project_name,
+              u.name AS assigned_user_name
        FROM tasks t
-       JOIN projects p ON p.id = t.project_id
+       LEFT JOIN projects p ON t.project_id = p.id
        LEFT JOIN users u ON u.id = t.assigned_user_id
-       WHERE t.is_archived = TRUE
-         AND p.is_archived = FALSE
-         AND (p.owner_id = $1 OR t.assigned_user_id = $1)
+       WHERE t.is_archived = TRUE 
+       AND (
+         p.owner_id = $1 OR 
+         t.assigned_user_id = $1 OR 
+         (t.project_id IS NULL AND t.assigned_user_id = $1)
+       )
        ORDER BY t.archived_at DESC`,
       [userId]
     );
-
-    res.status(200).json(result.rows);
+    res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error fetching archived tasks.' });
+    res.status(500).json({ error: "Failed to fetch archived tasks" });
   }
 };
 
@@ -164,8 +162,12 @@ const archiveTask = async (req, res) => {
   try {
     const task = await pool.query(
       `SELECT t.* FROM tasks t
-       JOIN projects p ON p.id = t.project_id
-       WHERE t.id = $1 AND (p.owner_id = $2 OR t.assigned_user_id = $2)`,
+        LEFT JOIN projects p ON p.id = t.project_id
+        WHERE t.id = $1 AND (
+          p.owner_id = $2 OR 
+          t.assigned_user_id = $2 OR
+          (t.project_id IS NULL AND t.assigned_user_id = $2)
+        )`,
       [id, userId]
     );
 
@@ -192,8 +194,12 @@ const restoreTask = async (req, res) => {
   try {
     const task = await pool.query(
       `SELECT t.* FROM tasks t
-       JOIN projects p ON p.id = t.project_id
-       WHERE t.id = $1 AND (p.owner_id = $2 OR t.assigned_user_id = $2)`,
+        LEFT JOIN projects p ON p.id = t.project_id
+        WHERE t.id = $1 AND (
+          p.owner_id = $2 OR 
+          t.assigned_user_id = $2 OR
+          (t.project_id IS NULL AND t.assigned_user_id = $2)
+        )`,
       [id, userId]
     );
 
@@ -220,9 +226,13 @@ const permanentDeleteTask = async (req, res) => {
   try {
     const task = await pool.query(
       `SELECT t.* FROM tasks t
-       JOIN projects p ON p.id = t.project_id
-       WHERE t.id = $1 AND t.is_archived = TRUE
-         AND (p.owner_id = $2 OR t.assigned_user_id = $2)`,
+        LEFT JOIN projects p ON p.id = t.project_id
+        WHERE t.id = $1 AND t.is_archived = TRUE
+          AND (
+            p.owner_id = $2 OR 
+            t.assigned_user_id = $2 OR
+            (t.project_id IS NULL AND t.assigned_user_id = $2)
+          )`,
       [id, userId]
     );
 

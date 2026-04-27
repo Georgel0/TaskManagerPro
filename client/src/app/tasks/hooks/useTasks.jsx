@@ -6,15 +6,15 @@ import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
-  }
+  if (typeof window !== 'undefined') return localStorage.getItem('token');
   return null;
 };
 
 export function useTasks() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+
+  const [activeTab, setActiveTab] = useState('project');
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [projectFilter, setProjectFilter] = useState('');
@@ -24,12 +24,7 @@ export function useTasks() {
   const urlProjectId = searchParams.get('project_id');
   const urlUserId = searchParams.get('user_id');
 
-  // Fetch Tasks
-  const {
-    data: tasks = [],
-    isLoading: isTasksLoading,
-    error: tasksError
-  } = useQuery({
+  const { data: tasks = [], isLoading: isTasksLoading, error: tasksError } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
       const res = await fetch(`${API}/tasks`, { headers: { Authorization: `Bearer ${getToken()}` } });
@@ -38,12 +33,7 @@ export function useTasks() {
     },
   });
 
-  // Fetch Projects
-  const {
-    data: projects = [],
-    isLoading: isProjectsLoading,
-    error: projectsError
-  } = useQuery({
+  const { data: projects = [], isLoading: isProjectsLoading, error: projectsError } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
       const res = await fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${getToken()}` } });
@@ -55,15 +45,18 @@ export function useTasks() {
   const loading = isTasksLoading || isProjectsLoading;
   const error = (tasksError?.message || projectsError?.message) || null;
 
-  // Apply URL params once data is loaded
   useEffect(() => {
     if (loading) return;
-    if (urlProjectId) setProjectFilter(urlProjectId);
+    if (urlProjectId) { setProjectFilter(urlProjectId); setActiveTab('project'); }
     if (urlUserId) setUserFilter(urlUserId);
   }, [loading, urlProjectId, urlUserId]);
 
   useEffect(() => {
     if (!highlightId || tasks.length === 0) return;
+    const taskToHighlight = tasks.find(t => String(t.id) === String(highlightId));
+    if (taskToHighlight) {
+      setActiveTab(taskToHighlight.project_id ? 'project' : 'personal');
+    }
     setStatusFilter('All');
     setProjectFilter('');
     setUserFilter('');
@@ -78,7 +71,6 @@ export function useTasks() {
     }, 150);
   }, [highlightId, tasks.length]);
 
-  // Create Task
   const createMutation = useMutation({
     mutationFn: async (taskData) => {
       const res = await fetch(`${API}/tasks`, {
@@ -96,7 +88,6 @@ export function useTasks() {
     onError: (err) => toast.error(err.message),
   });
 
-  // Update Task
   const updateMutation = useMutation({
     mutationFn: async ({ id, taskData }) => {
       const res = await fetch(`${API}/tasks/${id}`, {
@@ -108,24 +99,14 @@ export function useTasks() {
       return { updatedTask: await res.json(), taskData };
     },
     onSuccess: ({ updatedTask, taskData }) => {
-      // Optimistically update the cache instead of full refetch
       queryClient.setQueryData(['tasks'], (oldTasks = []) =>
-        oldTasks.map((t) =>
-          t.id === updatedTask.id
-            ? {
-              ...t,
-              ...updatedTask,
-              assigned_user_name: taskData.assigned_user_id ? taskData.assigned_user_name : null,
-            }
-            : t
-        )
+        oldTasks.map((t) => t.id === updatedTask.id ? { ...t, ...updatedTask, assigned_user_name: taskData.assigned_user_id ? taskData.assigned_user_name : null } : t)
       );
       toast.success('Task updated successfully!');
     },
     onError: (err) => toast.error(err.message),
   });
 
-  // Delete Task
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const res = await fetch(`${API}/tasks/${id}`, {
@@ -136,21 +117,17 @@ export function useTasks() {
       return id;
     },
     onSuccess: (deletedId) => {
-      queryClient.setQueryData(['tasks'], (oldTasks = []) =>
-        oldTasks.filter((t) => t.id !== deletedId)
-      );
+      queryClient.setQueryData(['tasks'], (oldTasks = []) => oldTasks.filter((t) => t.id !== deletedId));
       toast.success('Task deleted!');
     },
     onError: (err) => toast.error(err.message),
   });
-
 
   const usersInSelectedProject = useMemo(() => {
     if (!projectFilter) return [];
     const projectTasks = tasks.filter((t) => String(t.project_id) === String(projectFilter));
     const seen = new Set();
     const users = [];
-
     for (const t of projectTasks) {
       if (t.assigned_user_id && !seen.has(t.assigned_user_id)) {
         seen.add(t.assigned_user_id);
@@ -162,13 +139,22 @@ export function useTasks() {
 
   const filteredTasks = useMemo(() =>
     tasks.filter((task) => {
+      const isTaskPersonal = !task.project_id;
+
+      // Tab Filtering
+      if (activeTab === 'project' && isTaskPersonal) return false;
+      if (activeTab === 'personal' && !isTaskPersonal) return false;
+
+      // Regular Filtering
       if (statusFilter === 'Active' && task.status === 'Done') return false;
       if (statusFilter === 'Completed' && task.status !== 'Done') return false;
-      if (projectFilter && String(task.project_id) !== String(projectFilter)) return false;
-      if (userFilter && String(task.assigned_user_id) !== String(userFilter)) return false;
+      if (activeTab === 'project') {
+        if (projectFilter && String(task.project_id) !== String(projectFilter)) return false;
+        if (userFilter && String(task.assigned_user_id) !== String(userFilter)) return false;
+      }
       return true;
     }),
-    [tasks, statusFilter, projectFilter, userFilter]
+    [tasks, activeTab, statusFilter, projectFilter, userFilter]
   );
 
   const clearFilters = () => {
@@ -181,65 +167,25 @@ export function useTasks() {
 
   const handleCommentCountChange = (taskId, amount) => {
     queryClient.setQueryData(['tasks'], (oldTasks = []) =>
-      oldTasks.map((t) =>
-        t.id === taskId
-          ? { ...t, comment_count: Math.max(0, (parseInt(t.comment_count) || 0) + amount) }
-          : t
-      )
+      oldTasks.map((t) => t.id === taskId ? { ...t, comment_count: Math.max(0, (parseInt(t.comment_count) || 0) + amount) } : t)
     );
   };
 
   const handleAttachmentCountChange = (taskId, amount) => {
     queryClient.setQueryData(['tasks'], (oldTasks = []) =>
-      oldTasks.map((t) =>
-        t.id === taskId
-          ? { ...t, attachment_count: Math.max(0, (parseInt(t.attachment_count) || 0) + amount) }
-          : t
-      )
+      oldTasks.map((t) => t.id === taskId ? { ...t, attachment_count: Math.max(0, (parseInt(t.attachment_count) || 0) + amount) } : t)
     );
   };
 
-  const createTask = async (taskData) => {
-    try {
-      await createMutation.mutateAsync(taskData);
-      return true;
-    } catch { return false; }
-  };
-
-  const updateTask = async (id, taskData) => {
-    try {
-      await updateMutation.mutateAsync({ id, taskData });
-      return true;
-    } catch { return false; }
-  };
-
-  const deleteTask = async (id) => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      return true;
-    } catch { return false; }
-  };
-
-  const isSubmitting = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+  const createTask = async (taskData) => { try { await createMutation.mutateAsync(taskData); return true; } catch { return false; } };
+  const updateTask = async (id, taskData) => { try { await updateMutation.mutateAsync({ id, taskData }); return true; } catch { return false; } };
+  const deleteTask = async (id) => { try { await deleteMutation.mutateAsync(id); return true; } catch { return false; } };
 
   return {
-    projects,
-    loading,
-    error,
-    isSubmitting,
-    filteredTasks,
-
-    statusFilter, setStatusFilter,
-    projectFilter, setProjectFilter,
-    userFilter, setUserFilter,
-    usersInSelectedProject,
-    hasActiveFilters,
-    clearFilters,
-
-    createTask,
-    updateTask,
-    deleteTask,
-    handleCommentCountChange,
-    handleAttachmentCountChange
+    projects, loading, error, isSubmitting: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
+    filteredTasks, activeTab, setActiveTab,
+    statusFilter, setStatusFilter, projectFilter, setProjectFilter, userFilter, setUserFilter,
+    usersInSelectedProject, hasActiveFilters, clearFilters,
+    createTask, updateTask, deleteTask, handleCommentCountChange, handleAttachmentCountChange
   };
 }

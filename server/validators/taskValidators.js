@@ -45,7 +45,8 @@ const createTaskSchema = z.object({
  project_id: z.coerce
     .number({ required_error: 'project_id is required.', invalid_type_error: 'project_id must be a number.' })
     .int('project_id must be an integer.')
-    .positive('project_id must be a positive number.'),
+    .positive('project_id must be a positive number.')
+    .optional(),
 
   assigned_user_id: z
     .number({ invalid_type_error: 'assigned_user_id must be a number.' })
