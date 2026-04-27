@@ -1,0 +1,122 @@
+.archive-header {
+  margin-bottom: 2rem;
+}
+
+.archive-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+  color: var(--pri-text-color);
+  margin: 0 0 6px;
+}
+
+.archive-subtitle {
+  font-size: 0.875rem;
+  color: var(--sec-text-color);
+  margin: 0;
+}
+
+.archive-section {
+  background: var(--sec-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.archive-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--pri-text-color);
+  margin: 0 0 1rem;
+}
+
+.archive-count {
+  font-size: 0.75rem;
+  font-weight: 400;
+  background: var(--pri-background);
+  border: 1px solid var(--border-color);
+  color: var(--sec-text-color);
+  border-radius: 99px;
+  padding: 2px 8px;
+}
+
+.archive-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.archive-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.archive-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.archive-item:first-child {
+  padding-top: 0;
+}
+
+.archive-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.archive-item-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--pri-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archive-item-meta {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.archive-item-desc {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.archive-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.archive-empty,
+.archive-loading {
+  font-size: 0.875rem;
+  color: var(--sec-text-color);
+  margin: 0;
+  padding: 0.5rem 0;
+}
