@@ -61,14 +61,14 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
               </button>
             )
           )}
+          <ArchiveButton
+            type="project"
+            id={project.id}
+            name={project.name}
+            onArchive={archiveProject}
+          />
         </div>
       )}
-      <ArchiveButton
-        type="project"
-        id={project.id}
-        name={project.name}
-        onArchive={archiveProject}
-      />
     </div>
   );
 }

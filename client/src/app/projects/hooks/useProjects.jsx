@@ -85,11 +85,14 @@ export function useProjects() {
       }
       return newProject;
     },
-    onSuccess: (newProject) => {
+    onSuccess: (newProject, variables) => {
+      const { pendingMembers } = variables;
+
       queryClient.setQueryData(['projects'], (prev = []) => [
         { ...newProject, task_count: 0, member_count: 1 + pendingMembers.length, announcement_count: 0 },
         ...prev,
       ]);
+      
       setIsCreateModalOpen(false);
       setCreateForm({ name: '', description: '' });
       toast.success('Project created successfully!');

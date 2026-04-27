@@ -16,8 +16,8 @@ export default function Archive() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const handleConfirmDelete = () => {
-    if (pendingDelete.type === 'project') permanentDeleteProject(pendingDelete.id);
-    else permanentDeleteTask(pendingDelete.id);
+    if (pendingDelete?.type === 'project') permanentDeleteProject(pendingDelete?.id);
+    else permanentDeleteTask(pendingDelete?.id);
     setPendingDelete(null);
   };
 
@@ -30,7 +30,6 @@ export default function Archive() {
         </p>
       </div>
 
-      {/* Projects */}
       <section className="archive-section">
         <h3 className="archive-section-title">
           <i className="fas fa-folder"></i> Projects
@@ -78,7 +77,6 @@ export default function Archive() {
         )}
       </section>
 
-      {/* Tasks */}
       <section className="archive-section">
         <h3 className="archive-section-title">
           <i className="fas fa-tasks"></i> Tasks
