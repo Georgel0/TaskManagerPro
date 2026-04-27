@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useArchive } from '@/hooks/useArchive';
+import { ArchiveButton } from '@/components/ui';
 
 export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave }) {
   const [leaveConfirm, setLeaveConfirm] = useState(false);
   const [open, setOpen] = useState(false);
+  const { archiveProject } = useArchive();
   const ref = useRef(null);
 
   useEffect(() => {
@@ -60,6 +63,12 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
           )}
         </div>
       )}
+      <ArchiveButton
+        type="project"
+        id={project.id}
+        name={project.name}
+        onArchive={archiveProject}
+      />
     </div>
   );
 }

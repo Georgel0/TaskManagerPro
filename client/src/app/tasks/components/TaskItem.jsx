@@ -1,9 +1,12 @@
 'use client';
 import { formatDate } from "@/lib";
 import { useApp } from "@/context";
+import { ArchiveButton } from '@/components/ui';
+import { useArchive } from '@/hooks/useArchive';
 
 export function TaskItem({ task, onDetail, onEdit, onDelete }) {
   const { user } = useApp();
+  const { archiveTask } = useArchive();
 
   const hasEditRights = user?.id === task.project_owner_id || user?.id === task.assigned_user_id;
 
@@ -59,6 +62,9 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
             <button className="btn-icon edit-btn" onClick={(e) => { e.stopPropagation(); onEdit(task); }} title="Edit Task">
               <i className="fas fa-pencil-alt"></i>
             </button>
+
+            <ArchiveButton type="task" id={task.id} name={task.title} onArchive={archiveTask} />
+            
             <button className="btn-icon delete-btn" onClick={(e) => { e.stopPropagation(); onDelete(task); }} title="Delete Task">
               <i className="fas fa-trash"></i>
             </button>

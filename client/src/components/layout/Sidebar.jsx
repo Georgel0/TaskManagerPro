@@ -10,6 +10,7 @@ const pages = [
   { id: 'projects', label: 'Projects', icon: 'fas fa-folder', path: '/projects' },
   { id: 'tasks', label: 'Tasks', icon: 'fas fa-list-check', path: '/tasks' },
   { id: 'profile', label: 'Profile', icon: 'fas fa-user', path: '/profile' },
+  { id: 'archive', label: 'Archive', icon: 'fas fa-box-archive', path: '/archive' }
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isCollapsed }) {
