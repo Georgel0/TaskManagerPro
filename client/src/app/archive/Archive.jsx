@@ -49,7 +49,9 @@ export default function Archive() {
                 <div className="archive-item-info">
                   <span className="archive-item-name">{p.name}</span>
                   <span className="archive-item-meta">
-                    {p.task_count} task{p.task_count !== 1 ? 's' : ''} · Archived {formatDate(p.archived_at)}
+                    {p.task_count} task{p.task_count !== 1 ? 's' : ''} ·
+                    {p.member_count} member{p.member_count !== 1 ? 's' : ''} ·
+                    Archived {formatDate(p.archived_at)}
                   </span>
                   {p.description && (
                     <span className="archive-item-desc">{p.description}</span>
@@ -96,8 +98,8 @@ export default function Archive() {
                 <div className="archive-item-info">
                   <span className="archive-item-name">{t.title}</span>
                   <span className="archive-item-meta">
-                    <i className="fas fa-folder"></i> {t.project_name} · 
-                    <span className={`badge priority-${t.priority?.toLowerCase()}`}>{t.priority}</span> · 
+                    <i className="fas fa-folder"></i> {t.project_name} ·
+                    <span className={`badge priority-${t.priority?.toLowerCase()}`}>{t.priority}</span> ·
                     Archived {formatDate(t.archived_at)}
                   </span>
                 </div>
@@ -129,7 +131,7 @@ export default function Archive() {
         title="Permanent Deletion"
         message={
           <>
-            Permanently delete <strong>{pendingDelete?.name}</strong>? 
+            Permanently delete <strong>{pendingDelete?.name}</strong>?
             {pendingDelete?.type === 'project' && ' All tasks and files inside will be gone forever.'}
             {pendingDelete?.type === 'task' && ' All comments and attachments will be gone forever.'}
             {' '}This cannot be undone.

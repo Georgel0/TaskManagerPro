@@ -32,10 +32,12 @@ const getProjects = async (req, res) => {
         LEFT JOIN project_members pm ON p.id = pm.project_id
         LEFT JOIN tasks t ON t.project_id = p.id
         LEFT JOIN project_announcements pa ON pa.project_id = p.id
-        WHERE p.owner_id = $1 OR EXISTS (
-            SELECT 1 FROM project_members pm_access 
-            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1 AND p.is_archived = FALSE
-        )
+       WHERE (
+        p.owner_id = $1 OR EXISTS (
+          SELECT 1 FROM project_members pm_access 
+            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+          )
+        ) AND p.is_archived = FALSE
         GROUP BY p.id
         ORDER BY p.created_at DESC;`,
       [userId]
@@ -426,7 +428,7 @@ const leaveProject = async (req, res) => {
     await Promise.all(
       membersResult.rows
         .filter((m) => m.id !== userId)
-        .map( async (m) =>
+        .map(async (m) =>
           await isNotificationAllowed(m.id, 'project_changes') &&
           createNotification(m.id, `${userName} left the project "${project.rows[0].name}".`)
         )

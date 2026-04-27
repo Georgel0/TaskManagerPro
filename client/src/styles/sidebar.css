@@ -112,6 +112,10 @@
   color: var(--sec-text-color);
 }
 
+.settings-btn.active {
+  color: var(--accent-color);
+}
+
 .sidebar.collapsed {
   width: 70px;
 }
