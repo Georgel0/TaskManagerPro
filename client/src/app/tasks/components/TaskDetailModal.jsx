@@ -14,6 +14,8 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
   const commentsEndRef = useRef(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
 
+  const isPersonal = !task?.project_id;
+
   const {
     comments, loading, isSubmitting,
     editingId, editText, setEditText,
@@ -108,7 +110,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
               >
                 <i className={`fas fa-chevron-right comments-toggle-icon ${commentsOpen ? 'comments-toggle-icon-open' : ''}`}></i>
                 <p className="task-detail-label">
-                  Comments
+                  {isPersonal ? 'Notes' : 'Comments'}
                   {comments.length > 0 && (
                     <span className="comment-count">{comments.length}</span>
                   )}
@@ -119,9 +121,9 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
                 <div className="comments-section-inner">
                   <div className="comments-list">
                     {loading ? (
-                      <p className="comments-loading-text">Loading comments...</p>
+                      <p className="comments-loading-text">Loading {isPersonal ? 'Notes' : 'Comments'} ...</p>
                     ) : comments.length === 0 ? (
-                      <p className="comments-empty">No comments yet. Be the first to comment.</p>
+                      <p className="comments-empty">No {isPersonal ? 'Notes' : 'Comments'} yet. {!isPersonal && ('Be the first to comment.')}</p>
                     ) : (
                       comments.map((c) => (
                         <div key={c.id} className={`comment-item ${c.user_id === user?.id ? 'comment-own' : ''}`}>
@@ -210,7 +212,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
                       <div className={`comment-input-wrapper ${commentError ? 'has-error' : ''}`}>
                         <textarea
                           className="form-control comment-input"
-                          placeholder="Write a comment..."
+                          placeholder={`Write a ${isPersonal ? 'note' : 'comment'}...`}
                           value={commentText}
                           rows={1}
                           onChange={(e) => {
