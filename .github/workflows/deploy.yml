@@ -1,0 +1,21 @@
+name: Deploy TaskManagerPro
+on:
+  push:
+    branches: [ main ] # This triggers the script every time you push to 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into Oracle and Update
+        uses: appleboy/ssh-action@master
+        with:
+          host: 144.24.185.246
+          username: ubuntu
+          # This refers to the secret you're about to add to GitHub
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/TaskManagerPro/server
+            git pull origin main
+            npm install
+            pm2 restart task-manager-api
