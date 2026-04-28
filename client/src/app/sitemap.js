@@ -1,12 +1,13 @@
 export default function sitemap() {
-  const baseUrl = 'https://task-manager-pro-demo.vercel.app/';
+  const baseUrl = 'https://task-manager-pro-demo.vercel.app';
 
   const routes = [
     '',
     '/dashboard',
     '/projects',
     '/tasks',
-    '/profile'
+    '/profile',
+    '/archive'
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split('T')[0],
