@@ -42,6 +42,7 @@
 
 .tasks-list {
   list-style: none;
+  overflow: visible !important;
 }
 
 .tasks-card-body {

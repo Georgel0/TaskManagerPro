@@ -1,4 +1,6 @@
 'use client';
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { formatDate } from "@/lib";
 import { useApp } from "@/context";
 import { ArchiveButton } from '@/components/ui';
@@ -10,6 +12,37 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
 
   const isPersonal = !task.project_id;
   const hasEditRights = isPersonal ? (user?.id === task.assigned_user_id) : (user?.id === task.project_owner_id || user?.id === task.assigned_user_id);
+
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        menuRef.current && !menuRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    if (!open) {
+      // Calculate position before opening
+      const rect = triggerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.right - 10 + window.scrollX,
+      });
+    }
+    setOpen(!open);
+  };
 
   return (
     <li id={`task-${task.id}`} className="tasks-item" onClick={() => onDetail(task)}>
@@ -47,10 +80,51 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
         </div>
 
         {hasEditRights && (
-          <div className="action-buttons">
-            <button className="btn-icon edit-btn" onClick={(e) => { e.stopPropagation(); onEdit(task); }}><i className="fas fa-pencil-alt"></i></button>
-            <ArchiveButton type="task" id={task.id} name={task.title} onArchive={archiveTask} />
-            <button className="btn-icon delete-btn" onClick={(e) => { e.stopPropagation(); onDelete(task); }}><i className="fas fa-trash"></i></button>
+          <div className="action-dropdown-wrapper">
+            <button
+              ref={triggerRef}
+              className="btn-icon"
+              title="More actions"
+              onClick={handleToggle}
+            >
+              <i className="fas fa-ellipsis-v"></i>
+            </button>
+
+            {open && createPortal(
+              <div
+                ref={menuRef}
+                className="action-dropdown-menu"
+                style={{
+                  position: 'absolute',
+                  top: `${coords.top}px`,
+                  left: `${coords.left}px`,
+                  zIndex: 9999
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className="btn-icon edit-btn"
+                  onClick={(e) => { e.stopPropagation(); onEdit(task); setOpen(false); }}
+                  title="Edit Task"
+                >
+                  <i className="fas fa-pencil-alt"></i>
+                </button>
+                <ArchiveButton
+                  type="task"
+                  id={task.id}
+                  name={task.title}
+                  onArchive={(id) => { archiveTask(id); setOpen(false); }}
+                />
+                <button
+                  className="btn-icon delete-btn"
+                  onClick={(e) => { e.stopPropagation(); onDelete(task); setOpen(false); }}
+                  title="Delete Task"
+                >
+                  <i className="fas fa-trash"></i>
+                </button>
+              </div>,
+              document.body
+            )}
           </div>
         )}
       </div>

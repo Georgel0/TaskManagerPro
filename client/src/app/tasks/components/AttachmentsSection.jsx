@@ -78,7 +78,7 @@ export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAt
 
         {loading ? (
           <div className="card">
-            <div className="skeleton-task-row"><div className="skeleton" style={{ width: '100%', height: '60px' }}></div></div>
+            <div className="skeleton" style={{ width: '100%', height: '60px' }}></div>
           </div>
         ) : attachments.length === 0 ? (
           <p className="attachments-empty">No files attached yet.</p>
