@@ -36,13 +36,20 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
                 className="btn-icon edit-btn" title="Edit Project"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(project); }}
               >
-                <i className="fas fa-pencil-alt"></i>
+                <i className="fas fa-pencil-alt"></i> Edit
               </button>
+              <ArchiveButton
+                text={true}
+                type="project"
+                id={project.id}
+                name={project.name}
+                onArchive={archiveProject}
+              />
               <button
                 className="btn-icon delete-btn" title="Delete Project"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); onDelete(project); }}
               >
-                <i className="fas fa-trash"></i>
+                <i className="fas fa-trash"></i> Delete
               </button>
             </>
           ) : (
@@ -54,19 +61,13 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
               </div>
             ) : (
               <button
-                className="btn-icon btn-sm " title="Leave Project"
+                className="btn-icon btn-sm" title="Leave Project"
                 onClick={(e) => { e.stopPropagation(); setLeaveConfirm(true); }}
               >
-                <i className="fas fa-right-from-bracket"></i>
+                <i className="fas fa-right-from-bracket"></i> Leave
               </button>
             )
           )}
-          <ArchiveButton
-            type="project"
-            id={project.id}
-            name={project.name}
-            onArchive={archiveProject}
-          />
         </div>
       )}
     </div>

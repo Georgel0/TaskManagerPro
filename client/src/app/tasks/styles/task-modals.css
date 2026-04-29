@@ -304,11 +304,11 @@ textarea.form-control.comment-input {
   text-align: center;
 }
 
-.action-dropdown-wrapper {
+.tasks-dropdown-wrapper {
   position: relative;
 }
 
-.action-dropdown-menu {
+.tasks-dropdown-menu {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -319,9 +319,9 @@ textarea.form-control.comment-input {
   justify-content: center;
   position: absolute;
   top: 100%;
-  right: 10px;
+  right: 20px;
   padding: 4px 0;
-  min-width: 40px;
+  margin-right: 20px;
 }
 
 @media (max-width: 480px) {

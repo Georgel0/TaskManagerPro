@@ -108,11 +108,11 @@
   text-decoration: none;
 }
 
-.settings-btn:hover, .archive-btn:hover {
+.settings-btn:hover, .sb-archive-btn:hover {
   color: var(--sec-text-color);
 }
 
-.settings-btn.active, .archive-btn.active {
+.settings-btn.active, .sb-archive-btn.active {
   color: var(--accent-color);
 }
 

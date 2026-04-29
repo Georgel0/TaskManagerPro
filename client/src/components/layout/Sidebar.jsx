@@ -95,7 +95,7 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
           <Link href="/settings" className={`settings-btn ${pathname === '/settings' ? 'active' : ''}`} title='Settings'>
             <i className="fas fa-gear"></i>
           </Link>
-          <Link href="/archive" className={`archive-btn ${pathname === '/archive' ? 'active' : ''}`} title="Archive">
+          <Link href="/archive" className={`sb-archive-btn ${pathname === '/archive' ? 'active' : ''}`} title="Archive">
             <i className="fas fa-box-archive"></i>
           </Link>
         </div>

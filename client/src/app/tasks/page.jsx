@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
-import Tasks from './Tasks';
+import Tasks, { TasksSkeleton } from './Tasks';
 
 export default function TasksPage() {
   return (
-    <Suspense fallback={<div>Loading your tasks...</div>}>
+    <Suspense fallback={ <TasksSkeleton /> }>
       <Tasks />
     </Suspense>
   );

@@ -1,17 +1,17 @@
 'use client';
 import { useState } from 'react';
 
-export function ArchiveButton({ type, id, name, onArchive, className = '' }) {
+export function ArchiveButton({ text, type, id, name, onArchive, className = '' }) {
   const [confirm, setConfirm] = useState(false);
 
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
+    <div style={{ position: 'relative', display: 'flex', width: '100%', justifyContent: 'center' }}>
       <button
         className={`btn-icon archive-btn ${className}`}
         title={`Archive ${type}`}
         onClick={(e) => { e.stopPropagation(); setConfirm(true); }}
       >
-        <i className="fas fa-box-archive"></i>
+        <i className="fas fa-box-archive"></i> {text ? 'Archive' : ''}
       </button>
 
       {confirm && (

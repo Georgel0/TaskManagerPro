@@ -40,7 +40,7 @@ export function TaskDetailModal({ isOpen, onClose, onEdit, task, isProjectOwner,
     }
 
     setCommentError(null);
-    await createComment(commentText.trim());
+    createComment(commentText.trim());
     onCommentAdded();
     setCommentText('');
   };

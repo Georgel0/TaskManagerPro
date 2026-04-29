@@ -38,7 +38,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
       const rect = triggerRef.current.getBoundingClientRect();
       setCoords({
         top: rect.bottom + window.scrollY,
-        left: rect.right - 10 + window.scrollX,
+        left: rect.right - 90 + window.scrollX,
       });
     }
     setOpen(!open);
@@ -80,7 +80,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
         </div>
 
         {hasEditRights && (
-          <div className="action-dropdown-wrapper">
+          <div className="tasks-dropdown-wrapper">
             <button
               ref={triggerRef}
               className="btn-icon"
@@ -93,7 +93,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
             {open && createPortal(
               <div
                 ref={menuRef}
-                className="action-dropdown-menu"
+                className="tasks-dropdown-menu"
                 style={{
                   position: 'absolute',
                   top: `${coords.top}px`,
@@ -107,9 +107,10 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
                   onClick={(e) => { e.stopPropagation(); onEdit(task); setOpen(false); }}
                   title="Edit Task"
                 >
-                  <i className="fas fa-pencil-alt"></i>
+                  <i className="fas fa-pencil-alt"></i> Edit
                 </button>
                 <ArchiveButton
+                  text={true}
                   type="task"
                   id={task.id}
                   name={task.title}
@@ -120,7 +121,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
                   onClick={(e) => { e.stopPropagation(); onDelete(task); setOpen(false); }}
                   title="Delete Task"
                 >
-                  <i className="fas fa-trash"></i>
+                  <i className="fas fa-trash"></i> Delete
                 </button>
               </div>,
               document.body

@@ -78,24 +78,20 @@
   color: var(--error-color);
 }
 
-.delete-btn {
-  color: var(--pri-text-color);
-  background: none;
-}
-
 .delete-btn:hover {
   color: var(--error-color);
-  background: none;
-}
-
-.edit-btn {
-  color: var(--sec-text-color);
-  background: none;
 }
 
 .edit-btn:hover {
   color: var(--accent-color);
-  background: none;
+}
+
+.edit-btn, .delete-btn, .archive-btn {
+  color: var(--sec-text-color);
+  width: 90%;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
 }
 
 .action-buttons {

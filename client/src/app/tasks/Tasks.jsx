@@ -8,7 +8,7 @@ import './styles/task-item.css';
 import './styles/task-modals.css';
 import './styles/tasks-layout.css';
 
-const TasksSkeleton = () => (
+export const TasksSkeleton = () => (
   <div className="page-content">
     <header className="dashboard-header" style={{ padding: '0 20px' }}>
       <div style={{ width: '100%' }}>
