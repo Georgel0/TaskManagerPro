@@ -185,6 +185,87 @@
   flex: 1;
 }
 
+.workload-legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--sec-background);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.workload-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--sec-text-color);
+  font-weight: 500;
+}
+
+.workload-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.workload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.workload-bar {
+  display: flex;
+  height: 5px;
+  border-radius: 99px;
+  overflow: hidden;
+  width: 80px;
+  background-color: var(--border-color);
+  flex-shrink: 0;
+}
+
+.workload-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.workload-todo,
+.workload-dot.workload-todo {
+  background-color: var(--sec-text-color);
+  opacity: 0.4;
+}
+
+.workload-progress,
+.workload-dot.workload-progress {
+  background-color: #f59e0b;
+}
+
+.workload-done,
+.workload-dot.workload-done {
+  background-color: #22c55e;
+}
+
+.workload-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sec-text-color);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.workload-overloaded {
+  color: #ef4444;
+}
+
+.workload-light {
+  color: #22c55e;
+}
+
 @media (max-width: 480px) {
   .add-member-input-group {
     flex-direction: column;

@@ -1,5 +1,7 @@
 The Self-Hosting Survival Guide
 1. App Management (PM2)
+ssh -i 'ssh-key-2026-04-28.key' ubuntu@144.24.185.246
+
 See what's running: pm2 status
 
 View real-time logs: pm2 logs (Use Ctrl+C to exit)

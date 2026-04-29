@@ -5,9 +5,15 @@ import { getInitials } from '@/lib';
 const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
+const PRESET_COLORS = [
+  '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
+  '#10b981', '#ef4444', '#06b6d4', '#f97316',
+];
+
 export function ProjectFormModal({ mode = 'create', formData, setFormData, onSubmit, onClose, isSubmitting }) {
   const isEdit = mode === 'edit';
   const [fieldErrors, setFieldErrors] = useState({});
+  const [tagInput, setTagInput] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -22,13 +28,12 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
     setPendingMembers([]);
     setSearchQuery('');
     setSearchResults([]);
+    setTagInput('');
   }, [mode, onClose]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setShowDropdown(false);
-      }
+      if (searchRef.current && !searchRef.current.contains(e.target)) setShowDropdown(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -39,17 +44,27 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
     if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  const addTag = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+      e.preventDefault();
+      const newTag = tagInput.trim().toLowerCase();
+      const existing = formData.tags || [];
+      if (!existing.includes(newTag) && existing.length < 5) {
+        handleChange('tags', [...existing, newTag]);
+      }
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tag) => {
+    handleChange('tags', (formData.tags || []).filter((t) => t !== tag));
+  };
+
   const handleSearchChange = (e) => {
     const q = e.target.value;
     setSearchQuery(q);
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    if (q.trim().length < 2) {
-      setSearchResults([]);
-      setShowDropdown(false);
-      return;
-    }
+    if (q.trim().length < 2) { setSearchResults([]); setShowDropdown(false); return; }
 
     debounceRef.current = setTimeout(async () => {
       setIsSearching(true);
@@ -58,9 +73,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         const data = await res.json();
-        // Filter out already pending members
-        const filtered = data.filter((u) => !pendingMembers.some((m) => m.id === u.id));
-        setSearchResults(filtered);
+        setSearchResults(data.filter((u) => !pendingMembers.some((m) => m.id === u.id)));
         setShowDropdown(true);
       } catch {
         setSearchResults([]);
@@ -77,16 +90,12 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
     setShowDropdown(false);
   };
 
-  const removeMember = (id) => {
-    setPendingMembers((prev) => prev.filter((m) => m.id !== id));
-  };
+  const removeMember = (id) => setPendingMembers((prev) => prev.filter((m) => m.id !== id));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     const schema = isEdit ? updateProjectSchema : createProjectSchema;
     const errors = validate(schema, formData);
-
     if (errors) { setFieldErrors(errors); return; }
     setFieldErrors({});
     onSubmit(e, pendingMembers);
@@ -97,9 +106,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{isEdit ? 'Edit Project' : 'Create New Project'}</h3>
-          <button className="btn-icon" onClick={onClose}>
-            <i className="fas fa-times"></i>
-          </button>
+          <button className="btn-icon" onClick={onClose}><i className="fas fa-times"></i></button>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -113,19 +120,13 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
-              {fieldErrors.name && (
-                <span className="field-error">
-                  <i className="fas fa-exclamation-circle"></i> {fieldErrors.name}
-                </span>
-              )}
+              {fieldErrors.name && <span className="field-error"><i className="fas fa-exclamation-circle"></i> {fieldErrors.name}</span>}
             </div>
 
             <div className={`form-group ${fieldErrors.description ? 'has-error' : ''}`}>
               <label>
                 Description
-                <span className="char-count text-secondary text-xs">
-                  {formData.description?.length ?? 0}/2000
-                </span>
+                <span className="char-count">{formData.description?.length ?? 0}/2000</span>
               </label>
               <textarea
                 className="form-control"
@@ -133,16 +134,63 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                 maxLength={2000}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
-              {fieldErrors.description && (
-                <span className="field-error">
-                  <i className="fas fa-exclamation-circle"></i> {fieldErrors.description}
-                </span>
+              {fieldErrors.description && <span className="field-error"><i className="fas fa-exclamation-circle"></i> {fieldErrors.description}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>Project Color</label>
+              <div className="color-picker-row">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`color-swatch ${formData.color === c ? 'color-swatch-active' : ''}`}
+                    style={{ '--swatch-color': c }}
+                    onClick={() => handleChange('color', formData.color === c ? null : c)}
+                    title={c}
+                  />
+                ))}
+                {formData.color && (
+                  <button
+                    type="button"
+                    className="btn-icon color-clear-btn"
+                    onClick={() => handleChange('color', null)}
+                    title="Clear color"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Tags <span className="form-hint">Press Enter or comma to add · max 5</span></label>
+              {(formData.tags || []).length > 0 && (
+                <div className="tag-chips">
+                  {(formData.tags || []).map((tag) => (
+                    <span key={tag} className="tag-chip">
+                      {tag}
+                      <button type="button" className="tag-chip-remove" onClick={() => removeTag(tag)}>
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </span>
+                  ))}
+                </div>
               )}
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g. client, urgent, frontend..."
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={addTag}
+                disabled={(formData.tags || []).length >= 5}
+              />
             </div>
 
             {!isEdit && (
               <div className="form-group">
-                <label>Add Members <span className="text-secondary text-xs">(optional)</span></label>
+                <label>Add Members <span className="form-hint">(optional)</span></label>
 
                 {pendingMembers.length > 0 && (
                   <div className="member-chips">
@@ -150,11 +198,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                       <span key={m.id} className="member-chip">
                         <span className="member-chip-avatar">{getInitials(m.name)}</span>
                         <span className="member-chip-name">{m.name}</span>
-                        <button
-                          type="button"
-                          className="member-chip-remove"
-                          onClick={() => removeMember(m.id)}
-                        >
+                        <button type="button" className="member-chip-remove" onClick={() => removeMember(m.id)}>
                           <i className="fas fa-times"></i>
                         </button>
                       </span>
@@ -174,9 +218,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                       onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
                       autoComplete="off"
                     />
-                    {isSearching && (
-                      <i className="fas fa-spinner fa-spin member-search-spinner"></i>
-                    )}
+                    {isSearching && <i className="fas fa-spinner fa-spin member-search-spinner"></i>}
                   </div>
 
                   {showDropdown && (
@@ -185,16 +227,9 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                         <li className="member-search-empty">No users found</li>
                       ) : (
                         searchResults.map((u) => (
-                          <li
-                            key={u.id}
-                            className="member-search-result"
-                            onMouseDown={() => addMember(u)}
-                          >
+                          <li key={u.id} className="member-search-result" onMouseDown={() => addMember(u)}>
                             <div className="member-search-avatar">
-                              {u.avatar
-                                ? <img src={u.avatar} alt={u.name} />
-                                : <span>{getInitials(u.name)}</span>
-                              }
+                              {u.avatar ? <img src={u.avatar} alt={u.name} /> : <span>{getInitials(u.name)}</span>}
                             </div>
                             <div className="member-search-info">
                               <span className="member-search-name">{u.name}</span>

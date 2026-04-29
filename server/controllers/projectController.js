@@ -2,15 +2,14 @@ const pool = require('../database');
 const { createNotification, isNotificationAllowed } = require('./notificationController');
 
 const createProject = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, tags = [], color = null } = req.body;
   const userId = req.user.id;
 
   try {
     const newProject = await pool.query(
-      'INSERT INTO projects (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *',
-      [name, description, userId]
+      'INSERT INTO projects (name, description, owner_id, tags, color) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [name, description, userId, tags, color]
     );
-
     res.status(201).json(newProject.rows[0]);
   } catch (err) {
     console.error(err);
@@ -24,22 +23,27 @@ const getProjects = async (req, res) => {
   try {
     const projects = await pool.query(
       `SELECT 
-            p.*,
-            COUNT(DISTINCT t.id)::int AS task_count,
-            COUNT(DISTINCT CASE WHEN pm.user_id != p.owner_id THEN pm.user_id END)::int + 1 AS member_count,
-            COUNT(DISTINCT pa.id)::int AS announcement_count
-        FROM projects p
-        LEFT JOIN project_members pm ON p.id = pm.project_id
-        LEFT JOIN tasks t ON t.project_id = p.id
-        LEFT JOIN project_announcements pa ON pa.project_id = p.id
-       WHERE (
+          p.*,
+          COUNT(DISTINCT t.id)        FILTER (WHERE t.is_archived = FALSE)::int              AS task_count,
+          COUNT(DISTINCT t.id)        FILTER (WHERE t.status = 'Done' AND t.is_archived = FALSE)::int AS done_task_count,
+          COUNT(DISTINCT CASE WHEN pm.user_id != p.owner_id THEN pm.user_id END)::int + 1   AS member_count,
+          COUNT(DISTINCT pa.id)::int                                                          AS announcement_count,
+          EXISTS(
+            SELECT 1 FROM starred_projects sp 
+            WHERE sp.project_id = p.id AND sp.user_id = $1
+          ) AS is_starred
+      FROM projects p
+      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN tasks t ON t.project_id = p.id
+      LEFT JOIN project_announcements pa ON pa.project_id = p.id
+      WHERE (
         p.owner_id = $1 OR EXISTS (
           SELECT 1 FROM project_members pm_access 
-            WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
-          )
-        ) AND p.is_archived = FALSE
-        GROUP BY p.id
-        ORDER BY p.created_at DESC;`,
+          WHERE pm_access.project_id = p.id AND pm_access.user_id = $1
+        )
+      ) AND p.is_archived = FALSE
+      GROUP BY p.id
+      ORDER BY is_starred DESC, p.created_at DESC;`,
       [userId]
     );
 
@@ -52,7 +56,7 @@ const getProjects = async (req, res) => {
 
 const updateProject = async (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+  const { name, description, tags, color } = req.body;
   const userId = req.user.id;
 
   try {
@@ -68,16 +72,18 @@ const updateProject = async (req, res) => {
     const oldName = project.rows[0].name;
 
     const updatedProject = await pool.query(
-      'UPDATE projects SET name = $1, description = $2 WHERE id = $3 RETURNING *',
-      [name, description, id]
+      `UPDATE projects 
+       SET name = $1, description = $2, 
+           tags = COALESCE($3, tags), 
+           color = COALESCE($4, color)
+       WHERE id = $5 RETURNING *`,
+      [name, description, tags ?? null, color ?? null, id]
     );
 
     if (oldName !== name) {
       const membersResult = await pool.query(
-        'SELECT user_id FROM project_members WHERE project_id = $1',
-        [id]
+        'SELECT user_id FROM project_members WHERE project_id = $1', [id]
       );
-
       await Promise.all(
         membersResult.rows.map(async (m) => {
           const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
@@ -90,6 +96,35 @@ const updateProject = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error while updating project.' });
+  }
+};
+
+const toggleStar = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const existing = await pool.query(
+      'SELECT 1 FROM starred_projects WHERE user_id = $1 AND project_id = $2',
+      [userId, id]
+    );
+
+    if (existing.rows.length > 0) {
+      await pool.query(
+        'DELETE FROM starred_projects WHERE user_id = $1 AND project_id = $2',
+        [userId, id]
+      );
+      return res.status(200).json({ starred: false });
+    } else {
+      await pool.query(
+        'INSERT INTO starred_projects (user_id, project_id) VALUES ($1, $2)',
+        [userId, id]
+      );
+      return res.status(200).json({ starred: true });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while toggling star.' });
   }
 };
 
@@ -108,16 +143,14 @@ const deleteProject = async (req, res) => {
     }
 
     const membersResult = await pool.query(
-      'SELECT user_id FROM project_members WHERE project_id = $1',
-      [id]
+      'SELECT user_id FROM project_members WHERE project_id = $1', [id]
     );
 
     await Promise.all(
       membersResult.rows.map(async (m) => {
         const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
         if (allowed) await createNotification(m.user_id, `The project "${project.rows[0].name}" has been deleted by the owner.`);
-      }
-      )
+      })
     );
 
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
@@ -149,13 +182,13 @@ const getProjectMembers = async (req, res) => {
         u.id, u.name, u.email, u.avatar,
         'owner' AS role,
         pm_owner.role_description,
-        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
-        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
-        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
+        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int        AS todo_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int   AS in_progress_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int          AS done_count
       FROM projects p
       JOIN users u ON u.id = p.owner_id
       LEFT JOIN project_members pm_owner ON pm_owner.project_id = p.id AND pm_owner.user_id = p.owner_id
-      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
+      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1 AND t.is_archived = FALSE
       WHERE p.id = $1
       GROUP BY u.id, u.name, u.email, u.avatar, pm_owner.role_description
 
@@ -165,14 +198,14 @@ const getProjectMembers = async (req, res) => {
         u.id, u.name, u.email, u.avatar,
         'member' AS role,
         pm.role_description,
-        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int       AS todo_count,
-        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int  AS in_progress_count,
-        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int         AS done_count
+        COUNT(t.id) FILTER (WHERE t.status = 'To Do')::int        AS todo_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'In Progress')::int   AS in_progress_count,
+        COUNT(t.id) FILTER (WHERE t.status = 'Done')::int          AS done_count
       FROM project_members pm
       JOIN users u ON u.id = pm.user_id
-      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1
+      LEFT JOIN tasks t ON t.assigned_user_id = u.id AND t.project_id = $1 AND t.is_archived = FALSE
       WHERE pm.project_id = $1
-      AND pm.user_id != (SELECT owner_id FROM projects WHERE id = $1)
+        AND pm.user_id != (SELECT owner_id FROM projects WHERE id = $1)
       GROUP BY u.id, u.name, u.email, u.avatar, pm.role_description`,
       [id]
     );
@@ -191,37 +224,22 @@ const addProjectMember = async (req, res) => {
 
   try {
     const project = await pool.query(
-      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2',
-      [id, userId]
+      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2', [id, userId]
     );
-
-    if (project.rows.length === 0) {
-      return res.status(403).json({ error: 'Not authorized.' });
-    }
+    if (project.rows.length === 0) return res.status(403).json({ error: 'Not authorized.' });
 
     const userResult = await pool.query(
-      'SELECT id, name, email, avatar FROM users WHERE email = $1',
-      [email]
+      'SELECT id, name, email, avatar FROM users WHERE email = $1', [email]
     );
-
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'No user found with that email.' });
-    }
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'No user found with that email.' });
 
     const member = userResult.rows[0];
-
-    if (member.id === userId) {
-      return res.status(400).json({ error: 'You are already the project owner.' });
-    }
+    if (member.id === userId) return res.status(400).json({ error: 'You are already the project owner.' });
 
     const isAlreadyMember = await pool.query(
-      'SELECT 1 FROM project_members WHERE project_id = $1 AND user_id = $2',
-      [id, member.id]
+      'SELECT 1 FROM project_members WHERE project_id = $1 AND user_id = $2', [id, member.id]
     );
-
-    if (isAlreadyMember.rows.length > 0) {
-      return res.status(400).json({ error: 'User is already a member of this project.' });
-    }
+    if (isAlreadyMember.rows.length > 0) return res.status(400).json({ error: 'User is already a member of this project.' });
 
     await pool.query(
       'INSERT INTO project_members (project_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
@@ -229,12 +247,7 @@ const addProjectMember = async (req, res) => {
     );
 
     const allowed = await isNotificationAllowed(member.id, 'project_changes');
-    if (allowed) {
-      await createNotification(
-        member.id,
-        `You have been added to the project: ${project.rows[0].name}`
-      );
-    }
+    if (allowed) await createNotification(member.id, `You have been added to the project: ${project.rows[0].name}`);
 
     res.status(200).json({ ...member, role: 'member' });
   } catch (err) {
@@ -249,26 +262,14 @@ const removeProjectMember = async (req, res) => {
 
   try {
     const project = await pool.query(
-      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2',
-      [id, userId]
+      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2', [id, userId]
     );
+    if (project.rows.length === 0) return res.status(403).json({ error: 'Not authorized.' });
 
-    if (project.rows.length === 0) {
-      return res.status(403).json({ error: 'Not authorized.' });
-    }
-
-    await pool.query(
-      'DELETE FROM project_members WHERE project_id = $1 AND user_id = $2',
-      [id, memberId]
-    );
+    await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, memberId]);
 
     const allowed = await isNotificationAllowed(memberId, 'project_changes');
-    if (allowed) {
-      await createNotification(
-        memberId,
-        `You have been removed from the project: ${project.rows[0].name}`
-      );
-    }
+    if (allowed) await createNotification(memberId, `You have been removed from the project: ${project.rows[0].name}`);
 
     res.status(200).json({ message: 'Member removed.' });
   } catch (err) {
@@ -283,50 +284,26 @@ const transferOwnership = async (req, res) => {
 
   try {
     const project = await pool.query(
-      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2',
-      [id, userId]
+      'SELECT * FROM projects WHERE id = $1 AND owner_id = $2', [id, userId]
     );
+    if (project.rows.length === 0) return res.status(403).json({ error: 'Not authorized.' });
 
-    if (project.rows.length === 0) {
-      return res.status(403).json({ error: 'Not authorized.' });
-    }
-
-    // Verify the target is actually a member of the project
     const memberCheck = await pool.query(
-      'SELECT * FROM project_members WHERE project_id = $1 AND user_id = $2',
-      [id, memberId]
+      'SELECT * FROM project_members WHERE project_id = $1 AND user_id = $2', [id, memberId]
     );
+    if (memberCheck.rows.length === 0) return res.status(400).json({ error: 'That user is not a member of this project.' });
 
-    if (memberCheck.rows.length === 0) {
-      return res.status(400).json({ error: 'That user is not a member of this project.' });
-    }
-
-    // Transfer ownership in a transaction — atomic, all or nothing
     await pool.query('BEGIN');
-
-    // Set new owner
     await pool.query('UPDATE projects SET owner_id = $1 WHERE id = $2', [memberId, id]);
-
-    // Remove new owner from members table (they're now owner)
     await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, memberId]);
-
-    // Add old owner as a member
-    await pool.query(
-      'INSERT INTO project_members (project_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [id, userId]
-    );
-
+    await pool.query('INSERT INTO project_members (project_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, userId]);
     await pool.query('COMMIT');
 
     const oldOwnerAllowed = await isNotificationAllowed(userId, 'project_changes');
-    if (oldOwnerAllowed) {
-      await createNotification(userId, `You transferred ownership of "${project.rows[0].name}" and are now a member.`);
-    }
+    if (oldOwnerAllowed) await createNotification(userId, `You transferred ownership of "${project.rows[0].name}" and are now a member.`);
 
     const newOwnerAllowed = await isNotificationAllowed(Number(memberId), 'project_changes');
-    if (newOwnerAllowed) {
-      await createNotification(Number(memberId), `You are now the owner of project: ${project.rows[0].name}`);
-    }
+    if (newOwnerAllowed) await createNotification(Number(memberId), `You are now the owner of project: ${project.rows[0].name}`);
 
     res.status(200).json({ message: 'Ownership transferred successfully.' });
   } catch (err) {
@@ -342,19 +319,11 @@ const updateRoleDescription = async (req, res) => {
   const userId = req.user.id;
 
   try {
-
-    const projectResult = await pool.query(
-      'SELECT owner_id, name FROM projects WHERE id = $1',
-      [projectId]
-    );
-
-    if (projectResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Project not found.' });
-    }
+    const projectResult = await pool.query('SELECT owner_id, name FROM projects WHERE id = $1', [projectId]);
+    if (projectResult.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
 
     const { owner_id, name: projectName } = projectResult.rows[0];
-
-    if (projectResult.rows[0].owner_id !== userId && userId !== parseInt(memberId)) {
+    if (owner_id !== userId && userId !== parseInt(memberId)) {
       return res.status(403).json({ error: 'Not authorized to edit this role.' });
     }
 
@@ -368,11 +337,7 @@ const updateRoleDescription = async (req, res) => {
 
     if (owner_id === userId && userId !== parseInt(memberId)) {
       const allowed = await isNotificationAllowed(parseInt(memberId), 'project_changes');
-      if (allowed) {
-        await createNotification(parseInt(memberId),
-          `Your role in "${projectName}" has been updated.`
-        );
-      }
+      if (allowed) await createNotification(parseInt(memberId), `Your role in "${projectName}" has been updated.`);
     }
 
     res.status(200).json({ message: 'Role description updated successfully.' });
@@ -387,41 +352,19 @@ const leaveProject = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const project = await pool.query(
-      'SELECT * FROM projects WHERE id = $1',
-      [id]
-    );
+    const project = await pool.query('SELECT * FROM projects WHERE id = $1', [id]);
+    if (project.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
+    if (project.rows[0].owner_id === userId) return res.status(400).json({ error: 'Owner cannot leave. Transfer ownership first.' });
 
-    if (project.rows.length === 0) {
-      return res.status(404).json({ error: 'Project not found.' });
-    }
+    await pool.query('UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2', [id, userId]);
+    await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, userId]);
 
-    if (project.rows[0].owner_id === userId) {
-      return res.status(400).json({ error: 'Owner cannot leave. Transfer ownership first.' });
-    }
-
-    await pool.query(
-      'UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2',
-      [id, userId]
-    );
-
-    await pool.query(
-      'DELETE FROM project_members WHERE project_id = $1 AND user_id = $2',
-      [id, userId]
-    );
-
-    // Get the leaving user's name for the notification message
-    const userResult = await pool.query(
-      'SELECT name FROM users WHERE id = $1',
-      [userId]
-    );
+    const userResult = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
     const userName = userResult.rows[0]?.name || 'A member';
 
-    // Get all remaining members + owner
     const membersResult = await pool.query(
       `SELECT user_id AS id FROM project_members WHERE project_id = $1
-       UNION
-       SELECT owner_id AS id FROM projects WHERE id = $1`,
+       UNION SELECT owner_id AS id FROM projects WHERE id = $1`,
       [id]
     );
 
@@ -435,9 +378,7 @@ const leaveProject = async (req, res) => {
     );
 
     const allowed = await isNotificationAllowed(userId, 'project_changes');
-    if (allowed) {
-      await createNotification(userId, `You left the project "${project.rows[0].name}".`);
-    }
+    if (allowed) await createNotification(userId, `You left the project "${project.rows[0].name}".`);
 
     res.status(200).json({ message: 'You have left the project.' });
   } catch (err) {
@@ -451,17 +392,13 @@ const getAnnouncements = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // Check access
     const access = await pool.query(
       `SELECT 1 FROM projects p
        LEFT JOIN project_members pm ON p.id = pm.project_id
        WHERE p.id = $1 AND (p.owner_id = $2 OR pm.user_id = $2)`,
       [id, userId]
     );
-
-    if (access.rows.length === 0) {
-      return res.status(403).json({ error: 'Not authorized to view announcements.' });
-    }
+    if (access.rows.length === 0) return res.status(403).json({ error: 'Not authorized to view announcements.' });
 
     const result = await pool.query(
       `SELECT a.*, 
@@ -490,12 +427,10 @@ const createAnnouncement = async (req, res) => {
 
   try {
     const project = await pool.query('SELECT owner_id, name FROM projects WHERE id = $1', [projectId]);
-
     if (project.rows.length === 0 || project.rows[0].owner_id !== userId) {
       return res.status(403).json({ error: 'Only the project owner can make announcements.' });
     }
 
-    // If this is pinned, unpin others to maintain a single pinned post
     if (isPinned) {
       await pool.query('UPDATE project_announcements SET is_pinned = false WHERE project_id = $1', [projectId]);
     }
@@ -506,18 +441,14 @@ const createAnnouncement = async (req, res) => {
       [projectId, userId, title, content, type, isPinned]
     );
 
-    const membersResult = await pool.query(
-      'SELECT user_id FROM project_members WHERE project_id = $1', [projectId]
-    );
-
+    const membersResult = await pool.query('SELECT user_id FROM project_members WHERE project_id = $1', [projectId]);
     await Promise.all(
       membersResult.rows
         .filter(m => m.user_id !== userId)
         .map(async (m) => {
           const allowed = await isNotificationAllowed(m.user_id, 'project_changes');
-          if (allowed) await createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`)
-        }
-        )
+          if (allowed) await createNotification(m.user_id, `New announcement in "${project.rows[0].name}": ${title}`);
+        })
     );
 
     res.status(201).json(result.rows[0]);
@@ -538,16 +469,10 @@ const toggleAcknowledgment = async (req, res) => {
     );
 
     if (isAcknowledged.rows.length > 0) {
-      await pool.query(
-        'DELETE FROM announcement_acknowledgments WHERE announcement_id = $1 AND user_id = $2',
-        [announcementId, userId]
-      );
+      await pool.query('DELETE FROM announcement_acknowledgments WHERE announcement_id = $1 AND user_id = $2', [announcementId, userId]);
       return res.status(200).json({ acknowledged: false });
     } else {
-      await pool.query(
-        'INSERT INTO announcement_acknowledgments (announcement_id, user_id) VALUES ($1, $2)',
-        [announcementId, userId]
-      );
+      await pool.query('INSERT INTO announcement_acknowledgments (announcement_id, user_id) VALUES ($1, $2)', [announcementId, userId]);
       return res.status(200).json({ acknowledged: true });
     }
   } catch (err) {
@@ -560,15 +485,8 @@ const deleteAnnouncement = async (req, res) => {
   const { announcementId } = req.params;
 
   try {
-    const result = await pool.query(
-      'DELETE FROM project_announcements WHERE id = $1',
-      [announcementId]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Announcement not found.' });
-    }
-
+    const result = await pool.query('DELETE FROM project_announcements WHERE id = $1', [announcementId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Announcement not found.' });
     res.status(200).json({ message: 'Announcement deleted.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete announcement.' });
@@ -576,18 +494,9 @@ const deleteAnnouncement = async (req, res) => {
 };
 
 module.exports = {
-  createProject,
-  getProjects,
-  updateProject,
-  deleteProject,
-  getProjectMembers,
-  addProjectMember,
-  removeProjectMember,
-  transferOwnership,
-  updateRoleDescription,
-  leaveProject,
-  getAnnouncements,
-  createAnnouncement,
-  toggleAcknowledgment,
-  deleteAnnouncement
+  createProject, getProjects, updateProject, deleteProject,
+  toggleStar,
+  getProjectMembers, addProjectMember, removeProjectMember,
+  transferOwnership, updateRoleDescription, leaveProject,
+  getAnnouncements, createAnnouncement, toggleAcknowledgment, deleteAnnouncement,
 };

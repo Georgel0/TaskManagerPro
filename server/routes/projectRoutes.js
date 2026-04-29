@@ -3,7 +3,8 @@ const {
   createProject, getProjects, updateProject,
   deleteProject, getProjectMembers, addProjectMember,
   removeProjectMember, transferOwnership, updateRoleDescription,
-  leaveProject, getAnnouncements, createAnnouncement, toggleAcknowledgment, deleteAnnouncement
+  leaveProject, getAnnouncements, createAnnouncement, toggleAcknowledgment, 
+  deleteAnnouncement, toggleStar,
 } = require('../controllers/projectController');
 const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
@@ -25,6 +26,7 @@ router.post('/', validate(createProjectSchema), createProject);
 router.post('/:id/members', validate(addMemberSchema), addProjectMember);
 router.post('/:id/announcements', createAnnouncement);
 router.post('/:id/announcements/:announcementId/acknowledge', toggleAcknowledgment);
+router.post('/:id/star', toggleStar);
 
 router.put('/:id', validate(updateProjectSchema), updateProject);
 router.put('/:id/members/:memberId/transfer', transferOwnership);

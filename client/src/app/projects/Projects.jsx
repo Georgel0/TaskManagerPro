@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
-import { ProjectCard, ProjectFormModal, MembersModal, TasksModal, AnnouncementsModal } from './components';
+import { ProjectCard, ProjectFormModal, MembersModal, TasksModal, 
+  AnnouncementsModal, QuickAddTaskModal } from './components';
 import { RemovalModal } from '@/components/ui';
 import './styles/project-members.css';
 import './styles/project-modals.css';
@@ -12,23 +13,18 @@ import './styles/member-detail.css';
 
 const ProjectsSkeleton = () => (
   <div className="page-content">
-    <div className="projects-header" style={{ padding: '0 20px' }}>
-      <div style={{ width: '100%' }}>
-        <div className="skeleton skeleton-title"></div>
-        <div className="skeleton skeleton-subtitle" style={{ width: '15%' }}></div>
-      </div>
+    <div className="projects-header">
+      <div className="skeleton skeleton-title" style={{ width: '200px' }}></div>
       <div className="project-header-actions">
         <div className="skeleton skeleton-btn"></div>
       </div>
     </div>
-
     <div className="skeleton-project-grid">
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div key={i} className="card" style={{ height: '200px', padding: '20px' }}>
           <div className="skeleton" style={{ width: '60%', height: '24px', marginBottom: '15px' }}></div>
           <div className="skeleton" style={{ width: '100%', height: '15px', marginBottom: '8px' }}></div>
           <div className="skeleton" style={{ width: '80%', height: '15px', marginBottom: '20px' }}></div>
-
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
             <div className="skeleton" style={{ width: '30%', height: '12px' }}></div>
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -51,17 +47,19 @@ export default function Projects() {
     selectedProject, setSelectedProject,
     createForm, setCreateForm,
     editForm, setEditForm,
+    activeTagFilter, setActiveTagFilter, allTags,
     isCreateModalOpen, setIsCreateModalOpen,
     isEditModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
     isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
+    quickAddProject, setQuickAddProject,
     projectTasks, loadingTasks,
-    handleCreate, handleEdit, handleDelete,
+    handleCreate, handleEdit, handleDelete, handleStar,
     openEdit, openDelete, openTasks, openMembers,
-    openAnnouncements, handleAnnouncementCreated,
-    handleAnnouncementDeleted
+    openAnnouncements, openQuickAdd,
+    handleAnnouncementCreated, handleAnnouncementDeleted,
   } = useProjects();
 
   const {
@@ -72,48 +70,61 @@ export default function Projects() {
     handleProjectLeave: _handleProjectLeave,
   } = useProjectMembers(selectedProject, setProjects);
 
-  const handleTransferOwnership = (memberId) =>
-    _handleTransferOwnership(memberId, setSelectedProject);
+  const handleTransferOwnership = (memberId) => _handleTransferOwnership(memberId, setSelectedProject);
+  const handleProjectLeave = (project) => _handleProjectLeave(project, setSelectedProject);
 
-  const handleProjectLeave = (project) =>
-    _handleProjectLeave(project, setSelectedProject);
-
-  if (appLoading || projectsLoading || !user) {
-    return <ProjectsSkeleton />;
-  }
-
-  if (!projectsLoading && !projects) {
-    return (
-      <div className="error-state">
-        <i className="fas fa-exclamation-triangle"></i>
-        <p>Failed to load projects.</p>
-      </div>
-    );
-  }
+  if (appLoading || projectsLoading || !user) return <ProjectsSkeleton />;
 
   return (
     <div className="page-content">
       <div className="projects-header">
         <h2><i className="fas fa-folder-open"></i> My Projects</h2>
         <div className="project-header-actions">
+          <Link href="/archive" className="btn btn-secondary" title="View Archive">
+            <i className="fas fa-box-archive"></i> Archive
+          </Link>
           <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
             <i className="fas fa-plus"></i> New Project
           </button>
-          <Link href='/tasks' className="btn btn-secondary" title="View Tasks">
+          <Link href="/tasks" className="btn btn-secondary" title="View Tasks">
             <i className="fas fa-list-check"></i> Tasks <i className="fas fa-arrow-right"></i>
           </Link>
         </div>
       </div>
+
+      {allTags.length > 0 && (
+        <div className="project-tag-filter-bar">
+          <button
+            className={`tag-filter-btn ${activeTagFilter === '' ? 'active' : ''}`}
+            onClick={() => setActiveTagFilter('')}
+          >
+            All
+          </button>
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              className={`tag-filter-btn ${activeTagFilter === tag ? 'active' : ''}`}
+              onClick={() => setActiveTagFilter(activeTagFilter === tag ? '' : tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       {error && <div className="error-message">{error}</div>}
 
       {projects.length === 0 ? (
         <div className="card projects-empty-state">
           <i className="fas fa-folder-plus projects-empty-icon"></i>
-          <p>You don't have any projects yet. Create one to get started.</p>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-            <i className="fas fa-plus"></i> New Project
-          </button>
+          <p>{activeTagFilter ? `No projects tagged "${activeTagFilter}".` : "You don't have any projects yet."}</p>
+          {activeTagFilter ? (
+            <button className="btn btn-secondary" onClick={() => setActiveTagFilter('')}>Clear filter</button>
+          ) : (
+            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+              <i className="fas fa-plus"></i> New Project
+            </button>
+          )}
         </div>
       ) : (
         <div className="projects-grid">
@@ -128,6 +139,8 @@ export default function Projects() {
               onMembers={openMembers}
               onLeave={handleProjectLeave}
               onAnnouncements={openAnnouncements}
+              onStar={handleStar}
+              onQuickAdd={openQuickAdd}
             />
           ))}
         </div>
@@ -195,6 +208,18 @@ export default function Projects() {
           onClose={() => setIsAnnouncementsModalOpen(false)}
           onAnnouncementCreated={() => handleAnnouncementCreated(selectedProject.id)}
           onAnnouncementDeleted={() => handleAnnouncementDeleted(selectedProject.id)}
+        />
+      )}
+
+      {quickAddProject && (
+        <QuickAddTaskModal
+          project={quickAddProject}
+          onClose={() => setQuickAddProject(null)}
+          onAdded={() => {
+            setProjects((prev) =>
+              prev.map((p) => p.id === quickAddProject.id ? { ...p, task_count: (p.task_count ?? 0) + 1 } : p)
+            );
+          }}
         />
       )}
     </div>
