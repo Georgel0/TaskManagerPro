@@ -73,11 +73,12 @@ const updateProject = async (req, res) => {
 
     const updatedProject = await pool.query(
       `UPDATE projects 
-       SET name = $1, description = $2, 
-           tags = COALESCE($3, tags), 
-           color = COALESCE($4, color)
-       WHERE id = $5 RETURNING *`,
-      [name, description, tags ?? null, color ?? null, id]
+        SET name = $1, 
+            description = $2, 
+            tags = $3, -- Remove COALESCE if you want to allow clearing tags
+            color = COALESCE($4, color)
+        WHERE id = $5 RETURNING *`,
+      [name, description, tags, color ?? null, id]
     );
 
     if (oldName !== name) {
@@ -356,7 +357,7 @@ const leaveProject = async (req, res) => {
     if (project.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
     if (project.rows[0].owner_id === userId) return res.status(400).json({ error: 'Owner cannot leave. Transfer ownership first.' });
 
-    await pool.query('UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2', [id, userId]);
+    await pool.query('UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2 AND status != "Done"', [id, userId]);
     await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, userId]);
 
     const userResult = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);

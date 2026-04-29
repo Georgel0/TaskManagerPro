@@ -17,7 +17,9 @@ function WorkloadBar({ member }) {
   const isLight = total <= 1;
 
   return (
-    <div className="workload-wrap" title={`${total} tasks · ${member.todo_count} to do · ${member.in_progress_count} in progress · ${member.done_count} done`}>
+    <div className="workload-wrap" 
+      title={`${total} tasks · ${member.todo_count} to do · ${member.in_progress_count} in progress · ${member.done_count} done`}
+    >
       <div className="workload-bar">
         {todoPct > 0 && <div className="workload-seg workload-todo" style={{ width: `${todoPct}%` }}></div>}
         {inProgressPct > 0 && <div className="workload-seg workload-progress" style={{ width: `${inProgressPct}%` }}></div>}

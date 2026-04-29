@@ -22,6 +22,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     setFieldErrors({});
@@ -63,20 +64,36 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   const handleSearchChange = (e) => {
     const q = e.target.value;
     setSearchQuery(q);
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (q.trim().length < 2) { setSearchResults([]); setShowDropdown(false); return; }
+    if (q.trim().length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
 
     debounceRef.current = setTimeout(async () => {
       setIsSearching(true);
+
+      // Cancel previous pending request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
       try {
         const res = await fetch(`${API}/users/search?q=${encodeURIComponent(q)}`, {
           headers: { Authorization: `Bearer ${getToken()}` },
+          signal: abortControllerRef.current.signal // Attach signal
         });
         const data = await res.json();
         setSearchResults(data.filter((u) => !pendingMembers.some((m) => m.id === u.id)));
         setShowDropdown(true);
-      } catch {
-        setSearchResults([]);
+      } catch (err) {
+        // Ignore abort errors, handle others
+        if (err.name !== 'AbortError') {
+          setSearchResults([]);
+        }
       } finally {
         setIsSearching(false);
       }
@@ -94,11 +111,52 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    let submissionData = { ...formData };
+
+    if (tagInput.trim()) {
+      const newTag = tagInput.trim().toLowerCase();
+      const existing = submissionData.tags || [];
+      if (!existing.includes(newTag) && existing.length < 5) {
+        submissionData.tags = [...existing, newTag];
+      }
+      setTagInput('');
+    }
+
     const schema = isEdit ? updateProjectSchema : createProjectSchema;
-    const errors = validate(schema, formData);
-    if (errors) { setFieldErrors(errors); return; }
+    const errors = validate(schema, submissionData);
+
+    if (errors) {
+      setFieldErrors(errors);
+      return;
+    }
+
     setFieldErrors({});
-    onSubmit(e, pendingMembers);
+    onSubmit(e, pendingMembers, submissionData);
+  };
+
+  const handlePasteTags = (e) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData('text');
+    if (!pasteData) return;
+
+    const incomingTags = pasteData.split(/[,\n]/)
+      .map(t => t.trim().toLowerCase())
+      .filter(t => t);
+
+    let currentTags = [...(formData.tags || [])];
+    let didAdd = false;
+
+    for (const tag of incomingTags) {
+      if (currentTags.length >= 5) break;
+      if (!currentTags.includes(tag)) {
+        currentTags.push(tag);
+        didAdd = true;
+      }
+    }
+
+    if (didAdd) {
+      handleChange('tags', currentTags);
+    }
   };
 
   return (
@@ -184,6 +242,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={addTag}
+                onPaste={handlePasteTags}
                 disabled={(formData.tags || []).length >= 5}
               />
             </div>

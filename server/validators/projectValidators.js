@@ -13,6 +13,19 @@ const projectBodySchema = z.object({
     .max(2000, 'Description must be at most 2000 characters.')
     .optional()
     .or(z.literal('')),
+
+  tags: z
+    .array(z.string().trim().max(20, 'Each tag must be short'))
+    .max(5, 'You can only have up to 5 tags')
+    .optional()
+    .default([]),
+
+  color: z
+    .string()
+    .trim()
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color')
+    .optional()
+    .nullable(),
 });
 
 // createProject and updateProject share the same body shape

@@ -158,14 +158,14 @@ export function useProjects() {
     onError: (err) => toast.error(err.message),
   });
 
-  const handleCreate = (e, pendingMembers = []) => {
+  const handleCreate = (e, pendingMembers = [], finalForm = createForm) => {
     e.preventDefault();
-    createMutation.mutate({ form: createForm, pendingMembers });
+    createMutation.mutate({ form: finalForm, pendingMembers });
   };
 
-  const handleEdit = (e) => {
+  const handleEdit = (e, pendingMembers, finalForm = editForm) => {
     e.preventDefault();
-    editMutation.mutate(editForm);
+    editMutation.mutate(finalForm);
   };
 
   const handleDelete = () => deleteMutation.mutate();
