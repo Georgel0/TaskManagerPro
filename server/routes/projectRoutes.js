@@ -6,8 +6,10 @@ const {
   leaveProject, getAnnouncements, createAnnouncement, toggleAcknowledgment, 
   deleteAnnouncement, toggleStar,
 } = require('../controllers/projectController');
+const { getReadme, saveReadme, uploadReadmeFile, deleteReadmeFile } = require('../controllers/readmeController');
 const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
+const { upload } = require('../middleware/upload');
 const {
   createProjectSchema,
   updateProjectSchema,
@@ -36,5 +38,11 @@ router.delete('/:id', deleteProject);
 router.delete('/:id/leave', leaveProject);
 router.delete('/:id/members/:memberId', removeProjectMember);
 router.delete('/:id/announcements/:announcementId', deleteAnnouncement);
+
+router.get('/:id/readme', getReadme);
+router.put('/:id/readme', saveReadme);
+
+router.post('/:id/readme/files', upload.single('file'), uploadReadmeFile);
+router.delete('/:id/readme/files/:fileId', deleteReadmeFile);
 
 module.exports = router;

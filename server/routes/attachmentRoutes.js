@@ -1,7 +1,7 @@
 const express = require('express');
 const { getAttachments, uploadAttachment, deleteAttachment } = require('../controllers/attachmentController');
 const { protect } = require('../middleware/authMiddleware');
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 
 const router = express.Router();
 

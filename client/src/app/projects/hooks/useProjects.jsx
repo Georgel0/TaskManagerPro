@@ -24,6 +24,7 @@ export function useProjects() {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
   const [quickAddProject, setQuickAddProject] = useState(null);
+  const [readmeProject, setReadmeProject] = useState(null);
 
   const { data: projects = [], isLoading: loading, error } = useQuery({
     queryKey: ['projects'],
@@ -206,6 +207,7 @@ export function useProjects() {
     isMembersModalOpen, setIsMembersModalOpen,
     isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
     quickAddProject, setQuickAddProject,
+    readmeProject, setReadmeProject,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete, handleStar,
     openEdit, openDelete, openTasks, openMembers,

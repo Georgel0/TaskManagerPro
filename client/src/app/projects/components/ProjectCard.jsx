@@ -6,7 +6,7 @@ const PROJECT_COLORS = [
   '#10b981', '#ef4444', '#06b6d4', '#f97316',
 ];
 
-export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements, onStar, onQuickAdd }) {
+export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements, onStar, onQuickAdd, onReadme }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
   const doneCount = project.done_task_count ?? 0;
@@ -86,6 +86,9 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             </button>
             <button className="project-chip project-chip-add" title="Quick Add Task" onClick={(e) => { e.stopPropagation(); onQuickAdd(project); }}>
               <i className="fas fa-plus"></i>
+            </button>
+            <button className="project-chip" title="Project README" onClick={(e) => { e.stopPropagation(); onReadme(project); }}>
+              <i className="fas fa-book-open"></i>
             </button>
           </div>
         </div>

@@ -5,13 +5,14 @@ import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
 import {
   ProjectCard, ProjectFormModal, MembersModal, TasksModal,
-  AnnouncementsModal, QuickAddTaskModal
+  AnnouncementsModal, QuickAddTaskModal, ReadmeModal
 } from './components';
 import { RemovalModal } from '@/components/ui';
 import './styles/project-members.css';
 import './styles/project-modals.css';
 import './styles/projects-layout.css';
 import './styles/member-detail.css';
+import './styles/readme.css';
 
 const ProjectsSkeleton = () => (
   <div className="page-content">
@@ -57,6 +58,7 @@ export default function Projects() {
     isMembersModalOpen, setIsMembersModalOpen,
     isAnnouncementsModalOpen, setIsAnnouncementsModalOpen,
     quickAddProject, setQuickAddProject,
+    readmeProject, setReadmeProject,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete, handleStar,
     openEdit, openDelete, openTasks, openMembers,
@@ -74,6 +76,7 @@ export default function Projects() {
 
   const handleTransferOwnership = (memberId) => _handleTransferOwnership(memberId, setSelectedProject);
   const handleProjectLeave = (project) => _handleProjectLeave(project, setSelectedProject);
+  const openReadme = (project) => setReadmeProject(project);
 
   if (appLoading || projectsLoading || !user) return <ProjectsSkeleton />;
 
@@ -143,6 +146,7 @@ export default function Projects() {
               onAnnouncements={openAnnouncements}
               onStar={handleStar}
               onQuickAdd={openQuickAdd}
+              onReadme={openReadme}
             />
           ))}
         </div>
@@ -222,6 +226,14 @@ export default function Projects() {
               prev.map((p) => p.id === quickAddProject.id ? { ...p, task_count: (p.task_count ?? 0) + 1 } : p)
             );
           }}
+        />
+      )}
+
+      {readmeProject && (
+        <ReadmeModal
+          project={readmeProject}
+          isOwner={readmeProject.owner_id === user.id}
+          onClose={() => setReadmeProject(null)}
         />
       )}
     </div>

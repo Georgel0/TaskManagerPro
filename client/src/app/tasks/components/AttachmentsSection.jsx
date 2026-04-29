@@ -3,6 +3,7 @@ import { useRef, useState, useCallback } from 'react';
 import { useAttachments } from '../hooks/useAttachments';
 import { RemovalModal } from '@/components/ui';
 import toast from 'react-hot-toast';
+import { formatSize } from '@/lib';
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -28,13 +29,6 @@ const getFileIcon = (fileType) => {
   if (!fileType) return 'fa-file';
   const match = Object.keys(FILE_ICONS).find((k) => fileType.startsWith(k));
   return match ? FILE_ICONS[match] : 'fa-file';
-};
-
-const formatSize = (bytes) => {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 const getIconType = (fileType) => {
