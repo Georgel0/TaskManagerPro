@@ -3,8 +3,10 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
-import { ProjectCard, ProjectFormModal, MembersModal, TasksModal, 
-  AnnouncementsModal, QuickAddTaskModal } from './components';
+import {
+  ProjectCard, ProjectFormModal, MembersModal, TasksModal,
+  AnnouncementsModal, QuickAddTaskModal
+} from './components';
 import { RemovalModal } from '@/components/ui';
 import './styles/project-members.css';
 import './styles/project-modals.css';
@@ -79,15 +81,15 @@ export default function Projects() {
     <div className="page-content">
       <div className="projects-header">
         <h2><i className="fas fa-folder-open"></i> My Projects</h2>
-        <div className="project-header-actions">
-          <Link href="/archive" className="btn btn-secondary" title="View Archive">
-            <i className="fas fa-box-archive"></i> Archive
+        <div className="header-actions">
+          <Link href="/dashboard" className="header-action-btn" title="View Dashboard">
+            <i className="fas fa-arrow-left"></i>
           </Link>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-            <i className="fas fa-plus"></i> New Project
+          <button className="header-action-btn" onClick={() => setIsCreateModalOpen(true)} title="Add New Project">
+            <i className="fas fa-folder-plus"></i>
           </button>
-          <Link href="/tasks" className="btn btn-secondary" title="View Tasks">
-            <i className="fas fa-list-check"></i> Tasks <i className="fas fa-arrow-right"></i>
+          <Link href="/tasks" className="header-action-btn" title="View Tasks">
+            <i className="fas fa-arrow-right"></i>
           </Link>
         </div>
       </div>

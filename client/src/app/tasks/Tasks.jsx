@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import { useApp } from '@/context';
@@ -59,9 +60,18 @@ export default function Tasks() {
     <div className="page-content">
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> {activeTab === 'project' ? 'Project Tasks' : 'Personal Tasks'}</h2>
-        <button className="btn btn-primary" onClick={() => setModalState({ type: 'create', task: null })}>
-          <i className="fas fa-plus"></i> New Task
-        </button>
+        <div className="header-actions">
+          <Link href="/projects" className="header-action-btn" title="View Tasks">
+            <i className="fas fa-arrow-left"></i>
+          </Link>
+          <button
+            className="header-action-btn"
+            onClick={() => setModalState({ type: 'create', task: null })}
+            title="Add New Task"
+          >
+            <i className="fas fa-square-plus"></i>
+          </button>
+        </div>
       </div>
 
       <div className="tasks-tabs-container">

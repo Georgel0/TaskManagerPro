@@ -63,18 +63,25 @@ export default function Dashboard() {
         </div>
         <div className="dashboard-header-actions">
           <button
-            className="btn btn-primary"
+            className="header-action-btn"
             onClick={() => setIsModalOpen(true)}
-            title="Create a new task for your projects"
+            title="Quick task"
           >
-            <i className="fas fa-plus"></i> New Task
+            <i className="fas fa-square-plus"></i>
           </button>
           <Link
             href='/projects'
-            className="btn btn-secondary dashboard-projects-btn"
-            title="View and manage all your projects"
+            className="header-action-btn"
+            title="View projects"
           >
-            <i className="fas fa-folder-open"></i>  Projects <i className="fas fa-arrow-right"></i>
+            <i className="fas fa-folder-open"></i>
+          </Link>
+          <Link
+            href='/tasks'
+            className="header-action-btn"
+            title="View tasks"
+          >
+            <i className="fas fa-list"></i>
           </Link>
         </div>
       </header>
