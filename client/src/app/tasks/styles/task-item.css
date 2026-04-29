@@ -239,6 +239,147 @@
   color: var(--sec-text-color);
 }
 
+/* ── Drag & Drop ────────────────────────────────────── */
+.attachments-dragging {
+  border-color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-color) 5%, transparent);
+}
+
+.attachments-drag-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border: 2px dashed var(--accent-color);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  gap: 8px;
+}
+
+.attachments-drag-icon {
+  font-size: 2rem;
+  color: var(--accent-color);
+}
+
+.attachments-drag-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  margin: 0;
+}
+
+.attachments-section {
+  position: relative;
+}
+
+.attachments-hidden-input {
+  display: none;
+}
+
+.attachments-skeleton-wrap {
+  padding: 12px 16px;
+}
+
+.attachments-skeleton {
+  width: 100%;
+  height: 60px;
+}
+
+.attachments-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px;
+  padding: 28px 20px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  width: calc(100% - 32px);
+  text-align: center;
+}
+
+.attachments-empty-state:hover:not(:disabled) {
+  border-color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-color) 5%, transparent);
+}
+
+.attachments-empty-state:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.attachments-empty-icon {
+  font-size: 1.75rem;
+  color: var(--sec-text-color);
+  margin-bottom: 4px;
+}
+
+.attachments-empty-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pri-text-color);
+  margin: 0;
+}
+
+.attachments-empty-sub {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+  margin: 0;
+}
+
+.attachment-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.attachment-icon-wrap {
+  overflow: hidden;
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.attachment-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--sec-text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  transition: background var(--transition), color var(--transition);
+  text-decoration: none;
+}
+
+.attachment-download-btn:hover {
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  color: var(--accent-color);
+}
+
+.attachment-delete-btn:hover {
+  background: color-mix(in srgb, var(--error-color) 10%, transparent);
+  color: var(--error-color);
+}
+
 @media (max-width: 640px) {
   .tasks-item {
     flex-direction: column;

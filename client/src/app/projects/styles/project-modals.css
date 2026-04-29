@@ -78,7 +78,7 @@
   position: absolute;
   top: 100%;
   right: 20px;
-  width: 90px;
+  min-width: 90px;
   background-color: var(--card-background); 
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);

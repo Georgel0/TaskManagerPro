@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Tooltip } from 'react-tooltip';
 import { useApp } from '@/context';
 import { useTasks } from './hooks/useTasks';
 import { TaskItem, TaskDetailModal, TaskFormModal } from './components';
@@ -64,12 +65,33 @@ export default function Tasks() {
       </div>
 
       <div className="tasks-tabs-container">
-        <button className={`task-tab-btn ${activeTab === 'project' ? 'active' : ''}`} onClick={() => setActiveTab('project')}>
-          <i className="fas fa-briefcase"></i> Team Projects
-        </button>
-        <button className={`task-tab-btn ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>
-          <i className="fas fa-user"></i> Personal To-Do
-        </button>
+        <div className="task-tab-group">
+          <button className={`task-tab-btn ${activeTab === 'project' ? 'active' : ''}`} onClick={() => setActiveTab('project')}>
+            <i className="fas fa-briefcase"></i> Team Projects
+          </button>
+          <button data-tooltip-id="team-info-tooltip" className="bio-info">
+            <i className="fa-solid fa-circle-info"></i>
+          </button>
+          <Tooltip id="team-info-tooltip" place="bottom">
+            <div className="tooltip-content">
+              <p>Tasks that belong to a shared project. Visible to all project members and can be assigned to specific teammates.</p>
+            </div>
+          </Tooltip>
+        </div>
+
+        <div className="task-tab-group">
+          <button className={`task-tab-btn ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>
+            <i className="fas fa-user"></i> Personal To-Do
+          </button>
+          <button data-tooltip-id="personal-info-tooltip" className="bio-info">
+            <i className="fa-solid fa-circle-info"></i>
+          </button>
+          <Tooltip id="personal-info-tooltip" place="bottom">
+            <div className="tooltip-content">
+              <p>Private tasks only visible to you. Great for reminders and personal work that isn't tied to a project.</p>
+            </div>
+          </Tooltip>
+        </div>
       </div>
 
       <div className="tasks-filters">

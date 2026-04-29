@@ -105,14 +105,14 @@ export function MemberActionMenu({ member, onRemove, onTransferClick }) {
             title="Make Owner"
             onClick={(e) => { e.stopPropagation(); onTransferClick(member.id); setOpen(false); }}
           >
-            <i className="fas fa-crown"></i>
+            <i className="fas fa-crown"></i> Promote
           </button>
           <button
             className="dropdown-item text-danger"
             title="Remove Member"
             onClick={(e) => { e.stopPropagation(); onRemove(member.id); setOpen(false); }}
           >
-            <i className="fas fa-user-minus"></i>
+            <i className="fas fa-user-minus"></i> Kick
           </button>
         </div>
       )}

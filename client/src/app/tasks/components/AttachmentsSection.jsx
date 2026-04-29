@@ -1,7 +1,19 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useAttachments } from '../hooks/useAttachments';
 import { RemovalModal } from '@/components/ui';
+import toast from 'react-hot-toast';
+
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+
+const ALLOWED_MIME_PREFIXES = ['image/', 'text/'];
+const ALLOWED_MIME_EXACT = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/zip',
+  'application/x-zip-compressed',
+];
 
 const FILE_ICONS = {
   'image/': 'fa-image',
@@ -31,23 +43,84 @@ const getIconType = (fileType) => {
   if (fileType === 'application/pdf') return 'pdf';
   if (fileType.includes('word')) return 'word';
   if (fileType.startsWith('text/')) return 'text';
-  if (fileType === 'application/zip') return 'zip';
+  if (fileType === 'application/zip' || fileType === 'application/x-zip-compressed') return 'zip';
   return 'file';
 };
 
+const validateFile = (file) => {
+  if (file.size > MAX_SIZE_BYTES) {
+    return `"${file.name}" exceeds the 10 MB limit (${formatSize(file.size)}).`;
+  }
+  const allowed =
+    ALLOWED_MIME_PREFIXES.some((p) => file.type.startsWith(p)) ||
+    ALLOWED_MIME_EXACT.includes(file.type);
+  if (!allowed) {
+    return `"${file.name}" has an unsupported file type.`;
+  }
+  return null;
+};
+
+const getDownloadUrl = (filePath) => {
+  // Inject fl_attachment into Cloudinary URL to force download
+  return filePath.replace('/upload/', '/upload/fl_attachment/');
+};
+
 export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAttachmentCountChange }) {
-  const { attachments, loading, isUploading, uploadAttachment, deleteAttachment } = useAttachments(taskId, onAttachmentCountChange);
+  const { attachments, loading, isUploading, uploadFiles, deleteAttachment } = useAttachments(taskId, onAttachmentCountChange);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const dragCounter = useRef(0);
 
   const pendingAttachment = attachments.find((a) => a.id === pendingDeleteId);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadAttachment(file);
-      e.target.value = ''; // reset so same file can be re-uploaded
+  const processFiles = useCallback((files) => {
+    const validFiles = [];
+    for (const file of files) {
+      const error = validateFile(file);
+      if (error) {
+        toast.error(error);
+      } else {
+        validFiles.push(file);
+      }
     }
+    if (validFiles.length > 0) {
+      uploadFiles(validFiles);
+    }
+  }, [uploadFiles]);
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) processFiles(files);
+    e.target.value = '';
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    if (dragCounter.current === 1) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length > 0) processFiles(files);
   };
 
   const canDelete = (attachment) =>
@@ -55,7 +128,20 @@ export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAt
 
   return (
     <>
-      <div className="attachments-section">
+      <div
+        className={`attachments-section${isDragging ? ' attachments-dragging' : ''}`}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className="attachments-drag-overlay">
+            <i className="fas fa-cloud-upload-alt attachments-drag-icon"></i>
+            <p className="attachments-drag-text">Drop files to upload</p>
+          </div>
+        )}
+
         <div className="attachments-header">
           <h4><i className="fas fa-paperclip"></i> Attachments</h4>
           <button
@@ -71,23 +157,40 @@ export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAt
           <input
             ref={fileInputRef}
             type="file"
-            style={{ display: 'none' }}
+            multiple
+            className="attachments-hidden-input"
             onChange={handleFileChange}
           />
         </div>
 
         {loading ? (
-          <div className="card">
-            <div className="skeleton" style={{ width: '100%', height: '60px' }}></div>
+          <div className="attachments-skeleton-wrap">
+            <div className="skeleton attachments-skeleton"></div>
           </div>
         ) : attachments.length === 0 ? (
-          <p className="attachments-empty">No files attached yet.</p>
+          <button
+            className="attachments-empty-state"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            <i className="fas fa-folder-open attachments-empty-icon"></i>
+            <p className="attachments-empty-title">No files attached yet</p>
+            <p className="attachments-empty-sub">Click or drag &amp; drop files here to upload</p>
+          </button>
         ) : (
           <ul className="attachments-list">
             {attachments.map((a) => (
               <li key={a.id} className="attachment-item">
                 <div className={`attachment-icon-wrap type-${getIconType(a.file_type)}`}>
-                  <i className={`fas ${getFileIcon(a.file_type)}`}></i>
+                  {a.file_type?.startsWith('image/') ? (
+                    <img
+                      src={a.file_path}
+                      alt={a.original_name}
+                      className="attachment-thumbnail"
+                    />
+                  ) : (
+                    <i className={`fas ${getFileIcon(a.file_type)}`}></i>
+                  )}
                 </div>
                 <div className="attachment-info">
                   <a href={a.file_path} target="_blank" rel="noopener noreferrer" className="attachment-name">
@@ -97,18 +200,33 @@ export function AttachmentsSection({ taskId, currentUserId, isProjectOwner, onAt
                     {formatSize(a.file_size)} · {a.uploader_name}
                   </span>
                 </div>
-                {canDelete(a) && (
-                  <button className="attachment-delete-btn" onClick={() => setPendingDeleteId(a.id)} title="Remove">
-                    <i className="fas fa-trash" style={{ fontSize: 13 }}></i>
-                  </button>
-                )}
+                <div className="attachment-actions">
+                  <a
+                    href={getDownloadUrl(a.file_path)}
+                    download={a.original_name}
+                    className="attachment-action-btn attachment-download-btn"
+                    title="Download"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <i className="fas fa-download"></i>
+                  </a>
+                  {canDelete(a) && (
+                    <button
+                      className="attachment-action-btn attachment-delete-btn"
+                      onClick={() => setPendingDeleteId(a.id)}
+                      title="Remove"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
         )}
 
         <div className="attachments-footer">
-          <i className="fas fa-info-circle" style={{ fontSize: 12 }}></i>
+          <i className="fas fa-info-circle"></i>
           Max 10 MB · Images, PDFs, Word, text, zip
         </div>
       </div>
