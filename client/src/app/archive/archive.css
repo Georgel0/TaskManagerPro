@@ -120,29 +120,3 @@
   margin: 0;
   padding: 0.5rem 0;
 }
-
-.archive-confirm-popover {
-  position: absolute;
-  bottom: 125%;
-  right: 0;
-  background: var(--sec-background);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 50;
-  white-space: nowrap;
-}
-
-.archive-confirm-popover::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  right: 12px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: var(--sec-background) transparent transparent transparent;
-}

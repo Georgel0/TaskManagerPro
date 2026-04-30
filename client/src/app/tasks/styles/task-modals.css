@@ -304,10 +304,6 @@ textarea.form-control.comment-input {
   text-align: center;
 }
 
-.tasks-dropdown-wrapper {
-  position: relative;
-}
-
 .tasks-dropdown-menu {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
@@ -317,7 +313,7 @@ textarea.form-control.comment-input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: absolute;
+  position: relativea;
   top: 100%;
   right: 20px;
   padding: 4px 0;

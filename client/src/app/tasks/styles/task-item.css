@@ -239,7 +239,6 @@
   color: var(--sec-text-color);
 }
 
-/* ── Drag & Drop ────────────────────────────────────── */
 .attachments-dragging {
   border-color: var(--accent-color);
   background-color: color-mix(in srgb, var(--accent-color) 5%, transparent);
