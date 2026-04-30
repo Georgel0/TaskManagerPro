@@ -160,7 +160,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{isEdit ? 'Edit Project' : 'Create New Project'}</h3>

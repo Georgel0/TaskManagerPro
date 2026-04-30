@@ -97,7 +97,7 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{mode === 'edit' ? 'Edit Task' : `Create New ${isPersonal ? 'Personal ' : ''}Task`}</h3>
