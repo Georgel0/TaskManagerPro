@@ -255,6 +255,49 @@
   font-weight: 500;
 }
 
+.dash-task-title-link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-task-title-link:hover .dash-task-title {
+  color: var(--accent-color);
+}
+
+.dash-task-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dash-task-link {
+  display: block;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition);
+}
+
+.dash-task-link:last-child {
+  border-bottom: none;
+}
+
+.dash-task-link:hover {
+  background-color: var(--sec-background);
+}
+
+.dash-task-link {
+  position: relative;
+  overflow: visible; 
+}
+
+.card, 
+.dashboard-card-body,
+.dash-task-list {
+  overflow: visible !important;
+}
+
 @media (min-width: 1024px) {
   .dashboard-content-grid {
     grid-template-columns: 2fr 1fr;

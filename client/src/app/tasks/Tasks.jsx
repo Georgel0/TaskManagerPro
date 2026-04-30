@@ -5,7 +5,7 @@ import { Tooltip } from 'react-tooltip';
 import { useApp } from '@/context';
 import { useTasks } from './hooks/useTasks';
 import { TaskItem, TaskDetailModal, TaskFormModal } from './components';
-import { RemovalModal } from '@/components/ui';
+import { RemovalModal, ExportButton, myTasksExportOptions } from '@/components/ui';
 import './styles/task-item.css';
 import './styles/task-modals.css';
 import './styles/tasks-layout.css';
@@ -61,6 +61,15 @@ export default function Tasks() {
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> {activeTab === 'project' ? 'Project Tasks' : 'Personal Tasks'}</h2>
         <div className="header-actions">
+          <ExportButton
+            options={myTasksExportOptions()}
+            label="Export My Tasks"
+            icon="fa-file-csv"
+            size="sm"
+            align="right"
+            title="Export your tasks"
+            className="header-action-btn"
+          />
           <Link href="/projects" className="header-action-btn" title="View Tasks">
             <i className="fas fa-arrow-left"></i>
           </Link>

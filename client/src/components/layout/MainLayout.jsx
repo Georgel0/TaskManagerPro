@@ -8,6 +8,10 @@ import Link from 'next/link';
 import Sidebar from './Sidebar';
 import { NotificationsModal } from '../ui/NotificationsModal';
 
+import '@/styles/export.css';
+import '@/styles/sidebar.css';
+import '@/styles/notifications.css';
+
 export function MainLayout({ children }) {
   const { user, loading } = useApp();
 

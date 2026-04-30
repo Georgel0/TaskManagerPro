@@ -1,5 +1,6 @@
 import { formatDate } from "@/lib";
 import { ProjectActionMenu } from "./Modals";
+import { ExportButton, projectExportOptions, myTasksExportOptions } from "@/components/ui";
 
 const PROJECT_COLORS = [
   '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
@@ -90,6 +91,10 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             <button className="project-chip" title="Project README" onClick={(e) => { e.stopPropagation(); onReadme(project); }}>
               <i className="fas fa-book-open"></i>
             </button>
+            <ExportButton
+              options={isOwner ? projectExportOptions(project.id) : myTasksExportOptions({ project_id: project.id })}
+              variant="modal"
+            />
           </div>
         </div>
       </div>

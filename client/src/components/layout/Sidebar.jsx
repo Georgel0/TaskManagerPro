@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import '@/styles/sidebar.css';
 
 const pages = [
   { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-simple', path: '/dashboard' },

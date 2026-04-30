@@ -4,7 +4,6 @@ import { useRef, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { usePushNotifications } from '@/hooks';
-import '@/styles/notifications.css';
 
 const getToken = () => localStorage.getItem('token');
 const API = process.env.NEXT_PUBLIC_API_URL;

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { formatDate } from '@/lib';
 import { useDashboard } from './useDashboard';
 import { QuickTaskModal, DashboardSkeleton } from './components';
+import { ExportButton, taskExportOptions, } from '@/components/ui';
 import './dashboard.css';
 
 const getUrgencyText = (deadlineDate) => {
@@ -28,9 +29,7 @@ export default function Dashboard() {
     fieldErrors, setFieldErrors, handleCreateTask
   } = useDashboard();
 
-  if (loading || !user) {
-    return <DashboardSkeleton />;
-  }
+  if (loading || !user) return <DashboardSkeleton />;
 
   if (error) {
     return (
@@ -69,18 +68,10 @@ export default function Dashboard() {
           >
             <i className="fas fa-square-plus"></i>
           </button>
-          <Link
-            href='/projects'
-            className="header-action-btn"
-            title="View projects"
-          >
+          <Link href='/projects' className="header-action-btn" title="View projects">
             <i className="fas fa-folder-open"></i>
           </Link>
-          <Link
-            href='/tasks'
-            className="header-action-btn"
-            title="View tasks"
-          >
+          <Link href='/tasks' className="header-action-btn" title="View tasks">
             <i className="fas fa-list"></i>
           </Link>
         </div>
@@ -144,23 +135,35 @@ export default function Dashboard() {
             ) : (
               <div className="dash-task-list">
                 {activeTasks.map(task => (
-                  <Link
-                    key={task.id}
-                    href={`/tasks?highlight=${task.id}`}
-                    className="dash-task-link"
-                    title={`View details for task: ${task.title}`}
-                  >
+                  <div key={task.id} className="dash-task-link">
                     <div className="dash-task-item">
                       <div className="dash-task-row">
-                        <h4 className="dash-task-title">{task.title}</h4>
-                        <span
-                          className="dash-task-user"
-                          title={`Assigned to ${task.assigned_user_name}`}
+                        <Link
+                          href={`/tasks?highlight=${task.id}`}
+                          className="dash-task-title-link"
+                          title={`View details for task: ${task.title}`}
                         >
-                          <i className="fas fa-user-circle"></i>
-                          {task.assigned_user_name.split(' ')[0]}
-                        </span>
+                          <h4 className="dash-task-title">{task.title}</h4>
+                        </Link>
+
+                        <div className="dash-task-row-actions">
+                          <span
+                            className="dash-task-user"
+                            title={`Assigned to ${task.assigned_user_name}`}
+                          >
+                            <i className="fas fa-user-circle"></i>
+                            {task.assigned_user_name.split(' ')[0]}
+                          </span>
+
+                          <ExportButton
+                            options={taskExportOptions(task.id)}
+                            icon="fa-file-csv"
+                            size="icon"
+                            align="right"
+                          />
+                        </div>
                       </div>
+
                       <div className="dash-task-meta-row">
                         <div className="dash-task-badge-group">
                           <span
@@ -189,7 +192,7 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
@@ -197,7 +200,6 @@ export default function Dashboard() {
         </section>
 
         <div className="dashboard-side-column">
-
           {overdueTasks.length > 0 && (
             <section className="card">
               <div className="card-header">

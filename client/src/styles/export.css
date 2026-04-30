@@ -1,0 +1,207 @@
+.export-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  background: transparent;
+  color: var(--sec-text-color);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: var(--sec-background);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.export-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.export-btn--active {
+  background: var(--sec-background);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.export-btn--icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--radius-sm, 6px);
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.export-btn--sm {
+  padding: 5px 10px;
+  height: 32px;
+  font-size: 0.8rem;
+}
+
+.export-btn--md {
+  padding: 7px 14px;
+  height: 36px;
+  font-size: 0.85rem;
+}
+
+.export-chevron {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  transition: transform 0.15s ease;
+}
+
+.export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 200;
+  min-width: 230px;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: export-menu-in 0.12s ease;
+}
+
+@keyframes export-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.export-menu--right {
+  right: 0;
+}
+
+.export-menu--left {
+  left: 0;
+}
+
+.export-menu__header {
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sec-text-color);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.export-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-color);
+  transition: background-color var(--transition);
+}
+
+.export-menu__item:last-child {
+  border-bottom: none;
+}
+
+.export-menu__item:hover:not(:disabled) {
+  background: var(--sec-background);
+}
+
+.export-menu__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-menu__item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  color: var(--accent-color);
+}
+
+.export-menu__item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.export-menu__item-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.export-menu__item-desc {
+  font-size: 0.73rem;
+  color: var(--sec-text-color);
+  line-height: 1.3;
+}
+
+.export-menu__item-arrow {
+  font-size: 0.7rem;
+  color: var(--sec-text-color);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.export-menu__item:hover .export-menu__item-arrow {
+  color: var(--accent-color);
+  opacity: 1;
+}
+
+.dash-task-row .export-wrapper,
+.dash-task-row .export-btn {
+  flex-shrink: 0;
+}
+
+.dash-task-link .export-menu {
+  z-index: 300;
+}
+
+.export-wrapper:focus-within,
+.export-wrapper:has(.export-menu) {
+  z-index: 100;
+}
+
+.export-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.export-modal-list .export-menu__item:last-child {
+  border-bottom: none !important;
+}
+
+.export-modal-list .export-menu__item:hover {
+  background-color: var(--sec-background);
+  border-radius: var(--radius-sm);
+}
