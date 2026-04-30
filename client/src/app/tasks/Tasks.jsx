@@ -64,6 +64,9 @@ export default function Tasks() {
           <Link href="/projects" className="header-action-btn" title="View Tasks">
             <i className="fas fa-arrow-left"></i>
           </Link>
+          <Link href="/dashboard" className="header-action-btn" title="Go back to Dashboard">
+            <i className="fas fa-chart-simple"></i>
+          </Link>
           <button
             className="header-action-btn"
             onClick={() => setModalState({ type: 'create', task: null })}
@@ -78,9 +81,9 @@ export default function Tasks() {
         <div className="task-tab-group">
           <button className={`task-tab-btn ${activeTab === 'project' ? 'active' : ''}`} onClick={() => setActiveTab('project')}>
             <i className="fas fa-briefcase"></i> Team Projects
-          </button>
-          <button data-tooltip-id="team-info-tooltip" className="bio-info">
-            <i className="fa-solid fa-circle-info"></i>
+            <div data-tooltip-id="team-info-tooltip" className="task-bio-info">
+              <i className="fa-solid fa-circle-info"></i>
+            </div>
           </button>
           <Tooltip id="team-info-tooltip" place="bottom">
             <div className="tooltip-content">
@@ -92,9 +95,9 @@ export default function Tasks() {
         <div className="task-tab-group">
           <button className={`task-tab-btn ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>
             <i className="fas fa-user"></i> Personal To-Do
-          </button>
-          <button data-tooltip-id="personal-info-tooltip" className="bio-info">
-            <i className="fa-solid fa-circle-info"></i>
+            <div data-tooltip-id="personal-info-tooltip" className="task-bio-info">
+              <i className="fa-solid fa-circle-info"></i>
+            </div>
           </button>
           <Tooltip id="personal-info-tooltip" place="bottom">
             <div className="tooltip-content">

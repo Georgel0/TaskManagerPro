@@ -92,7 +92,7 @@
   right: 0;
   height: 2px;
   background-color: var(--accent-color);
-  border-radius: 2px 2px 0 0;
+  border-radius: 2px 0 0 0;
 }
 
 .task-tab-group {
@@ -109,7 +109,8 @@
   z-index: 999;
 }
 
-.bio-info {
+.task-bio-info {
+  position: relative;
   background: none;
   border: none;
   color: var(--sec-text-color);
@@ -117,8 +118,12 @@
   margin-bottom: 2px;
 }
 
-.bio-info:hover {
+.task-bio-info:hover {
   color: var(--pri-text-color);
+}
+
+.task-tab-btn.active > .task-bio-info {
+  color: var(--accent-color);
 }
 
 @media (max-width: 576px) {
@@ -145,5 +150,17 @@
     flex: 1;
     min-width: 140px;
     max-width: none;
+  }
+
+  .tasks-header > h2 {
+    font-size: 1.2rem;
+  }
+
+  .tasks-header {
+    flex-direction: row;
+  }
+
+  .task-tab-btn {
+    font-size: 0.9rem;
   }
 }

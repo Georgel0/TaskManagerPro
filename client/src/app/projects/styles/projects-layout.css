@@ -285,7 +285,7 @@
 
 @media (max-width: 768px) {
   .projects-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     gap: 16px;
   }

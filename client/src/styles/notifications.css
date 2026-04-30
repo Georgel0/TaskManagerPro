@@ -159,4 +159,9 @@
   .notification-dropdown {
     width: 300px;
   }
+
+  .bell-icon-btn {
+    font-size: 0.9rem;
+    padding: 5px;
+  }
 }

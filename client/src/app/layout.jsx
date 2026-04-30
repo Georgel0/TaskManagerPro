@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Providers } from './providers';
 import '@/styles/global.css';
 import '@/styles/components.css';
+import '@/styles/layout.css';
 
 export const metadata = {
   openGraph: {
