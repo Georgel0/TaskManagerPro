@@ -15,9 +15,9 @@ export function ExportButton({
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const ref = useRef(null);
   const { exportData, exportingKey } = useExport();
-
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -31,6 +31,15 @@ export function ExportButton({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 768px)');
+    setIsMobile(query.matches);
+
+    const handler = (e) => setIsMobile(e.matches);
+    query.addEventListener('change', handler);
+    return () => query.removeEventListener('change', handler);
+  }, []);
+
   const handleExport = (option) => {
     setOpen(false);
     setShowModal(false);
@@ -38,6 +47,18 @@ export function ExportButton({
   };
 
   const isLoading = exportingKey !== null;
+
+  const renderButtonInner = (currentLoading, currentLabel) => (
+    <>
+      <i className={`fas ${currentLoading ? 'fa-spinner fa-spin' : icon}`}></i>
+      {size !== 'icon' && !isMobile && (
+        <>
+          <span>{currentLoading ? 'Exporting…' : currentLabel}</span>
+          <i className={`fas fa-chevron-${open ? 'up' : 'down'} export-chevron`}></i>
+        </>
+      )}
+    </>
+  );
 
   const renderTrigger = (onClick) => (
     <button
@@ -49,7 +70,7 @@ export function ExportButton({
       <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : icon}`}></i>
       {size !== 'icon' && (
         <>
-          <span>{isLoading ? 'Exporting…' : label}</span>
+          <span>{!isMobile && (isLoading ? 'Exporting…' : label)}</span>
           <i className={`fas fa-chevron-down export-chevron`}></i>
         </>
       )}
@@ -96,7 +117,13 @@ export function ExportButton({
   if (variant === 'modal') {
     return (
       <>
-        {renderTrigger(() => setShowModal(true))}
+        <button
+          className={`export-btn ...`}
+          onClick={() => setShowModal(true)}
+          disabled={isLoading}
+        >
+          {renderButtonInner(isLoading, label)}
+        </button>
         {mounted && showModal && createPortal(modalJSX, document.body)}
       </>
     );
@@ -114,10 +141,7 @@ export function ExportButton({
         title={opt.label}
         aria-label={opt.label}
       >
-        <i className={`fas ${thisLoading ? 'fa-spinner fa-spin' : icon}`}></i>
-        {size !== 'icon' && (
-          <span>{thisLoading ? 'Exporting…' : label}</span>
-        )}
+        {renderButtonInner(thisLoading, label)}
       </button>
     );
   }
@@ -132,13 +156,7 @@ export function ExportButton({
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : icon}`}></i>
-        {size !== 'icon' && (
-          <>
-            <span>{isLoading ? 'Exporting…' : label}</span>
-            <i className={`fas fa-chevron-${open ? 'up' : 'down'} export-chevron`}></i>
-          </>
-        )}
+        {renderButtonInner(isLoading, label)}
       </button>
 
       {open && (
