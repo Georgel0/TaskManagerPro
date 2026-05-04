@@ -404,18 +404,6 @@
   color: var(--error-color);
 }
 
-<<<<<<< HEAD
-@media (max-width: 768px) {
-  .logo-group {
-    font-size: 1rem;
-  }
-
-  .logo-image {
-    width: 30px;
-    height: 30px;
-  }
-}
-=======
 
 @media (max-width: 768px) {
   .logo-group {
@@ -488,4 +476,3 @@
     font-size: 1rem;
   }
 }
->>>>>>> a540990e5487b839ed71d8c440f711539f8743f3
