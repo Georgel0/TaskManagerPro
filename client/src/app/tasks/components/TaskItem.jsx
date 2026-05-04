@@ -22,7 +22,8 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
     const handleOutside = (e) => {
       if (
         triggerRef.current && !triggerRef.current.contains(e.target) &&
-        menuRef.current && !menuRef.current.contains(e.target)
+        menuRef.current && !menuRef.current.contains(e.target) 
+        && !e.target.closest('.archive-confirm-popover')
       ) {
         setOpen(false);
       }

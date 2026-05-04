@@ -12,7 +12,13 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
 
   useEffect(() => {
     const handleOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        !e.target.closest('.archive-confirm-popover')
+      ) {
+        setOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);

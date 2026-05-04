@@ -2,11 +2,6 @@ import { formatDate } from "@/lib";
 import { ProjectActionMenu } from "./Modals";
 import { ExportButton, projectExportOptions, myTasksExportOptions } from "@/components/ui";
 
-const PROJECT_COLORS = [
-  '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#10b981', '#ef4444', '#06b6d4', '#f97316',
-];
-
 export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements, onStar, onQuickAdd, onReadme }) {
   const isOwner = project.owner_id === userId;
   const taskCount = project.task_count ?? 0;
