@@ -7,11 +7,11 @@ import { useProjectMembers } from './hooks/useProjectMembers';
 import {
   ProjectCard, ProjectFormModal, MembersModal, TasksModal,
   AnnouncementsModal, QuickAddTaskModal, ReadmeModal,
+  TasksWindowContent, MembersWindowContent,
 } from './components';
 import { RemovalModal } from '@/components/ui';
 import { WindowManagerProvider, useWindowManager } from '@/components/layout';
-import { TasksWindowContent } from './components/TasksWindowContent';
-import { MembersWindowContent } from './components/MembersWindowContent';
+
 import './styles/project-members.css';
 import './styles/project-modals.css';
 import './styles/projects-layout.css';

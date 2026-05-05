@@ -5,24 +5,24 @@ const WMCtx = createContext(null);
 export const useWindowManager = () => useContext(WMCtx);
 
 const WIN_CFG = {
-  tasks:         { w: 520,  h: 620, icon: 'fa-list-check'  },
-  members:       { w: 510,  h: 590, icon: 'fa-users'       },
-  announcements: { w: 620,  h: 660, icon: 'fa-bullhorn'    },
-  readme:        { w: 900,  h: 700, icon: 'fa-book-open'   },
-  quickAdd:      { w: 430,  h: 320, icon: 'fa-circle-plus' },
+  tasks: { w: 520, h: 620, icon: 'fa-list-check' },
+  members: { w: 510, h: 590, icon: 'fa-users' },
+  announcements: { w: 620, h: 660, icon: 'fa-bullhorn' },
+  readme: { w: 700, h: 500, icon: 'fa-book-open' },
+  quickAdd: { w: 430, h: 320, icon: 'fa-circle-plus' },
 };
 
-let _zc  = 200;
+let _zc = 200;
 let _wid = 0;
-let _ci  = 0;
-const freshZ  = () => Math.min(++_zc, 8990);
+let _ci = 0;
+const freshZ = () => Math.min(++_zc, 8990);
 const freshId = () => `fw${++_wid}`;
 const cascadePos = (type) => {
   const off = (_ci++ % 8) * 28;
   if (typeof window === 'undefined') return { x: 80 + off, y: 60 + off };
   const { w = 500, h = 560 } = WIN_CFG[type] ?? {};
   return {
-    x: Math.max(0, Math.min(80 + off, window.innerWidth  - w - 20)),
+    x: Math.max(0, Math.min(80 + off, window.innerWidth - w - 20)),
     y: Math.max(0, Math.min(60 + off, window.innerHeight - h - 60)),
   };
 };
@@ -31,15 +31,15 @@ function FloatingWindow({ win, onClose, onFocus }) {
   const cfg = WIN_CFG[win.type] ?? { w: 500, h: 560, icon: 'fa-square' };
 
   const posRef = useRef({ ...win.position });
-  const [pos,  setPos ] = useState({ ...win.position });
-  const [size]          = useState({ w: cfg.w, h: cfg.h });
+  const [pos, setPos] = useState({ ...win.position });
+  const [size] = useState({ w: cfg.w, h: cfg.h });
 
-  const dragging   = useRef(false);
+  const dragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   const onBarDown = useCallback((e) => {
     if (e.button !== 0 || e.target.closest('[data-nodrag]')) return;
-    dragging.current   = true;
+    dragging.current = true;
     dragOffset.current = { x: e.clientX - posRef.current.x, y: e.clientY - posRef.current.y };
     onFocus(win.id);
     e.preventDefault();
@@ -48,17 +48,17 @@ function FloatingWindow({ win, onClose, onFocus }) {
   useEffect(() => {
     const onMove = (e) => {
       if (!dragging.current) return;
-      const x = Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth  - size.w));
+      const x = Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - size.w));
       const y = Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 48));
       posRef.current = { x, y };
       setPos({ x, y });
     };
     const onUp = () => { dragging.current = false; };
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup',   onUp);
+    window.addEventListener('mouseup', onUp);
     return () => {
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup',   onUp);
+      window.removeEventListener('mouseup', onUp);
     };
   }, [size.w]);
 
@@ -122,7 +122,7 @@ export function WindowManagerProvider({ children, enabled }) {
   useEffect(() => {
     const cls = 'fw-taskbar-visible';
     if (enabled && windows.length > 0) document.body.classList.add(cls);
-    else                                document.body.classList.remove(cls);
+    else document.body.classList.remove(cls);
     return () => document.body.classList.remove(cls);
   }, [enabled, windows.length]);
 
@@ -133,11 +133,19 @@ export function WindowManagerProvider({ children, enabled }) {
    * @param {ReactNode|Function} render - JSX or (closeFn) => JSX
    */
   const openWindow = useCallback((type, title, render) => {
-    const id  = freshId();
-    const pos = cascadePos(type);
-    const z   = freshZ();
-    setWindows(ws => [...ws, { id, type, title, render, position: pos, zIndex: z }]);
-    return id;
+    setWindows(ws => {
+      const existingCount = ws.filter(w => w.type === type).length;
+      const limit = 2;
+
+      if (existingCount >= limit) {
+        ws.find(w => w.type === type);
+        return ws;
+      }
+      const id = freshId();
+      const pos = cascadePos(type);
+      const z = freshZ();
+      return [...ws, { id, type, title, render, position: pos, zIndex: z }];
+    });
   }, []);
 
   const closeWindow = useCallback((id) => setWindows(ws => ws.filter(w => w.id !== id)), []);

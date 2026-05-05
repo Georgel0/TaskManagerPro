@@ -167,7 +167,7 @@
 }
 
 .fw-taskbar {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
@@ -262,10 +262,6 @@
 .fw-tb-x:hover {
   background: color-mix(in srgb, #ef4444 18%, transparent);
   color: #ef4444;
-}
-
-body.fw-taskbar-visible {
-  padding-bottom: 52px;
 }
 
 .fw-toggle-btn {

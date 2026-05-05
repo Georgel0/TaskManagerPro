@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useArchive } from '@/hooks/useArchive';
-import { ArchiveButton } from '@/components/ui';
+import { ArchiveButton, ExportButton, projectExportOptions, myTasksExportOptions } from "@/components/ui";
 
 export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave }) {
   const [leaveConfirm, setLeaveConfirm] = useState(false);
@@ -57,6 +58,12 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
               >
                 <i className="fas fa-trash"></i> Delete
               </button>
+              <ExportButton 
+                options={isOwner ? projectExportOptions(project.id) : myTasksExportOptions({ project_id: project.id })}
+                variant="modal"
+                size="md"
+                sizeDep={false}
+              />
             </>
           ) : (
             leaveConfirm ? (
@@ -192,6 +199,25 @@ export function TasksModal({ project, tasks, loading, onClose }) {
       </div>
     </div>
   );
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL;
+const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+
+export function TasksWindowContent({ project, onClose }) {
+  const { data: tasks = [], isFetching: loading } = useQuery({
+    queryKey: ['projects', project.id, 'tasks'],
+    queryFn: async () => {
+      const res = await fetch(`${API}/tasks?project_id=${project.id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      return res.json();
+    },
+    enabled: !!project.id,
+  });
+
+  return <TasksModal project={project} tasks={tasks} loading={loading} onClose={onClose} />;
 }
 
 

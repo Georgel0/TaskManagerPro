@@ -1,6 +1,5 @@
 import { formatDate } from "@/lib";
 import { ProjectActionMenu } from "./Modals";
-import { ExportButton, projectExportOptions, myTasksExportOptions } from "@/components/ui";
 
 export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements, onStar, onQuickAdd, onReadme }) {
   const isOwner = project.owner_id === userId;
@@ -86,10 +85,6 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             <button className="project-chip" title="Project README" onClick={(e) => { e.stopPropagation(); onReadme(project); }}>
               <i className="fas fa-book-open"></i>
             </button>
-            <ExportButton className="project-chip"
-              options={isOwner ? projectExportOptions(project.id) : myTasksExportOptions({ project_id: project.id })}
-              variant="modal"
-            />
           </div>
         </div>
       </div>

@@ -4,6 +4,8 @@ import { addMemberSchema, validate } from '@/lib/validators';
 import { getInitials } from '@/lib';
 import { MemberActionMenu } from './Modals';
 import { MemberDetailModal } from './MemberDetailModal';
+import { useQueryClient } from '@tanstack/react-query';
+import { useProjectMembers } from '../hooks/useProjectMembers';
 
 function WorkloadBar({ member }) {
   const total = (member.todo_count ?? 0) + (member.in_progress_count ?? 0) + (member.done_count ?? 0);
@@ -196,5 +198,48 @@ export function MembersModal({
         );
       })()}
     </>
+  );
+}
+
+export function MembersWindowContent({ project: initialProject, currentUserId, isOwner, onClose }) {
+  const [project, setProject] = useState(initialProject);
+
+  const queryClient = useQueryClient();
+
+  const setProjects = (updater) => {
+    queryClient.setQueryData(['projects'], (old = []) =>
+      typeof updater === 'function' ? updater(old) : updater
+    );
+  };
+
+  const {
+    projectMembers,
+    loadingMembers,
+    handleAddMember,
+    handleRemoveMember,
+    handleUpdateRoleDescription,
+    handleTransferOwnership: _transfer,
+    handleProjectLeave: _leave,
+  } = useProjectMembers(project, setProjects);
+
+  const handleTransferOwnership = (memberId) =>
+    _transfer(memberId, setProject);
+
+  const handleProjectLeave = (proj) =>
+    _leave(proj, () => { setProject(null); onClose(); });
+
+  return (
+    <MembersModal
+      project={project}
+      members={projectMembers}
+      loading={loadingMembers}
+      isOwner={isOwner}
+      currentUserId={currentUserId}
+      onAddMember={handleAddMember}
+      onRemoveMember={handleRemoveMember}
+      onTransferOwnership={handleTransferOwnership}
+      onClose={onClose}
+      onUpdateRoleDescription={handleUpdateRoleDescription}
+    />
   );
 }

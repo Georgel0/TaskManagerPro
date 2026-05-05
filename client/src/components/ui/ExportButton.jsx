@@ -11,6 +11,8 @@ export function ExportButton({
   size = 'icon',
   align = 'right',
   className = '',
+  sizeDep = true,
+  wrapperClass = ''
 }) {
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -24,11 +26,13 @@ export function ExportButton({
   }, []);
 
   useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    if (sizeDep) {
+      const handler = (e) => {
+        if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      };
+      document.addEventListener('mousedown', handler);
+      return () => document.removeEventListener('mousedown', handler);
+    } else return;
   }, []);
 
   useEffect(() => {
@@ -54,7 +58,7 @@ export function ExportButton({
       {size !== 'icon' && !isMobile && (
         <>
           <span>{currentLoading ? 'Exporting…' : currentLabel}</span>
-          <i className={`fas fa-chevron-${open ? 'up' : 'down'} export-chevron`}></i>
+          {variant === 'dropdown' && (<i className={`fas fa-chevron-${open ? 'up' : 'down'} export-chevron`}></i>)}
         </>
       )}
     </>
@@ -130,9 +134,9 @@ export function ExportButton({
   }
 
   return (
-    <div className="export-wrapper" ref={ref}>
+    <div className={`export-wrapper ${wrapperClass}`} ref={ref}>
       <button
-        className={`export-btn export-btn--${size} ${open ? 'export-btn--active' : ''} ${className}`}
+        className={`btn-icon export-btn ${className} export-btn--${size} ${open ? 'export-btn--active' : ''}`}
         onClick={(e) => { e.stopPropagation(); setOpen(p => !p); }}
         disabled={isLoading}
         title="Export options"
