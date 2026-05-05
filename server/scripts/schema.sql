@@ -7,7 +7,7 @@ CREATE TABLE users (
     avatar TEXT, 
     bio TEXT, 
     reset_token TEXT, 
-    reset_token_expires TIMESTAMP, 
+    reset_token_expires TIMESTAMP WITHOUT TIME ZONE, 
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
 
@@ -17,6 +17,8 @@ CREATE TABLE projects (
     name VARCHAR(100) NOT NULL, 
     description TEXT, 
     owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE, 
+    tags TEXT[] DEFAULT '{}',
+    color VARCHAR(7) DEFAULT NULL,
     is_archived BOOLEAN DEFAULT false, 
     archived_at TIMESTAMP WITHOUT TIME ZONE, 
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP 
@@ -128,4 +130,32 @@ CREATE TABLE push_subscriptions (
     p256dh TEXT NOT NULL, 
     auth TEXT NOT NULL, 
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+);
+
+-- 13. Project Readme
+CREATE TABLE project_readme (
+    project_id INTEGER PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
+    content TEXT DEFAULT '',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 14. Project Readme Files
+CREATE TABLE project_readme_files (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    file_path TEXT NOT NULL,
+    public_id TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    file_type TEXT,
+    file_size BIGINT,
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 15. Starred Projects
+CREATE TABLE starred_projects (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, project_id)
 );
