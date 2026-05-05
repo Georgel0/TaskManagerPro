@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
+import { useSettings } from '../settings/useSettings';
+import { RemovalModal } from '@/components/ui';
+import { WindowManagerProvider, useWindowManager } from '@/components/layout';
 import {
   ProjectCard, ProjectFormModal, MembersModal, TasksModal,
   AnnouncementsModal, QuickAddTaskModal, ReadmeModal,
-  TasksWindowContent, MembersWindowContent,
+  TasksWindowContent, MembersWindowContent
 } from './components';
-import { RemovalModal } from '@/components/ui';
-import { WindowManagerProvider, useWindowManager } from '@/components/layout';
 
 import './styles/project-members.css';
 import './styles/project-modals.css';
@@ -45,7 +46,7 @@ const ProjectsSkeleton = () => (
   </div>
 );
 
-function ProjectsInner({ wmEnabled, toggleWM }) {
+function ProjectsInner({ wmEnabled }) {
   const { user, loading: appLoading } = useApp();
   const wm = useWindowManager();
 
@@ -56,8 +57,7 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
     createForm, setCreateForm,
     editForm, setEditForm,
     activeTagFilter, setActiveTagFilter, allTags,
-    isCreateModalOpen, setIsCreateModalOpen,
-    isEditModalOpen, setIsEditModalOpen,
+    setIsCreateModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
     isMembersModalOpen, setIsMembersModalOpen,
@@ -66,7 +66,7 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
     readmeProject, setReadmeProject,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete, handleStar,
-    openEdit, openDelete, openTasks, openMembers,
+    openDelete, openTasks, openMembers,
     openAnnouncements, openQuickAdd,
     handleAnnouncementCreated, handleAnnouncementDeleted,
   } = useProjects();
@@ -162,6 +162,56 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
     }
   };
 
+  const openCreateProjectHandler = () => {
+    if (wmEnabled && wm) {
+      wm.openWindow('create-project', 'Create New Project', (close) => (
+        <ProjectFormModal
+          mode="create"
+          formData={createForm}
+          setFormData={setCreateForm}
+          onSubmit={(e, members, data) => {
+            handleCreate(e, members, data);
+            close();
+          }}
+          onClose={close}
+          isSubmitting={isSubmitting}
+        />
+      ));
+    } else {
+      setIsCreateModalOpen(true);
+    }
+  };
+
+  const openEditProjectHandler = (project) => {
+    const projectData = {
+      name: project.name,
+      description: project.description || '',
+      tags: project.tags || [],
+      color: project.color || null
+    };
+
+    setEditForm(projectData);
+    setSelectedProject(project);
+
+    if (wmEnabled && wm) {
+      wm.openWindow(`edit-${project.id}`, `Edit: ${project.name}`, (close) => (
+        <ProjectFormModal
+          mode="edit"
+          formData={projectData}
+          setFormData={setEditForm}
+          onSubmit={(e, members, data) => {
+            handleEdit(e, members, data);
+            close();
+          }}
+          onClose={close}
+          isSubmitting={isSubmitting}
+        />
+      ));
+    } else {
+      setIsEditModalOpen(true);
+    }
+  };
+
   if (appLoading || projectsLoading || !user) return <ProjectsSkeleton />;
 
   return (
@@ -174,7 +224,7 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
           </Link>
           <button
             className="header-action-btn"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={openCreateProjectHandler}
             title="Add New Project"
           >
             <i className="fas fa-folder-plus"></i>
@@ -220,7 +270,7 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
               Clear filter
             </button>
           ) : (
-            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+            <button className="btn btn-primary" onClick={openCreateProjectHandler}>
               <i className="fas fa-plus"></i> New Project
             </button>
           )}
@@ -233,7 +283,7 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
               project={project}
               userId={user.id}
               onOpen={openTasksHandler}
-              onEdit={openEdit}
+              onEdit={openEditProjectHandler}
               onDelete={openDelete}
               onMembers={openMembersHandler}
               onLeave={handleProjectLeave}
@@ -244,28 +294,6 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
             />
           ))}
         </div>
-      )}
-
-      {isCreateModalOpen && (
-        <ProjectFormModal
-          mode="create"
-          formData={createForm}
-          setFormData={setCreateForm}
-          onSubmit={handleCreate}
-          onClose={() => setIsCreateModalOpen(false)}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
-      {isEditModalOpen && selectedProject && (
-        <ProjectFormModal
-          mode="edit"
-          formData={editForm}
-          setFormData={setEditForm}
-          onSubmit={handleEdit}
-          onClose={() => setIsEditModalOpen(false)}
-          isSubmitting={isSubmitting}
-        />
       )}
 
       <RemovalModal
@@ -341,28 +369,24 @@ function ProjectsInner({ wmEnabled, toggleWM }) {
 }
 
 export default function Projects() {
+  const { prefs, loading } = useSettings();
   const [wmEnabled, setWmEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const isMobile = window.innerWidth <= 768;
-    const stored = localStorage.getItem('fw-enabled') === 'true';
-    setWmEnabled(stored && !isMobile);
   }, []);
 
-  const toggleWM = () => {
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) return;
-    setWmEnabled((prev) => {
-      const next = !prev;
-      localStorage.setItem('fw-enabled', String(next));
-      return next;
-    });
-  };
+  useEffect(() => {
+    if (!loading) {
+      const isMobile = window.innerWidth <= 768;
+      setWmEnabled(prefs.floating_windows_enabled && !isMobile);
+    }
+  }, [prefs.floating_windows_enabled, loading]);
 
   return (
     <WindowManagerProvider enabled={wmEnabled}>
-      <ProjectsInner wmEnabled={wmEnabled} toggleWM={toggleWM} mounted={mounted} />
+      <ProjectsInner wmEnabled={wmEnabled} mounted={mounted} />
     </WindowManagerProvider>
   );
 }

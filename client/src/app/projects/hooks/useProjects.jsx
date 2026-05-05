@@ -172,12 +172,6 @@ export function useProjects() {
   const handleDelete = () => deleteMutation.mutate();
   const handleStar = (projectId) => starMutation.mutate(projectId);
 
-  const openEdit = (project) => {
-    setSelectedProject(project);
-    setEditForm({ name: project.name, description: project.description || '', tags: project.tags || [], color: project.color || null });
-    setIsEditModalOpen(true);
-  };
-
   const openDelete = (project) => { setSelectedProject(project); setIsDeleteModalOpen(true); };
   const openAnnouncements = (project) => { setSelectedProject(project); setIsAnnouncementsModalOpen(true); };
   const openTasks = (project) => { setSelectedProject(project); setIsTasksModalOpen(true); };
@@ -210,7 +204,7 @@ export function useProjects() {
     readmeProject, setReadmeProject,
     projectTasks, loadingTasks,
     handleCreate, handleEdit, handleDelete, handleStar,
-    openEdit, openDelete, openTasks, openMembers,
+    openDelete, openTasks, openMembers,
     openAnnouncements, openQuickAdd,
     handleAnnouncementCreated, handleAnnouncementDeleted,
   };

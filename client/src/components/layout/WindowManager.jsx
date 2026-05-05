@@ -4,11 +4,11 @@ const WMCtx = createContext(null);
 export const useWindowManager = () => useContext(WMCtx);
 
 const WIN_CFG = {
-  tasks: { w: 520, h: 620, icon: 'fa-list-check' },
-  members: { w: 510, h: 590, icon: 'fa-users' },
-  announcements: { w: 620, h: 260, icon: 'fa-bullhorn' },
+  tasks: { w: 520, h: 320, icon: 'fa-list-check' },
+  members: { w: 510, h: 450, icon: 'fa-users' },
+  announcements: { w: 620, h: 230, icon: 'fa-bullhorn' },
   readme: { w: 700, h: 500, icon: 'fa-book-open' },
-  quickAdd: { w: 430, h: 320, icon: 'fa-circle-plus' },
+  quickAdd: { w: 430, h: 280, icon: 'fa-circle-plus' },
 };
 
 let _zc = 200;

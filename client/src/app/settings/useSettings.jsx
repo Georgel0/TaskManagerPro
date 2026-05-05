@@ -6,44 +6,34 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => localStorage.getItem('token');
 
 const DEFAULT_PREFS = {
-  task_assigned:            true,
-  task_updated:             true,
-  task_completed:           true,
-  task_deleted:             true,
-  comment_added:            true,
-  project_changes:          true,
-  deadline_reminders:       true,
-  announcements:            true,
-  account_actions:          true,
+  task_assigned: true,
+  task_updated: true,
+  task_completed: true,
+  task_deleted: true,
+  comment_added: true,
+  project_changes: true,
+  deadline_reminders: true,
+  announcements: true,
+  account_actions: true,
   floating_windows_enabled: false,
 };
 
-function syncToLocalStorage(data) {
-  if (typeof window === 'undefined') return;
-  const isMobile = window.innerWidth <= 768;
-  localStorage.setItem(
-    'fw-enabled',
-    String(!isMobile && (data.floating_windows_enabled ?? false))
-  );
-}
-
 export function useSettings() {
-  const [prefs,    setPrefs   ] = useState(DEFAULT_PREFS);
-  const [loading,  setLoading ] = useState(true);
+  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/notifications/preferences`, {
+        const res = await fetch(`${API}/settings`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error();
         const data = await res.json();
         setPrefs({ ...DEFAULT_PREFS, ...data });
-        syncToLocalStorage(data);
       } catch {
-        // keep defaults
+        // Keep defaults
       } finally {
         setLoading(false);
       }
@@ -56,16 +46,15 @@ export function useSettings() {
   const savePrefs = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch(`${API}/notifications/preferences`, {
-        method:  'PUT',
+      const res = await fetch(`${API}/settings`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body:    JSON.stringify(prefs),
+        body: JSON.stringify(prefs),
       });
       if (!res.ok) throw new Error();
-      syncToLocalStorage(prefs); 
-      toast.success('Preferences saved.');
+      toast.success('Settings saved.');
     } catch {
-      toast.error('Failed to save preferences.');
+      toast.error('Failed to save settings.');
     } finally {
       setIsSaving(false);
     }

@@ -355,9 +355,16 @@ const leaveProject = async (req, res) => {
   try {
     const project = await pool.query('SELECT * FROM projects WHERE id = $1', [id]);
     if (project.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
-    if (project.rows[0].owner_id === userId) return res.status(400).json({ error: 'Owner cannot leave. Transfer ownership first.' });
 
-    await pool.query('UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2 AND status != "Done"', [id, userId]);
+    if (Number(project.rows[0].owner_id) === Number(userId)) {
+      return res.status(400).json({ error: 'Owner cannot leave. Transfer ownership first.' });
+    }
+
+    await pool.query(
+      "UPDATE tasks SET assigned_user_id = NULL WHERE project_id = $1 AND assigned_user_id = $2 AND status != 'Done'",
+      [id, userId]
+    );
+
     await pool.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [id, userId]);
 
     const userResult = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
@@ -371,19 +378,18 @@ const leaveProject = async (req, res) => {
 
     await Promise.all(
       membersResult.rows
-        .filter((m) => m.id !== userId)
-        .map(async (m) =>
-          await isNotificationAllowed(m.id, 'project_changes') &&
-          createNotification(m.id, `${userName} left the project "${project.rows[0].name}".`)
-        )
+        .filter((m) => Number(m.id) !== Number(userId))
+        .map(async (m) => {
+          const allowed = await isNotificationAllowed(m.id, 'project_changes');
+          if (allowed) {
+            return createNotification(m.id, `${userName} left the project "${project.rows[0].name}".`);
+          }
+        })
     );
-
-    const allowed = await isNotificationAllowed(userId, 'project_changes');
-    if (allowed) await createNotification(userId, `You left the project "${project.rows[0].name}".`);
 
     res.status(200).json({ message: 'You have left the project.' });
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
     res.status(500).json({ error: 'Server error while leaving project.' });
   }
 };
