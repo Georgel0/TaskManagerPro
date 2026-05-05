@@ -17,19 +17,37 @@ export function MainLayout({ children }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
 
+  useEffect(() => {
+    setIsMounted(true);
+    const saved = localStorage.getItem('sidebar_collapsed');
+    if (saved !== null) {
+      setSidebarCollapsed(saved === 'true');
+    }
+  }, []);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const toggleSidebarCollapse = () => setSidebarCollapsed(!sidebarCollapsed);
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const newValue = !prev;
+      localStorage.setItem('sidebar_collapsed', String(newValue));
+      return newValue;
+    });
+  };
 
   useEffect(() => {
     if (!loading && !user && !isLandingPage) {
       router.push('/');
     }
   }, [user, loading, isLandingPage, router]);
+
+  if (!isMounted && !isLandingPage) return null;
 
   return (
     <div className="app-wrapper">
