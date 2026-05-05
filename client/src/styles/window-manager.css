@@ -1,0 +1,303 @@
+.fw-win {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.22),
+    0 6px 20px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  min-width: 340px;
+  min-height: 220px;
+  resize: both;
+  will-change: transform;
+  transition: box-shadow 0.15s ease;
+}
+
+.fw-win:has(.fw-bar:active) {
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.28),
+    0 8px 28px rgba(0, 0, 0, 0.16);
+}
+
+.fw-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 14px;
+  height: 38px;
+  background: var(--sec-background);
+  border-bottom: 1px solid var(--border-color);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.fw-bar:active {
+  cursor: grabbing;
+}
+
+.fw-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.fw-bar-icon {
+  color: var(--accent-color);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.fw-bar-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--pri-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fw-bar-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--sec-text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+
+.fw-bar-close:hover {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  color: #ef4444;
+}
+
+.fw-win-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.fw-win-body>.modal-overlay:first-child {
+  position: static !important;
+  background: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+}
+
+.fw-win-body>.modal-overlay:first-child>.modal-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.fw-win-body>.modal-overlay:first-child .modal-header {
+  display: none !important;
+}
+
+.fw-win-body>.modal-overlay:first-child .modal-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+.fw-win-body>.modal-overlay:first-child .readme-modal,
+.fw-win-body>.modal-overlay:first-child .quick-add-modal {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.fw-win-body .nested-modal-overlay,
+.fw-win-body>.modal-overlay:not(:first-child) {
+  position: fixed !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  inset: 0 !important;
+  z-index: 9100 !important;
+  padding: 20px !important;
+}
+
+.fw-win-body .nested-modal-overlay .modal-content,
+.fw-win-body>.modal-overlay:not(:first-child) .modal-content {
+  width: auto !important;
+  min-width: 340px !important;
+  max-width: 520px !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.fw-win-body .nested-modal-overlay .modal-header,
+.fw-win-body>.modal-overlay:not(:first-child) .modal-header {
+  display: flex !important;
+}
+
+.fw-taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card-background);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+  padding: 0 6px;
+}
+
+.fw-tb-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  color: var(--accent-color);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.fw-tb-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 4px;
+}
+
+.fw-tb-list::-webkit-scrollbar {
+  display: none;
+}
+
+.fw-tb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 10px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--sec-background);
+  color: var(--pri-text-color);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 200px;
+  transition: background var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+
+.fw-tb-item:hover {
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border-color: var(--accent-color);
+}
+
+.fw-tb-item i:first-child {
+  font-size: 0.72rem;
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.fw-tb-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.fw-tb-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  color: var(--sec-text-color);
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+
+.fw-tb-x:hover {
+  background: color-mix(in srgb, #ef4444 18%, transparent);
+  color: #ef4444;
+}
+
+body.fw-taskbar-visible {
+  padding-bottom: 52px;
+}
+
+.fw-toggle-btn {
+  position: relative;
+}
+
+.fw-toggle-btn.fw-active {
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.fw-active-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  border: 1px solid var(--card-background);
+}
+
+@media (max-width: 768px) {
+  .fw-toggle-btn {
+    display: none !important;
+  }
+
+  .fw-win {
+    display: none !important;
+  }
+
+  .fw-taskbar {
+    display: none !important;
+  }
+}

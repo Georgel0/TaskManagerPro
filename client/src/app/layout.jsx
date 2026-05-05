@@ -4,6 +4,7 @@ import { Providers } from './providers';
 import '@/styles/global.css';
 import '@/styles/components.css';
 import '@/styles/layout.css';
+import '@/styles/window-manager.css';
 
 export const metadata = {
   openGraph: {

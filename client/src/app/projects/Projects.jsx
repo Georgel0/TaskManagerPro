@@ -1,13 +1,17 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
 import {
   ProjectCard, ProjectFormModal, MembersModal, TasksModal,
-  AnnouncementsModal, QuickAddTaskModal, ReadmeModal
+  AnnouncementsModal, QuickAddTaskModal, ReadmeModal,
 } from './components';
 import { RemovalModal } from '@/components/ui';
+import { WindowManagerProvider, useWindowManager } from '@/components/layout';
+import { TasksWindowContent } from './components/TasksWindowContent';
+import { MembersWindowContent } from './components/MembersWindowContent';
 import './styles/project-members.css';
 import './styles/project-modals.css';
 import './styles/projects-layout.css';
@@ -41,8 +45,9 @@ const ProjectsSkeleton = () => (
   </div>
 );
 
-export default function Projects() {
+function ProjectsInner({ wmEnabled, toggleWM }) {
   const { user, loading: appLoading } = useApp();
+  const wm = useWindowManager();
 
   const {
     projects, setProjects,
@@ -74,9 +79,88 @@ export default function Projects() {
     handleProjectLeave: _handleProjectLeave,
   } = useProjectMembers(selectedProject, setProjects);
 
-  const handleTransferOwnership = (memberId) => _handleTransferOwnership(memberId, setSelectedProject);
-  const handleProjectLeave = (project) => _handleProjectLeave(project, setSelectedProject);
-  const openReadme = (project) => setReadmeProject(project);
+  const handleTransferOwnership = (memberId) =>
+    _handleTransferOwnership(memberId, setSelectedProject);
+  const handleProjectLeave = (project) =>
+    _handleProjectLeave(project, setSelectedProject);
+
+
+  const openTasksHandler = (project) => {
+    if (wmEnabled && wm) {
+      wm.openWindow('tasks', `${project.name} — Tasks`, (close) => (
+        <TasksWindowContent project={project} onClose={close} />
+      ));
+    } else {
+      openTasks(project);
+    }
+  };
+
+  const openMembersHandler = (project) => {
+    if (wmEnabled && wm) {
+      wm.openWindow('members', `${project.name} — Team`, (close) => (
+        <MembersWindowContent
+          project={project}
+          currentUserId={user.id}
+          isOwner={project.owner_id === user.id}
+          onClose={close}
+        />
+      ));
+    } else {
+      openMembers(project);
+    }
+  };
+
+  const openAnnouncementsHandler = (project) => {
+    if (wmEnabled && wm) {
+      wm.openWindow('announcements', `${project.name} — Announcements`, (close) => (
+        <AnnouncementsModal
+          project={project}
+          isOwner={project.owner_id === user.id}
+          onClose={close}
+          onAnnouncementCreated={() => handleAnnouncementCreated(project.id)}
+          onAnnouncementDeleted={() => handleAnnouncementDeleted(project.id)}
+        />
+      ));
+    } else {
+      openAnnouncements(project);
+    }
+  };
+
+  const openReadmeHandler = (project) => {
+    if (wmEnabled && wm) {
+      wm.openWindow('readme', `${project.name} — README`, (close) => (
+        <ReadmeModal
+          project={project}
+          isOwner={project.owner_id === user.id}
+          onClose={close}
+        />
+      ));
+    } else {
+      setReadmeProject(project);
+    }
+  };
+
+  const openQuickAddHandler = (project) => {
+    if (wmEnabled && wm) {
+      wm.openWindow('quickAdd', `Quick Add — ${project.name}`, (close) => (
+        <QuickAddTaskModal
+          project={project}
+          onClose={close}
+          onAdded={() =>
+            setProjects((prev) =>
+              prev.map((p) =>
+                p.id === project.id
+                  ? { ...p, task_count: (p.task_count ?? 0) + 1 }
+                  : p
+              )
+            )
+          }
+        />
+      ));
+    } else {
+      openQuickAdd(project);
+    }
+  };
 
   if (appLoading || projectsLoading || !user) return <ProjectsSkeleton />;
 
@@ -88,7 +172,11 @@ export default function Projects() {
           <Link href="/dashboard" className="header-action-btn" title="View Dashboard">
             <i className="fas fa-arrow-left"></i>
           </Link>
-          <button className="header-action-btn" onClick={() => setIsCreateModalOpen(true)} title="Add New Project">
+          <button
+            className="header-action-btn"
+            onClick={() => setIsCreateModalOpen(true)}
+            title="Add New Project"
+          >
             <i className="fas fa-folder-plus"></i>
           </button>
           <Link href="/tasks" className="header-action-btn" title="View Tasks">
@@ -122,9 +210,15 @@ export default function Projects() {
       {projects.length === 0 ? (
         <div className="card projects-empty-state">
           <i className="fas fa-folder-plus projects-empty-icon"></i>
-          <p>{activeTagFilter ? `No projects tagged "${activeTagFilter}".` : "You don't have any projects yet."}</p>
+          <p>
+            {activeTagFilter
+              ? `No projects tagged "${activeTagFilter}".`
+              : "You don't have any projects yet."}
+          </p>
           {activeTagFilter ? (
-            <button className="btn btn-secondary" onClick={() => setActiveTagFilter('')}>Clear filter</button>
+            <button className="btn btn-secondary" onClick={() => setActiveTagFilter('')}>
+              Clear filter
+            </button>
           ) : (
             <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
               <i className="fas fa-plus"></i> New Project
@@ -138,15 +232,15 @@ export default function Projects() {
               key={project.id}
               project={project}
               userId={user.id}
-              onOpen={openTasks}
+              onOpen={openTasksHandler}
               onEdit={openEdit}
               onDelete={openDelete}
-              onMembers={openMembers}
+              onMembers={openMembersHandler}
               onLeave={handleProjectLeave}
-              onAnnouncements={openAnnouncements}
+              onAnnouncements={openAnnouncementsHandler}
               onStar={handleStar}
-              onQuickAdd={openQuickAdd}
-              onReadme={openReadme}
+              onQuickAdd={openQuickAddHandler}
+              onReadme={openReadmeHandler}
             />
           ))}
         </div>
@@ -177,7 +271,9 @@ export default function Projects() {
       <RemovalModal
         isOpen={isDeleteModalOpen}
         item={selectedProject}
-        message={<>Are you sure you want to delete <strong>{selectedProject?.name}</strong>?</>}
+        message={
+          <>Are you sure you want to delete <strong>{selectedProject?.name}</strong>?</>
+        }
         onConfirm={handleDelete}
         onClose={() => setIsDeleteModalOpen(false)}
         isSubmitting={isSubmitting}
@@ -221,11 +317,15 @@ export default function Projects() {
         <QuickAddTaskModal
           project={quickAddProject}
           onClose={() => setQuickAddProject(null)}
-          onAdded={() => {
+          onAdded={() =>
             setProjects((prev) =>
-              prev.map((p) => p.id === quickAddProject.id ? { ...p, task_count: (p.task_count ?? 0) + 1 } : p)
-            );
-          }}
+              prev.map((p) =>
+                p.id === quickAddProject.id
+                  ? { ...p, task_count: (p.task_count ?? 0) + 1 }
+                  : p
+              )
+            )
+          }
         />
       )}
 
@@ -237,5 +337,32 @@ export default function Projects() {
         />
       )}
     </div>
+  );
+}
+
+export default function Projects() {
+  const [wmEnabled, setWmEnabled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const isMobile = window.innerWidth <= 768;
+    const stored = localStorage.getItem('fw-enabled') === 'true';
+    setWmEnabled(stored && !isMobile);
+  }, []);
+
+  const toggleWM = () => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) return;
+    setWmEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem('fw-enabled', String(next));
+      return next;
+    });
+  };
+
+  return (
+    <WindowManagerProvider enabled={wmEnabled}>
+      <ProjectsInner wmEnabled={wmEnabled} toggleWM={toggleWM} mounted={mounted} />
+    </WindowManagerProvider>
   );
 }
