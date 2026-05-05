@@ -9,3 +9,5 @@ client/.env
 # Server ignore
 server/node_modules/
 server/.env
+
+ssh-key-2026-04-28.key

@@ -85,9 +85,26 @@
   justify-content: space-between;
   padding: 0.875rem 0;
   cursor: pointer;
+  gap: 1.25rem;
+}
+
+.settings-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-toggle-label-main {
   font-size: 0.875rem;
   color: var(--pri-text-color);
-  gap: 1rem;
+  font-weight: 500;
+}
+
+.settings-toggle-desc {
+  margin: 0;
+  line-height: 1.45;
 }
 
 .settings-toggle-input {

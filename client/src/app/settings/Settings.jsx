@@ -4,17 +4,52 @@ import { useSettings } from './useSettings';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import './settings.css';
 
-const PREF_LABELS = [
-  { key: 'task_assigned',       label: 'Task assigned or unassigned to you' },
-  { key: 'task_updated',        label: 'Task you are assigned to is updated' },
-  { key: 'task_completed',      label: 'Task marked as completed' },
-  { key: 'task_deleted',        label: 'Task you are assigned to is deleted' },
-  { key: 'comment_added',       label: 'New comment on your task' },
-  { key: 'project_changes',     label: 'Project renamed, members added or removed' },
-  { key: 'deadline_reminders',  label: 'Deadline approaching or overdue reminders' },
-  { key: 'announcements',       label: 'New project announcements' },
-  { key: 'account_actions',     label: 'Account actions' },
+const INTERFACE_PREFS = [
+  {
+    key:         'floating_windows_enabled',
+    label:       'Floating Windows',
+    description: 'Open project panels as draggable, resizable windows instead of full-screen modals. Desktop only — automatically disabled on mobile.',
+  },
 ];
+
+const NOTIFICATION_PREFS = [
+  { key: 'task_assigned',      label: 'Task assigned or unassigned to you'              },
+  { key: 'task_updated',       label: 'Task you are assigned to is updated'             },
+  { key: 'task_completed',     label: 'Task marked as completed'                        },
+  { key: 'task_deleted',       label: 'Task you are assigned to is deleted'             },
+  { key: 'comment_added',      label: 'New comment on your task'                        },
+  { key: 'project_changes',    label: 'Project renamed, members added or removed'       },
+  { key: 'deadline_reminders', label: 'Deadline approaching or overdue reminders'       },
+  { key: 'announcements',      label: 'New project announcements'                       },
+  { key: 'account_actions',    label: 'Account actions'                                 },
+];
+
+function ToggleRow({ id, label, description, checked, onChange }) {
+  return (
+    <li className="settings-pref-item">
+      <label className="settings-toggle-label" htmlFor={id}>
+        <div className="settings-toggle-text">
+          <span className="settings-toggle-label-main">{label}</span>
+          {description && (
+            <span className="settings-description settings-toggle-desc">{description}</span>
+          )}
+        </div>
+        <div className="settings-toggle-wrapper">
+          <input
+            type="checkbox"
+            id={id}
+            checked={checked}
+            onChange={onChange}
+            className="settings-toggle-input"
+          />
+          <span className="settings-toggle-track">
+            <span className="settings-toggle-thumb" />
+          </span>
+        </div>
+      </label>
+    </li>
+  );
+}
 
 export default function Settings() {
   const { currentTheme, changeTheme, groupedThemes } = useTheme();
@@ -26,7 +61,7 @@ export default function Settings() {
 
       <div className="settings-section">
         <h2 className="settings-section-title">
-          <i className="fas fa-palette"></i> Appearance
+          <i className="fas fa-palette" /> Appearance
         </h2>
         <div className="settings-row">
           <div className="settings-row-info">
@@ -51,7 +86,40 @@ export default function Settings() {
 
       <div className="settings-section">
         <h2 className="settings-section-title">
-          <i className="fas fa-bell"></i> Push Notifications
+          <i className="fas fa-layer-group" /> Interface
+        </h2>
+        <p className="settings-section-description">
+          Customise how the app looks and behaves.
+        </p>
+
+        {loading ? (
+          <p className="settings-loading">Loading preferences…</p>
+        ) : (
+          <>
+            <ul className="settings-prefs-list">
+              {INTERFACE_PREFS.map(({ key, label, description }) => (
+                <ToggleRow
+                  key={key}
+                  id={`iface-${key}`}
+                  label={label}
+                  description={description}
+                  checked={prefs[key] ?? false}
+                  onChange={(e) => updatePref(key, e.target.checked)}
+                />
+              ))}
+            </ul>
+            <div className="settings-save-row">
+              <button className="btn btn-primary" onClick={savePrefs} disabled={isSaving}>
+                {isSaving ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="settings-section">
+        <h2 className="settings-section-title">
+          <i className="fas fa-bell" /> Push Notifications
         </h2>
         <div className="settings-row">
           <div className="settings-row-info">
@@ -74,45 +142,30 @@ export default function Settings() {
 
       <div className="settings-section">
         <h2 className="settings-section-title">
-          <i className="fas fa-sliders-h"></i> Notification Preferences
+          <i className="fas fa-sliders-h" /> Notification Preferences
         </h2>
         <p className="settings-section-description">
-          Choose which events send you notifications. Changes apply to both in-app and push notifications.
+          Choose which events send you notifications. Applies to both in-app and push notifications.
         </p>
 
         {loading ? (
-          <p className="settings-loading">Loading preferences...</p>
+          <p className="settings-loading">Loading preferences…</p>
         ) : (
           <>
             <ul className="settings-prefs-list">
-              {PREF_LABELS.map(({ key, label }) => (
-                <li key={key} className="settings-pref-item">
-                  <label className="settings-toggle-label" htmlFor={key}>
-                    <span>{label}</span>
-                    <div className="settings-toggle-wrapper">
-                      <input
-                        type="checkbox"
-                        id={key}
-                        checked={prefs[key] ?? true}
-                        onChange={(e) => updatePref(key, e.target.checked)}
-                        className="settings-toggle-input"
-                      />
-                      <span className="settings-toggle-track">
-                        <span className="settings-toggle-thumb"></span>
-                      </span>
-                    </div>
-                  </label>
-                </li>
+              {NOTIFICATION_PREFS.map(({ key, label }) => (
+                <ToggleRow
+                  key={key}
+                  id={`notif-${key}`}
+                  label={label}
+                  checked={prefs[key] ?? true}
+                  onChange={(e) => updatePref(key, e.target.checked)}
+                />
               ))}
             </ul>
-
             <div className="settings-save-row">
-              <button
-                className="btn btn-primary"
-                onClick={savePrefs}
-                disabled={isSaving}
-              >
-                {isSaving ? 'Saving...' : 'Save Preferences'}
+              <button className="btn btn-primary" onClick={savePrefs} disabled={isSaving}>
+                {isSaving ? 'Saving…' : 'Save Preferences'}
               </button>
             </div>
           </>

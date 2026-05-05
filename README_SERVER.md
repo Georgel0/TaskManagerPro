@@ -22,9 +22,9 @@ See who is visiting (Access Logs): tail -f /var/log/nginx/access.log
 See why things are failing (Error Logs): tail -f /var/log/nginx/error.log
 
 3. The Database (PostgreSQL)
-Enter the DB console: psql -h localhost -U postgres -d task_manager
+Enter the DB console: psql -h localhost -U task_user -d task_manager
 
-Back up your database to a file: pg_dump -h localhost -U postgres -d task_manager > backup_$(date +%F).sql
+Back up your database to a file: pg_dump -h localhost -U task_user -d task_manager > backup_$(date +%F).sql
 
 List all tables (inside psql): \dt
 
