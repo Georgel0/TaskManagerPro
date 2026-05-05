@@ -168,7 +168,6 @@ function ProjectsInner({ wmEnabled }) {
         <ProjectFormModal
           mode="create"
           formData={createForm}
-          setFormData={setCreateForm}
           onSubmit={(e, members, data) => {
             handleCreate(e, members, data);
             close();
@@ -198,7 +197,6 @@ function ProjectsInner({ wmEnabled }) {
         <ProjectFormModal
           mode="edit"
           formData={projectData}
-          setFormData={setEditForm}
           onSubmit={(e, members, data) => {
             handleEdit(e, members, data);
             close();

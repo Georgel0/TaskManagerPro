@@ -1,12 +1,14 @@
 'use client';
-import React, { createContext, useContext, useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import { Rnd } from 'react-rnd';
+
 const WMCtx = createContext(null);
 export const useWindowManager = () => useContext(WMCtx);
 
 const WIN_CFG = {
-  tasks: { w: 520, h: 320, icon: 'fa-list-check' },
+  tasks: { w: 520, h: 280, icon: 'fa-list-check' },
   members: { w: 510, h: 450, icon: 'fa-users' },
-  announcements: { w: 620, h: 230, icon: 'fa-bullhorn' },
+  announcements: { w: 620, h: 260, icon: 'fa-bullhorn' },
   readme: { w: 700, h: 500, icon: 'fa-book-open' },
   quickAdd: { w: 430, h: 280, icon: 'fa-circle-plus' },
 };
@@ -29,79 +31,47 @@ const cascadePos = (type) => {
 const FloatingWindow = React.memo(function FloatingWindow({ win, onClose, onFocus }) {
   const cfg = WIN_CFG[win.type] ?? { w: 500, h: 560, icon: 'fa-square' };
 
-  const winRef = useRef(null);
-
-  const posRef = useRef({ ...win.position });
-  const dragOffset = useRef({ x: 0, y: 0 });
-
-  const onBarDown = useCallback((e) => {
-    if (e.button !== 0 || e.target.closest('[data-nodrag]')) return;
-
-    dragOffset.current = {
-      x: e.clientX - posRef.current.x,
-      y: e.clientY - posRef.current.y
-    };
-
-    onFocus(win.id);
-    e.preventDefault();
-
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  }, [win.id, onFocus]);
-
-  const onMove = useCallback((e) => {
-    const x = Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - cfg.w));
-    const y = Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 48));
-
-    posRef.current = { x, y };
-
-    if (winRef.current) {
-      winRef.current.style.transform = `translate(${x}px, ${y}px)`;
-    }
-  }, [cfg.w]);
-
-  const onUp = useCallback(() => {
-    window.removeEventListener('mousemove', onMove);
-    window.removeEventListener('mouseup', onUp);
-  }, [onMove]);
-
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [onMove, onUp]);
-
   const close = useCallback(() => onClose(win.id), [win.id, onClose]);
 
   return (
-    <div
-      ref={winRef}
-      className="fw-win"
-      style={{
-        transform: `translate(${posRef.current.x}px, ${posRef.current.y}px)`,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: win.zIndex,
+    <Rnd
+      default={{
+        x: win.position.x,
+        y: win.position.y,
         width: cfg.w,
-        height: cfg.h
+        height: cfg.h,
       }}
+      enableResizing={{
+        top: true, right: true, bottom: true, left: true,
+        topRight: true, bottomRight: true, bottomLeft: true, topLeft: true
+      }}
+      minWidth={340}
+      minHeight={220}
+      bounds="window"
+      dragHandleClassName="fw-bar"
       onMouseDown={() => onFocus(win.id)}
+      style={{ zIndex: win.zIndex, display: 'flex', flexDirection: 'column' }}
+      className="fw-win"
     >
-      <div className="fw-bar" onMouseDown={onBarDown} style={{ cursor: 'grab' }}>
+      <div className="fw-bar" style={{ cursor: 'grab' }}>
         <div className="fw-bar-left">
           <i className={`fas ${cfg.icon} fw-bar-icon`} />
           <span className="fw-bar-title">{win.title}</span>
         </div>
-        <button data-nodrag className="fw-bar-close" onClick={close} title="Close">
+        <button
+          className="fw-bar-close"
+          onClick={close}
+          onMouseDown={(e) => e.stopPropagation()}
+          title="Close"
+        >
           <i className="fas fa-times" />
         </button>
       </div>
+
       <div className="fw-win-body">
         {typeof win.render === 'function' ? win.render(close) : win.render}
       </div>
-    </div>
+    </Rnd>
   );
 });
 

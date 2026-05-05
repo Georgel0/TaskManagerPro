@@ -225,9 +225,6 @@ export function MembersWindowContent({ project: initialProject, currentUserId, i
   const handleTransferOwnership = (memberId) =>
     _transfer(memberId, setProject);
 
-  const handleProjectLeave = (proj) =>
-    _leave(proj, () => { setProject(null); onClose(); });
-
   return (
     <MembersModal
       project={project}

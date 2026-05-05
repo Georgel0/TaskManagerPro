@@ -10,10 +10,12 @@ const PRESET_COLORS = [
   '#10b981', '#ef4444', '#06b6d4', '#f97316',
 ];
 
-export function ProjectFormModal({ mode = 'create', formData, setFormData, onSubmit, onClose, isSubmitting }) {
+export function ProjectFormModal({ mode = 'create', formData: initialData, onSubmit, onClose, isSubmitting }) {
   const isEdit = mode === 'edit';
   const [fieldErrors, setFieldErrors] = useState({});
   const [tagInput, setTagInput] = useState('');
+
+  const [localData, setLocalData] = useState(initialData);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -41,7 +43,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   }, []);
 
   const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    setLocalData((prev) => ({ ...prev, [field]: value }));
     if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
@@ -49,7 +51,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
       e.preventDefault();
       const newTag = tagInput.trim().toLowerCase();
-      const existing = formData.tags || [];
+      const existing = localData.tags || [];
       if (!existing.includes(newTag) && existing.length < 5) {
         handleChange('tags', [...existing, newTag]);
       }
@@ -58,7 +60,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
   };
 
   const removeTag = (tag) => {
-    handleChange('tags', (formData.tags || []).filter((t) => t !== tag));
+    handleChange('tags', (localData.tags || []).filter((t) => t !== tag));
   };
 
   const handleSearchChange = (e) => {
@@ -111,7 +113,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let submissionData = { ...formData };
+    let submissionData = { ...localData };
 
     if (tagInput.trim()) {
       const newTag = tagInput.trim().toLowerCase();
@@ -143,7 +145,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
       .map(t => t.trim().toLowerCase())
       .filter(t => t);
 
-    let currentTags = [...(formData.tags || [])];
+    let currentTags = [...(localData.tags || [])];
     let didAdd = false;
 
     for (const tag of incomingTags) {
@@ -175,7 +177,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
               <input
                 type="text"
                 className="form-control"
-                value={formData.name}
+                value={localData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
               {fieldErrors.name && <span className="field-error"><i className="fas fa-exclamation-circle"></i> {fieldErrors.name}</span>}
@@ -184,11 +186,11 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
             <div className={`form-group ${fieldErrors.description ? 'has-error' : ''}`}>
               <label>
                 Description
-                <span className="char-count">{formData.description?.length ?? 0}/2000</span>
+                <span className="char-count">{localData.description?.length ?? 0}/2000</span>
               </label>
               <textarea
                 className="form-control"
-                value={formData.description}
+                value={localData.description}
                 maxLength={2000}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
@@ -202,13 +204,13 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                   <button
                     key={c}
                     type="button"
-                    className={`color-swatch ${formData.color === c ? 'color-swatch-active' : ''}`}
+                    className={`color-swatch ${localData.color === c ? 'color-swatch-active' : ''}`}
                     style={{ '--swatch-color': c }}
-                    onClick={() => handleChange('color', formData.color === c ? null : c)}
+                    onClick={() => handleChange('color', localData.color === c ? null : c)}
                     title={c}
                   />
                 ))}
-                {formData.color && (
+                {localData.color && (
                   <button
                     type="button"
                     className="btn-icon color-clear-btn"
@@ -223,9 +225,9 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
 
             <div className="form-group">
               <label>Tags <span className="form-hint">Press Enter or comma to add · max 5</span></label>
-              {(formData.tags || []).length > 0 && (
+              {(localData.tags || []).length > 0 && (
                 <div className="tag-chips">
-                  {(formData.tags || []).map((tag) => (
+                  {(localData.tags || []).map((tag) => (
                     <span key={tag} className="tag-chip">
                       {tag}
                       <button type="button" className="tag-chip-remove" onClick={() => removeTag(tag)}>
@@ -243,7 +245,7 @@ export function ProjectFormModal({ mode = 'create', formData, setFormData, onSub
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={addTag}
                 onPaste={handlePasteTags}
-                disabled={(formData.tags || []).length >= 5}
+                disabled={(localData.tags || []).length >= 5}
               />
             </div>
 

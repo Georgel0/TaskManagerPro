@@ -8,6 +8,7 @@
   align-items: center;
   gap: 10px;
   padding: 4px;
+  z-index: 999;
 }
 
 .header-action-btn {

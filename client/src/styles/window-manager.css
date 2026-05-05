@@ -264,15 +264,6 @@
   color: #ef4444;
 }
 
-.fw-toggle-btn {
-  position: relative;
-}
-
-.fw-toggle-btn.fw-active {
-  color: var(--accent-color);
-  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
-}
-
 .fw-active-dot {
   position: absolute;
   top: 4px;
@@ -285,10 +276,6 @@
 }
 
 @media (max-width: 768px) {
-  .fw-toggle-btn {
-    display: none !important;
-  }
-
   .fw-win {
     display: none !important;
   }
