@@ -86,7 +86,7 @@ export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembe
             <button className="project-chip" title="Project README" onClick={(e) => { e.stopPropagation(); onReadme(project); }}>
               <i className="fas fa-book-open"></i>
             </button>
-            <ExportButton
+            <ExportButton className="project-chip"
               options={isOwner ? projectExportOptions(project.id) : myTasksExportOptions({ project_id: project.id })}
               variant="modal"
             />

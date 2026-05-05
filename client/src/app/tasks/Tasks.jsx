@@ -61,15 +61,6 @@ export default function Tasks() {
       <div className="tasks-header">
         <h2><i className="fas fa-tasks"></i> {activeTab === 'project' ? 'Project Tasks' : 'Personal Tasks'}</h2>
         <div className="header-actions">
-          <ExportButton
-            options={myTasksExportOptions()}
-            label="Export My Tasks"
-            icon="fa-file-csv"
-            size="sm"
-            align="right"
-            title="Export your tasks"
-            className="header-action-btn"
-          />
           <Link href="/projects" className="header-action-btn" title="View Tasks">
             <i className="fas fa-arrow-left"></i>
           </Link>
@@ -83,6 +74,15 @@ export default function Tasks() {
           >
             <i className="fas fa-square-plus"></i>
           </button>
+          <ExportButton
+            options={myTasksExportOptions()}
+            label=""
+            icon="fa-file-csv"
+            size="sm"
+            align="right"
+            title="Export your tasks"
+            className="header-action-btn"
+          />
         </div>
       </div>
 

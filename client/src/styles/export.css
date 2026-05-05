@@ -7,9 +7,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 3px 9px;
   border: none;
   border-radius: var(--radius-sm, 6px);
-  background: transparent;
+  background-color: var(--sec-background);
   color: var(--sec-text-color);
   cursor: pointer;
   font-size: 0.8rem;

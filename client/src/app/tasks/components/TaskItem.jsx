@@ -104,7 +104,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  className="btn-icon edit-btn"
+                  className="btn-icon dropdown-edit-btn"
                   onClick={(e) => { e.stopPropagation(); onEdit(task); setOpen(false); }}
                   title="Edit Task"
                 >
@@ -118,7 +118,7 @@ export function TaskItem({ task, onDetail, onEdit, onDelete }) {
                   onArchive={(id) => { archiveTask(id); setOpen(false); }}
                 />
                 <button
-                  className="btn-icon delete-btn"
+                  className="btn-icon dropdown-delete-btn"
                   onClick={(e) => { e.stopPropagation(); onDelete(task); setOpen(false); }}
                   title="Delete Task"
                 >

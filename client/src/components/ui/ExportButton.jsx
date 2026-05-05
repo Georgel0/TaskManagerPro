@@ -60,23 +60,6 @@ export function ExportButton({
     </>
   );
 
-  const renderTrigger = (onClick) => (
-    <button
-      className={`export-btn export-btn--${size} ${open ? 'export-btn--active' : ''} ${className}`}
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-      disabled={isLoading}
-      title="Export options"
-    >
-      <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : icon}`}></i>
-      {size !== 'icon' && (
-        <>
-          <span>{!isMobile && (isLoading ? 'Exporting…' : label)}</span>
-          <i className={`fas fa-chevron-down export-chevron`}></i>
-        </>
-      )}
-    </button>
-  );
-
   const modalJSX = showModal && (
     <div className="modal-overlay" onClick={() => setShowModal(false)}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -149,7 +132,7 @@ export function ExportButton({
   return (
     <div className="export-wrapper" ref={ref}>
       <button
-        className={`export-btn export-btn--${size} ${open ? 'export-btn--active' : ''}  ${className}`}
+        className={`export-btn export-btn--${size} ${open ? 'export-btn--active' : ''} ${className}`}
         onClick={(e) => { e.stopPropagation(); setOpen(p => !p); }}
         disabled={isLoading}
         title="Export options"
@@ -199,7 +182,6 @@ export function ExportButton({
 }
 
 // Pre-built option factories
-
 export const taskExportOptions = (taskId) => [
   {
     label: 'Task Summary',

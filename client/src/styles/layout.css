@@ -135,12 +135,12 @@
   color: var(--accent-color);
 }
 
-.edit-btn,
-.delete-btn,
+.dropdown-edit-btn,
+.dropdown-delete-btn,
 .archive-btn {
   color: var(--sec-text-color);
-  width: 90%;
   display: flex;
+  width: 90%;
   gap: 10px;
   justify-content: flex-start;
 }

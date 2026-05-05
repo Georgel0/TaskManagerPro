@@ -68,7 +68,8 @@
 .sidebar-footer {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 15px;
   align-items: center;
   width: 100%;
   padding: 15px 25px;
@@ -84,15 +85,8 @@
   border: none;
   background: none;
   color: var(--pri-text-color);
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  margin-top: auto;
   cursor: pointer;
-}
-
-.logout-btn i {
-  margin-left: 5px;
+  font-size: 1rem;
 }
 
 .logout-btn:hover {
@@ -106,6 +100,7 @@
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
+  font-size: 1rem;
 }
 
 .settings-btn:hover, .sb-archive-btn:hover {

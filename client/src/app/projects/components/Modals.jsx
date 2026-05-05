@@ -39,7 +39,7 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
           {isOwner ? (
             <>
               <button
-                className="btn-icon edit-btn" title="Edit Project"
+                className="btn-icon dropdown-edit-btn" title="Edit Project"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(project); }}
               >
                 <i className="fas fa-pencil-alt"></i> Edit
@@ -52,7 +52,7 @@ export function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave 
                 onArchive={archiveProject}
               />
               <button
-                className="btn-icon delete-btn" title="Delete Project"
+                className="btn-icon dropdown-delete-btn" title="Delete Project"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); onDelete(project); }}
               >
                 <i className="fas fa-trash"></i> Delete

@@ -88,9 +88,8 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
         ))}
         <div className={`sidebar-footer ${isCollapsed ? 'collapsed' : ''}`}>
           <button onClick={handleLogout} className='logout-btn' title='Log Out'>
-            {isCollapsed ? '' : 'Log Out'} <i className="fa fa-right-from-bracket"></i>
+            <i className="fa fa-right-from-bracket"></i>
           </button>
-
           <Link href="/settings" className={`settings-btn ${pathname === '/settings' ? 'active' : ''}`} title='Settings'>
             <i className="fas fa-gear"></i>
           </Link>
