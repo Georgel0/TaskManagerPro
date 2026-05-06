@@ -54,9 +54,9 @@ function ProjectsInner({ wmEnabled }) {
     projects, setProjects,
     loading: projectsLoading, error, isSubmitting,
     selectedProject, setSelectedProject,
-    createForm, setCreateForm,
-    editForm, setEditForm,
+    createForm, setEditForm, editForm,
     activeTagFilter, setActiveTagFilter, allTags,
+    isCreateModalOpen, isEditModalOpen,
     setIsCreateModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
@@ -182,10 +182,10 @@ function ProjectsInner({ wmEnabled }) {
 
   const openEditProjectHandler = (project) => {
     const projectData = {
-      name:        project.name,
+      name: project.name,
       description: project.description || '',
-      tags:        project.tags  || [],
-      color:       project.color || null,
+      tags: project.tags || [],
+      color: project.color || null,
     };
 
     setEditForm(projectData);
@@ -313,6 +313,19 @@ function ProjectsInner({ wmEnabled }) {
         />
       )}
 
+      {(isCreateModalOpen || isEditModalOpen) && (
+        <ProjectFormModal
+          mode={isCreateModalOpen ? "create" : "edit"}
+          formData={isCreateModalOpen ? createForm : editForm}
+          onSubmit={isCreateModalOpen ? handleCreate : handleEdit}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setIsEditModalOpen(false);
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
       {isMembersModalOpen && selectedProject && (
         <MembersModal
           project={selectedProject}
@@ -367,14 +380,14 @@ function ProjectsInner({ wmEnabled }) {
 
 export default function Projects() {
   const { prefs, loading } = useSettings();
-  const [wmEnabled, setWmEnabled]   = useState(false);
-  const [mounted,   setMounted]     = useState(false);
+  const [wmEnabled, setWmEnabled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (!loading) {
-      const isMobile = window.innerWidth <= 768;
+      const isMobile = window.innerWidth <= 900;
       setWmEnabled(prefs.floating_windows_enabled && !isMobile);
     }
   }, [prefs.floating_windows_enabled, loading]);

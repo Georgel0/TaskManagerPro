@@ -149,7 +149,11 @@
 
 .badge-owner {
   background-color: var(--accent-color);
-  color: #fff;
+  color: var(--pri-background);
+}
+
+.project-card .badge-owner {
+  background-color: var(--project-color);
 }
 
 .badge-member {
@@ -284,6 +288,7 @@
   .add-member-input-group {
     flex-direction: column;
   }
+
   .add-member-input-group .btn {
     width: 100%;
   }

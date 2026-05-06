@@ -144,8 +144,8 @@
   color: var(--accent-color);
 }
 
-/* TASKS MODAL */
 
+/* TASKS MODAL */
 .project-tasks-list {
   list-style: none;
   display: flex;

@@ -21,7 +21,7 @@ function WorkloadBar({ member }) {
 
   return (
     <div className="workload-wrap" 
-      title={`${total} tasks · ${member.todo_count} to do · ${member.in_progress_count} in progress · ${member.done_count} done`}
+      title={`Workload: \n ${total} tasks · ${member.todo_count} to do · ${member.in_progress_count} in progress · ${member.done_count} done`}
     >
       <div className="workload-bar">
         {todoPct > 0 && <div className="workload-seg workload-todo" style={{ width: `${todoPct}%` }}></div>}
