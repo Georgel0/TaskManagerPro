@@ -54,7 +54,8 @@ function ProjectsInner({ wmEnabled }) {
     projects, setProjects,
     loading: projectsLoading, error, isSubmitting,
     selectedProject, setSelectedProject,
-    createForm, setEditForm,
+    createForm, setCreateForm,
+    editForm, setEditForm,
     activeTagFilter, setActiveTagFilter, allTags,
     setIsCreateModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
@@ -82,7 +83,6 @@ function ProjectsInner({ wmEnabled }) {
     _handleTransferOwnership(memberId, setSelectedProject);
   const handleProjectLeave = (project) =>
     _handleProjectLeave(project, setSelectedProject);
-
 
   const openTasksHandler = (project) => {
     if (wmEnabled && wm) {
@@ -182,10 +182,10 @@ function ProjectsInner({ wmEnabled }) {
 
   const openEditProjectHandler = (project) => {
     const projectData = {
-      name: project.name,
+      name:        project.name,
       description: project.description || '',
-      tags: project.tags || [],
-      color: project.color || null
+      tags:        project.tags  || [],
+      color:       project.color || null,
     };
 
     setEditForm(projectData);
@@ -367,12 +367,10 @@ function ProjectsInner({ wmEnabled }) {
 
 export default function Projects() {
   const { prefs, loading } = useSettings();
-  const [wmEnabled, setWmEnabled] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [wmEnabled, setWmEnabled]   = useState(false);
+  const [mounted,   setMounted]     = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (!loading) {
@@ -382,7 +380,11 @@ export default function Projects() {
   }, [prefs.floating_windows_enabled, loading]);
 
   return (
-    <WindowManagerProvider enabled={wmEnabled}>
+    <WindowManagerProvider
+      enabled={wmEnabled}
+      snapEnabled={prefs.snap_windows_enabled ?? false}
+      snapPattern={prefs.snap_pattern ?? 'grid'}
+    >
       <ProjectsInner wmEnabled={wmEnabled} mounted={mounted} />
     </WindowManagerProvider>
   );

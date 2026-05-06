@@ -135,7 +135,7 @@
   left: 3px;
   width: 18px;
   height: 18px;
-  background: white;
+  background: var(--pri-background);
   border-radius: 50%;
   transition: transform 0.2s;
 }
@@ -148,4 +148,101 @@
   margin-top: 1.25rem;
   display: flex;
   justify-content: flex-end;
+}
+
+
+.settings-sub-panel {
+  margin: 0 0 0.5rem 1.25rem;
+  padding: 0.75rem 0 0.75rem 1rem;
+  border-left: 2px solid var(--accent-color, #0984e3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.settings-sub-row {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.settings-snap-patterns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  animation: snap-fade-in 0.18s ease;
+}
+
+@keyframes snap-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.settings-snap-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sec-text-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-snap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.settings-snap-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0.65rem 0.75rem;
+  background: var(--pri-background);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.settings-snap-card:hover {
+  border-color: var(--accent-color, #0984e3);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color, #0984e3) 12%, transparent);
+}
+
+.settings-snap-card.active {
+  border-color: var(--accent-color, #0984e3);
+  background: color-mix(in srgb, var(--accent-color, #0984e3) 8%, var(--pri-background));
+}
+
+.settings-snap-icon {
+  font-size: 1rem;
+  color: var(--accent-color, #0984e3);
+  margin-bottom: 2px;
+}
+
+.settings-snap-name {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--pri-text-color);
+  line-height: 1.2;
+}
+
+.settings-snap-desc {
+  font-size: 0.72rem;
+  color: var(--sec-text-color);
+  line-height: 1.35;
+}
+
+.settings-snap-check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--accent-color, #0984e3);
 }
