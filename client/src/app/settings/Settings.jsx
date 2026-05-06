@@ -6,22 +6,22 @@ import './settings.css';
 
 const INTERFACE_PREFS = [
   {
-    key:         'floating_windows_enabled',
-    label:       'Floating Windows',
+    key: 'floating_windows_enabled',
+    label: 'Floating Windows',
     description: 'Open project panels as draggable, resizable windows instead of full-screen modals. Desktop only — automatically disabled on mobile.',
   },
 ];
 
 const NOTIFICATION_PREFS = [
-  { key: 'task_assigned',      label: 'Task assigned or unassigned to you'              },
-  { key: 'task_updated',       label: 'Task you are assigned to is updated'             },
-  { key: 'task_completed',     label: 'Task marked as completed'                        },
-  { key: 'task_deleted',       label: 'Task you are assigned to is deleted'             },
-  { key: 'comment_added',      label: 'New comment on your task'                        },
-  { key: 'project_changes',    label: 'Project renamed, members added or removed'       },
-  { key: 'deadline_reminders', label: 'Deadline approaching or overdue reminders'       },
-  { key: 'announcements',      label: 'New project announcements'                       },
-  { key: 'account_actions',    label: 'Account actions'                                 },
+  { key: 'task_assigned', label: 'Task assigned or unassigned to you' },
+  { key: 'task_updated', label: 'Task you are assigned to is updated' },
+  { key: 'task_completed', label: 'Task marked as completed' },
+  { key: 'task_deleted', label: 'Task you are assigned to is deleted' },
+  { key: 'comment_added', label: 'New comment on your task' },
+  { key: 'project_changes', label: 'Project renamed, members added or removed' },
+  { key: 'deadline_reminders', label: 'Deadline approaching or overdue reminders' },
+  { key: 'announcements', label: 'New project announcements' },
+  { key: 'account_actions', label: 'Account actions' },
 ];
 
 function ToggleRow({ id, label, description, checked, onChange }) {
@@ -84,38 +84,40 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          <i className="fas fa-layer-group" /> Interface
-        </h2>
-        <p className="settings-section-description">
-          Customise how the app looks and behaves.
-        </p>
+      {typeof window !== 'undefined' && window.innerWidth > 900 && (
+        <div className="settings-section">
+          <h2 className="settings-section-title">
+            <i className="fas fa-layer-group" /> Interface
+          </h2>
+          <p className="settings-section-description">
+            Customise how the app looks and behaves.
+          </p>
 
-        {loading ? (
-          <p className="settings-loading">Loading preferences…</p>
-        ) : (
-          <>
-            <ul className="settings-prefs-list">
-              {INTERFACE_PREFS.map(({ key, label, description }) => (
-                <ToggleRow
-                  key={key}
-                  id={`iface-${key}`}
-                  label={label}
-                  description={description}
-                  checked={prefs[key] ?? false}
-                  onChange={(e) => updatePref(key, e.target.checked)}
-                />
-              ))}
-            </ul>
-            <div className="settings-save-row">
-              <button className="btn btn-primary" onClick={savePrefs} disabled={isSaving}>
-                {isSaving ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+          {loading ? (
+            <p className="settings-loading">Loading preferences…</p>
+          ) : (
+            <>
+              <ul className="settings-prefs-list">
+                {INTERFACE_PREFS.map(({ key, label, description }) => (
+                  <ToggleRow
+                    key={key}
+                    id={`iface-${key}`}
+                    label={label}
+                    description={description}
+                    checked={prefs[key] ?? false}
+                    onChange={(e) => updatePref(key, e.target.checked)}
+                  />
+                ))}
+              </ul>
+              <div className="settings-save-row">
+                <button className="btn btn-primary" onClick={savePrefs} disabled={isSaving}>
+                  {isSaving ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="settings-section">
         <h2 className="settings-section-title">
