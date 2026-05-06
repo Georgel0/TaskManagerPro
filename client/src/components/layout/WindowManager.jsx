@@ -8,7 +8,7 @@ export const useWindowManager = () => useContext(WMCtx);
 const WIN_CFG = {
   tasks: { w: 520, h: 280, icon: 'fa-list-check' },
   members: { w: 510, h: 450, icon: 'fa-users' },
-  announcements: { w: 620, h: 260, icon: 'fa-bullhorn' },
+  announcements: { w: 480, h: 380, icon: 'fa-bullhorn' },
   readme: { w: 700, h: 500, icon: 'fa-book-open' },
   quickAdd: { w: 430, h: 280, icon: 'fa-circle-plus' },
 };
@@ -115,16 +115,10 @@ export function WindowManagerProvider({ children, enabled }) {
     return () => document.body.classList.remove(cls);
   }, [enabled, windows.length]);
 
-  /**
-   * Open a floating window.
-   * @param {'tasks'|'members'|'announcements'|'readme'|'quickAdd'} type
-   * @param {string}            title  - shown in title bar & taskbar
-   * @param {ReactNode|Function} render - JSX or (closeFn) => JSX
-   */
   const openWindow = useCallback((type, title, render) => {
     setWindows(ws => {
       const existingCount = ws.filter(w => w.type === type).length;
-      const limit = 2;
+      const limit = 3;
 
       if (existingCount >= limit) {
         ws.find(w => w.type === type);

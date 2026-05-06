@@ -247,12 +247,11 @@ export function QuickAddTaskModal({ project, onClose, onAdded }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content quick-add-modal" onClick={(e) => e.stopPropagation()}>
+      <form className="modal-content quick-add-modal" onClick={(e) => e.stopPropagation()}  onSubmit={handleSubmit}>
         <div className="modal-header">
           <h3><i className="fas fa-plus"></i> Quick Add Task</h3>
           <button className="btn-icon" onClick={onClose}><i className="fas fa-times"></i></button>
         </div>
-        <form onSubmit={handleSubmit}>
           <div className="modal-body">
             <p className="quick-add-project-label">
               <i className="fas fa-folder"></i> {project.name}
@@ -278,8 +277,7 @@ export function QuickAddTaskModal({ project, onClose, onAdded }) {
               {isSubmitting ? 'Adding...' : 'Add Task'}
             </button>
           </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 }

@@ -163,13 +163,12 @@ export function ProjectFormModal({ mode = 'create', formData: initialData, onSub
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <form className="modal-content" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit} noValidate>
         <div className="modal-header">
           <h3>{isEdit ? 'Edit Project' : 'Create New Project'}</h3>
           <button className="btn-icon" onClick={onClose}><i className="fas fa-times"></i></button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
           <div className="modal-body modal-body-scroll">
 
             <div className={`form-group ${fieldErrors.name ? 'has-error' : ''}`}>
@@ -305,7 +304,6 @@ export function ProjectFormModal({ mode = 'create', formData: initialData, onSub
                 </div>
               </div>
             )}
-
           </div>
 
           <div className="modal-footer">
@@ -316,8 +314,7 @@ export function ProjectFormModal({ mode = 'create', formData: initialData, onSub
                 : isEdit ? 'Save Changes' : 'Create Project'}
             </button>
           </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 }
