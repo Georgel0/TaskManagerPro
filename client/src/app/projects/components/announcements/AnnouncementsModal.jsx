@@ -1,17 +1,20 @@
 'use client';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useAnnouncements } from '../hooks/useAnnouncements';
+import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { RemovalModal } from '@/components/ui';
 import { formatDate } from '@/lib';
 
 export function AnnouncementsModal({ project, isOwner, onClose, onAnnouncementCreated, onAnnouncementDeleted }) {
-  const { announcements, loadingAnnouncements, handleCreateAnnouncement, handleAcknowledge, deleteAnnouncement 
-  } = useAnnouncements(project.id, onAnnouncementCreated, onAnnouncementDeleted);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: '', content: '', type: 'update', isPinned: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
+
+  const {
+    announcements, loadingAnnouncements, handleCreateAnnouncement, 
+    handleAcknowledge, deleteAnnouncement
+  } = useAnnouncements(project.id, onAnnouncementCreated, onAnnouncementDeleted);
 
   const pendingAnnouncement = announcements.find((a) => a.id === pendingDeleteId);
 

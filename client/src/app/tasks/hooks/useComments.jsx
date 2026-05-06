@@ -4,12 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-const getToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
-  }
-  return null;
-};
+const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
 
 export function useComments(taskId) {
   const queryClient = useQueryClient();

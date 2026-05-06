@@ -1,11 +1,12 @@
+'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { addMemberSchema, validate } from '@/lib/validators';
 import { getInitials } from '@/lib';
-import { MemberActionMenu } from './Modals';
+import { MemberActionMenu } from './MemberActionMenu';
 import { MemberDetailModal } from './MemberDetailModal';
 import { useQueryClient } from '@tanstack/react-query';
-import { useProjectMembers } from '../hooks/useProjectMembers';
+import { useProjectMembers } from '../../hooks/useProjectMembers';
 
 function WorkloadBar({ member }) {
   const total = (member.todo_count ?? 0) + (member.in_progress_count ?? 0) + (member.done_count ?? 0);

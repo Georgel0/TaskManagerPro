@@ -3,12 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-const getToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
-  }
-  return null;
-};
+const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
 
 const sortAnnouncements = (list) =>
   [...list].sort((a, b) => b.is_pinned - a.is_pinned || new Date(b.created_at) - new Date(a.created_at));

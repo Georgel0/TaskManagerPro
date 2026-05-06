@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-const getToken = () => localStorage.getItem('token');
+const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
 
 const DEFAULT_PREFS = {
   task_assigned: true,

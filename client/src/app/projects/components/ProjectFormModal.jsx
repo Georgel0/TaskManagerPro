@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect, useRef } from 'react';
 import { createProjectSchema, updateProjectSchema, validate } from '@/lib/validators';
 import { getInitials } from '@/lib';

@@ -1,5 +1,90 @@
+'use client';
+import { useState, useEffect, useRef } from "react";
 import { formatDate } from "@/lib";
-import { ProjectActionMenu } from "./Modals";
+import { useArchive } from '@/hooks/useArchive';
+import { ArchiveButton, ExportButton, projectExportOptions, myTasksExportOptions } from "@/components/ui";
+
+function ProjectActionMenu({ project, isOwner, onEdit, onDelete, onLeave }) {
+  const [leaveConfirm, setLeaveConfirm] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { archiveProject } = useArchive();
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        !e.target.closest('.archive-confirm-popover')
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  return (
+    <div className="action-dropdown-wrapper" ref={ref}>
+      <button
+        className="btn-icon"
+        title="More actions"
+        onClick={(e) => { e.stopPropagation(); setOpen((p) => !p); }}
+      >
+        <i className="fas fa-ellipsis-v"></i>
+      </button>
+
+      {open && (
+        <div className="action-dropdown-menu">
+          {isOwner ? (
+            <>
+              <button
+                className="btn-icon dropdown-edit-btn" title="Edit Project"
+                onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(project); }}
+              >
+                <i className="fas fa-pencil-alt"></i> Edit
+              </button>
+              <ArchiveButton
+                text={true}
+                type="project"
+                id={project.id}
+                name={project.name}
+                onArchive={archiveProject}
+              />
+              <button
+                className="btn-icon dropdown-delete-btn" title="Delete Project"
+                onClick={(e) => { e.stopPropagation(); setOpen(false); onDelete(project); }}
+              >
+                <i className="fas fa-trash"></i> Delete
+              </button>
+              <ExportButton 
+                options={isOwner ? projectExportOptions(project.id) : myTasksExportOptions({ project_id: project.id })}
+                variant="modal"
+                size="md"
+                sizeDep={false}
+              />
+            </>
+          ) : (
+            leaveConfirm ? (
+              <div className="transfer-confirm" onClick={(e) => e.stopPropagation()}>
+                <span className="transfer-confirm-text">Leave project?</span>
+                <button className="btn btn-danger btn-sm" onClick={(e) => { e.stopPropagation(); onLeave(project); }}>Yes</button>
+                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.stopPropagation(); setLeaveConfirm(false); }}>No</button>
+              </div>
+            ) : (
+              <button
+                className="btn-icon btn-sm" title="Leave Project"
+                onClick={(e) => { e.stopPropagation(); setLeaveConfirm(true); }}
+              >
+                <i className="fas fa-right-from-bracket"></i> Leave
+              </button>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ProjectCard({ project, userId, onOpen, onEdit, onDelete, onMembers, onLeave, onAnnouncements, onStar, onQuickAdd, onReadme }) {
   const isOwner = project.owner_id === userId;

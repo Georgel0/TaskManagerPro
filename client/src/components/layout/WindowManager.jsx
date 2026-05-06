@@ -7,7 +7,7 @@ export const useWindowManager = () => useContext(WMCtx);
 
 const WIN_CFG = {
   tasks: { w: 520, h: 280, icon: 'fa-list-check' },
-  members: { w: 510, h: 450, icon: 'fa-users' },
+  members: { w: 540, h: 490, icon: 'fa-users' },
   announcements: { w: 480, h: 380, icon: 'fa-bullhorn' },
   readme: { w: 700, h: 500, icon: 'fa-book-open' },
   quickAdd: { w: 430, h: 280, icon: 'fa-circle-plus' },

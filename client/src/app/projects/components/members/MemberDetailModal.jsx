@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import { getInitials } from '@/lib';
 import { Tooltip } from 'react-tooltip';
