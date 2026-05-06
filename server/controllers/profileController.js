@@ -9,16 +9,16 @@ const getUserProfile = async (req, res) => {
       u.id, u.name, u.email, u.avatar, u.bio, u.created_at,
 
       -- Project Stats
-      (SELECT COUNT(*) FROM projects WHERE owner_id = u.id) AS projects_owned,
-      (SELECT COUNT(*) FROM project_members WHERE user_id = u.id) AS projects_joined,
-      (SELECT COUNT(*) FROM project_members pm 
-       JOIN projects p ON pm.project_id = p.id 
-       WHERE pm.user_id = u.id AND p.owner_id != u.id) AS collaborative_projects,
+      (SELECT COUNT(*) FROM projects WHERE owner_id = u.id AND is_archived = false) AS projects_owned,
+      (SELECT COUNT(*) FROM projects WHERE owner_id = u.id AND is_archived = true) AS archived_projects,
+      (SELECT COUNT(*) FROM project_members pm JOIN projects p ON pm.project_id = p.id WHERE pm.user_id = u.id AND p.owner_id != u.id) AS collaborative_projects,
+      (SELECT COUNT(*) FROM starred_projects WHERE user_id = u.id) AS starred_projects,
 
-      -- Task Basics
-      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id) AS total_tasks,
+      -- Task & Subtask Basics
+      (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND is_archived = false) AS total_tasks,
       (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND status = 'Done') AS completed_tasks,
       (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND status = 'In Progress') AS in_progress_tasks,
+      (SELECT COUNT(*) FROM subtasks s JOIN tasks t ON s.task_id = t.id WHERE t.assigned_user_id = u.id AND s.is_completed = true) AS completed_subtasks,
       
       -- Priority & Deadlines
       (SELECT COUNT(*) FROM tasks WHERE assigned_user_id = u.id AND priority = 'High' AND status != 'Done') AS urgent_tasks,
@@ -31,13 +31,12 @@ const getUserProfile = async (req, res) => {
       AND deadline BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '7 days')
       AND status != 'Done') AS upcoming_tasks,
 
-      -- Interaction Stats
+      -- Interaction & Resources Stats
       (SELECT COUNT(*) FROM comments WHERE user_id = u.id) AS comments_count,
-      (SELECT COUNT(*) FROM attachments a 
-       JOIN tasks t ON a.task_id = t.id 
-       WHERE t.assigned_user_id = u.id) AS task_resources,
-      (SELECT COUNT(*) FROM notifications 
-       WHERE user_id = u.id AND read_status = FALSE) AS unread_alerts
+      (SELECT COUNT(*) FROM project_announcements WHERE author_id = u.id) AS authored_announcements,
+      (SELECT COUNT(*) FROM attachments a JOIN tasks t ON a.task_id = t.id WHERE t.assigned_user_id = u.id) AS task_resources,
+      (SELECT COALESCE(SUM(file_size), 0) FROM attachments WHERE user_id = u.id) AS total_attachment_bytes,
+      (SELECT COUNT(*) FROM notifications WHERE user_id = u.id AND read_status = FALSE) AS unread_alerts
 
     FROM users u 
     WHERE u.id = $1;`;
@@ -59,10 +58,14 @@ const getUserProfile = async (req, res) => {
       ...row,
       stats: {
         projects: parseInt(row.projects_owned) + parseInt(row.collaborative_projects),
+        archived_projects: parseInt(row.archived_projects),
+        starred_projects: parseInt(row.starred_projects),
         tasks: total,
         completed: completed,
+        completed_subtasks: parseInt(row.completed_subtasks),
         urgent: parseInt(row.urgent_tasks),
         engagement: parseInt(row.comments_count),
+        authored_announcements: parseInt(row.authored_announcements),
         performance: {
           score: score,
           overdue: parseInt(row.overdue_tasks),
@@ -72,6 +75,7 @@ const getUserProfile = async (req, res) => {
           owned: parseInt(row.projects_owned),
           collaboration: parseInt(row.collaborative_projects),
           resources: parseInt(row.task_resources),
+          resource_bytes: parseInt(row.total_attachment_bytes),
           unread: parseInt(row.unread_alerts)
         }
       }

@@ -99,19 +99,31 @@ export function DangerZone({ handleLogout }) {
   );
 }
 
-
-
 export function ProfileStatsExpanded({ stats }) {
   const [open, setOpen] = useState(false);
+
+  const formatBytes = (bytes, decimals = 2) => {
+    if (!+bytes) return '0 B';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  };
 
   const rows = [
     { icon: 'fa-folder-open', label: 'Projects Owned', value: stats?.activity?.owned ?? 0 },
     { icon: 'fa-users', label: 'Projects Joined', value: stats?.activity?.collaboration ?? 0 },
-    { icon: 'fa-tasks', label: 'In Progress', value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
+    { icon: 'fa-star', label: 'Starred Projects', value: stats?.starred_projects ?? 0, accent: 'accent' },
+    { icon: 'fa-archive', label: 'Archived Projects', value: stats?.archived_projects ?? 0 },
+    { icon: 'fa-tasks', label: 'In Progress Tasks', value: stats?.tasks - (stats?.completed ?? 0) - (stats?.performance?.overdue ?? 0) },
+    { icon: 'fa-check-double', label: 'Subtasks Completed', value: stats?.completed_subtasks ?? 0 },
     { icon: 'fa-exclamation-circle', label: 'Urgent (High Priority)', value: stats?.urgent ?? 0, accent: 'warning' },
     { icon: 'fa-calendar-times', label: 'Overdue', value: stats?.performance?.overdue ?? 0, accent: 'error' },
     { icon: 'fa-clock', label: 'Due This Week', value: stats?.performance?.upcoming ?? 0, accent: 'accent' },
+    { icon: 'fa-bullhorn', label: 'Announcements Authored', value: stats?.authored_announcements ?? 0 },
     { icon: 'fa-paperclip', label: 'Attachments', value: stats?.activity?.resources ?? 0 },
+    { icon: 'fa-database', label: 'Storage Used', value: formatBytes(stats?.activity?.resource_bytes ?? 0) },
     { icon: 'fa-bell', label: 'Unread Notifications', value: stats?.activity?.unread ?? 0 },
   ];
 
