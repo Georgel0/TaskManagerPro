@@ -1,0 +1,206 @@
+.pulse-create-btn {
+  width: 100%;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.announcements-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcement-card {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  position: relative;
+  transition: transform var(--transition);
+}
+
+.announcement-card.is-pinned {
+  border: 2px solid var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-color) 2%, transparent);
+}
+
+.pinned-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background-color: var(--accent-color);
+  color: var(--card-background);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: var(--shadow-sm);
+}
+
+.announcement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.ann-message-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pin-to-top-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-to-top-check > input {
+  margin-bottom: 4px;
+}
+
+.announcement-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.announcement-meta h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--pri-text-color);
+}
+
+.pulse-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.pulse-update    { background-color: color-mix(in srgb, var(--accent-color) 15%, transparent); color: var(--accent-color); }
+.pulse-milestone { background-color: color-mix(in srgb, #22c55e 15%, transparent); color: #15803d; }
+.pulse-urgent    { background-color: color-mix(in srgb, #ef4444 15%, transparent); border: 1px solid #ef4444; color: #b91c1c; }
+.type-urgent     { border-left: 4px solid #ef4444; }
+
+.announcement-date {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+}
+
+.announcement-content.markdown-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--pri-text-color);
+  margin-bottom: 16px;
+}
+
+.announcement-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.announcement-author {
+  font-size: 0.8rem;
+  color: var(--sec-text-color);
+  font-style: italic;
+}
+
+.announcement-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ack-stats {
+  font-size: 0.85rem;
+  color: var(--sec-text-color);
+  font-weight: 600;
+}
+
+.project-announcement-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sec-text-color);
+  background-color: var(--sec-background);
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.project-announcement-count:hover {
+  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  color: var(--accent-color);
+}
+
+/* TASKS MODAL */
+
+.project-tasks-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition);
+  gap: 12px;
+  color: var(--sec-text-color);
+}
+
+.project-task-item-title {
+  color: var(--pri-text-color);
+}
+
+.project-task-item:hover {
+  background-color: var(--sec-background);
+}
+
+.project-task-item > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.project-task-item > div:first-child > span:first-child {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-task-item > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.transfer-btn {
+  color: var(--sec-text-color);
+}
+
+.transfer-btn:hover {
+  color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+}

@@ -13,10 +13,10 @@ import {
   TasksWindowContent, MembersWindowContent
 } from './components';
 
-import './styles/project-members.css';
-import './styles/project-modals.css';
 import './styles/projects-layout.css';
-import './styles/member-detail.css';
+import './styles/forms.css';
+import './styles/announc&tasks.css';
+import './styles/members.css';
 import './styles/readme.css';
 
 const ProjectsSkeleton = () => (
