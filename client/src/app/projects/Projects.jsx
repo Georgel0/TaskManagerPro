@@ -50,13 +50,15 @@ function ProjectsInner({ wmEnabled }) {
   const { user, loading: appLoading } = useApp();
   const wm = useWindowManager();
 
+  const workspaceMode = wmEnabled && (wm?.windows?.length ?? 0) > 0;
+
   const {
     projects, setProjects,
     loading: projectsLoading, error, isSubmitting,
     selectedProject, setSelectedProject,
-    createForm, setEditForm, editForm,
+    createForm, isCreateModalOpen, isEditModalOpen,
+    editForm, setEditForm,
     activeTagFilter, setActiveTagFilter, allTags,
-    isCreateModalOpen, isEditModalOpen,
     setIsCreateModalOpen, setIsEditModalOpen,
     isDeleteModalOpen, setIsDeleteModalOpen,
     isTasksModalOpen, setIsTasksModalOpen,
@@ -167,10 +169,7 @@ function ProjectsInner({ wmEnabled }) {
         <ProjectFormModal
           mode="create"
           formData={createForm}
-          onSubmit={(e, members, data) => {
-            handleCreate(e, members, data);
-            close();
-          }}
+          onSubmit={(e, members, data) => { handleCreate(e, members, data); close(); }}
           onClose={close}
           isSubmitting={isSubmitting}
         />
@@ -187,7 +186,6 @@ function ProjectsInner({ wmEnabled }) {
       tags: project.tags || [],
       color: project.color || null,
     };
-
     setEditForm(projectData);
     setSelectedProject(project);
 
@@ -196,10 +194,7 @@ function ProjectsInner({ wmEnabled }) {
         <ProjectFormModal
           mode="edit"
           formData={projectData}
-          onSubmit={(e, members, data) => {
-            handleEdit(e, members, data);
-            close();
-          }}
+          onSubmit={(e, members, data) => { handleEdit(e, members, data); close(); }}
           onClose={close}
           isSubmitting={isSubmitting}
         />
@@ -211,10 +206,10 @@ function ProjectsInner({ wmEnabled }) {
 
   if (appLoading || projectsLoading || !user) return <ProjectsSkeleton />;
 
-  return (
-    <div className="page-content">
-      <div className="projects-header">
-        <h2><i className="fas fa-folder-open"></i> My Projects</h2>
+  const projectsContent = (
+    <>
+      <div className={workspaceMode ? 'workspace-projects-header' : 'projects-header'}>
+        <h2><i className="fas fa-folder-open"></i> Projects</h2>
         <div className="header-actions">
           <Link href="/dashboard" className="header-action-btn" title="View Dashboard">
             <i className="fas fa-arrow-left"></i>
@@ -263,9 +258,7 @@ function ProjectsInner({ wmEnabled }) {
               : "You don't have any projects yet."}
           </p>
           {activeTagFilter ? (
-            <button className="btn btn-secondary" onClick={() => setActiveTagFilter('')}>
-              Clear filter
-            </button>
+            <button className="btn btn-secondary" onClick={() => setActiveTagFilter('')}>Clear filter</button>
           ) : (
             <button className="btn btn-primary" onClick={openCreateProjectHandler}>
               <i className="fas fa-plus"></i> New Project
@@ -292,27 +285,11 @@ function ProjectsInner({ wmEnabled }) {
           ))}
         </div>
       )}
+    </>
+  );
 
-      <RemovalModal
-        isOpen={isDeleteModalOpen}
-        item={selectedProject}
-        message={
-          <>Are you sure you want to delete <strong>{selectedProject?.name}</strong>?</>
-        }
-        onConfirm={handleDelete}
-        onClose={() => setIsDeleteModalOpen(false)}
-        isSubmitting={isSubmitting}
-      />
-
-      {isTasksModalOpen && selectedProject && (
-        <TasksModal
-          project={selectedProject}
-          tasks={projectTasks}
-          loading={loadingTasks}
-          onClose={() => setIsTasksModalOpen(false)}
-        />
-      )}
-
+  const modals = (
+    <>
       {(isCreateModalOpen || isEditModalOpen) && (
         <ProjectFormModal
           mode={isCreateModalOpen ? "create" : "edit"}
@@ -325,7 +302,22 @@ function ProjectsInner({ wmEnabled }) {
           isSubmitting={isSubmitting}
         />
       )}
-
+      <RemovalModal
+        isOpen={isDeleteModalOpen}
+        item={selectedProject}
+        message={<>Are you sure you want to delete <strong>{selectedProject?.name}</strong>?</>}
+        onConfirm={handleDelete}
+        onClose={() => setIsDeleteModalOpen(false)}
+        isSubmitting={isSubmitting}
+      />
+      {isTasksModalOpen && selectedProject && (
+        <TasksModal
+          project={selectedProject}
+          tasks={projectTasks}
+          loading={loadingTasks}
+          onClose={() => setIsTasksModalOpen(false)}
+        />
+      )}
       {isMembersModalOpen && selectedProject && (
         <MembersModal
           project={selectedProject}
@@ -340,7 +332,6 @@ function ProjectsInner({ wmEnabled }) {
           onUpdateRoleDescription={handleUpdateRoleDescription}
         />
       )}
-
       {isAnnouncementsModalOpen && selectedProject && (
         <AnnouncementsModal
           project={selectedProject}
@@ -350,7 +341,6 @@ function ProjectsInner({ wmEnabled }) {
           onAnnouncementDeleted={() => handleAnnouncementDeleted(selectedProject.id)}
         />
       )}
-
       {quickAddProject && (
         <QuickAddTaskModal
           project={quickAddProject}
@@ -366,7 +356,6 @@ function ProjectsInner({ wmEnabled }) {
           }
         />
       )}
-
       {readmeProject && (
         <ReadmeModal
           project={readmeProject}
@@ -374,6 +363,34 @@ function ProjectsInner({ wmEnabled }) {
           onClose={() => setReadmeProject(null)}
         />
       )}
+    </>
+  );
+
+  if (workspaceMode) {
+    return (
+      <div className="workspace-root">
+        <div className="workspace-projects-panel">
+          {projectsContent}
+        </div>
+
+        <div className="workspace-canvas" aria-hidden="true">
+          <div className="workspace-canvas-hint">
+            <i className="fas fa-layer-group" />
+            <span>
+              {wm.windows.length} window{wm.windows.length !== 1 ? 's' : ''} open
+            </span>
+          </div>
+        </div>
+
+        {modals}
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-content">
+      {projectsContent}
+      {modals}
     </div>
   );
 }
@@ -387,16 +404,19 @@ export default function Projects() {
 
   useEffect(() => {
     if (!loading) {
-      const isMobile = window.innerWidth <= 900;
+      const isMobile = window.innerWidth <= 768;
       setWmEnabled(prefs.floating_windows_enabled && !isMobile);
     }
   }, [prefs.floating_windows_enabled, loading]);
 
+  const snapPattern = prefs.window_snap_pattern ?? 'free';
+  const snapEnabled = snapPattern !== 'free';
+
   return (
     <WindowManagerProvider
       enabled={wmEnabled}
-      snapEnabled={prefs.snap_windows_enabled ?? false}
-      snapPattern={prefs.snap_pattern ?? 'grid'}
+      snapEnabled={snapEnabled}
+      snapPattern={snapPattern}
     >
       <ProjectsInner wmEnabled={wmEnabled} mounted={mounted} />
     </WindowManagerProvider>
