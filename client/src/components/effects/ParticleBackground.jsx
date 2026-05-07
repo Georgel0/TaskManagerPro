@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useRef } from 'react';
 
-export function ParticleBackground() {
+export function ParticleBackground({ mouseInteraction, lineOpacity, particleOpacity, speed }) {
   const canvasRef = useRef(null);
   const mouse = useRef({ x: null, y: null });
   const particles = useRef([]);
   const animationFrameId = useRef(null);
   const resizeTimeout = useRef(null);
+  const accentColorRgb = useRef('56, 189, 248');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -20,10 +21,27 @@ export function ParticleBackground() {
     let particleCount = 200;
     let connectionDistance = 200;
     let connectionDistanceSq = connectionDistance * connectionDistance;
-
-    let speedFactor = 0.5;
+    let speedFactor = speed;
+    let lineOpacityFactor = lineOpacity;
     const mouseDistance = 100;
-    const lineOpacityFactor = 1;
+
+    const updateAccentColor = () => {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const color = rootStyle.getPropertyValue('--accent-color').trim();
+
+      if (color.startsWith('#')) {
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+
+        accentColorRgb.current = `${r}, ${g}, ${b}`;
+      } else if (color.startsWith('rgb')) {
+        const matches = color.match(/\d+/g);
+        if (matches) accentColorRgb.current = `${matches[0]}, ${matches[1]}, ${matches[2]}`;
+      } else {
+        accentColorRgb.current = '56, 189, 248';
+      }
+    };
 
     class Particle {
       constructor(width, height) {
@@ -65,7 +83,7 @@ export function ParticleBackground() {
       }
 
       draw() {
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+        ctx.fillStyle = `rgba(${accentColorRgb.current}, ${particleOpacity})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -83,7 +101,7 @@ export function ParticleBackground() {
     const handleResize = () => {
       const dpr = window.devicePixelRatio || 1;
 
-      // Use the canvas's parent dimensions instead of window
+      // Use the canvas's parent dimensions
       const rect = canvas.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
@@ -102,6 +120,7 @@ export function ParticleBackground() {
       connectionDistance = width < 400 ? 80 : 120;
       connectionDistanceSq = connectionDistance * connectionDistance;
 
+      updateAccentColor();
       initParticles(width, height);
     };
 
@@ -132,7 +151,7 @@ export function ParticleBackground() {
             const dist = Math.sqrt(distSq);
             const opacity = (1 - dist / connectionDistance) * lineOpacityFactor;
 
-            ctx.strokeStyle = `rgba(56, 189, 248, ${opacity})`;
+            ctx.strokeStyle = `rgba(${accentColorRgb.current}, ${opacity})`;
             ctx.lineWidth = 0.5;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
@@ -145,6 +164,8 @@ export function ParticleBackground() {
     };
 
     const handleMouseMove = (e) => {
+      if (!mouseInteraction) return;
+
       const canvas = canvasRef.current;
       if (!canvas) return;
 

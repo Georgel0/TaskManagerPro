@@ -6,22 +6,24 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 const getToken = () => (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
 
 const DEFAULT_PREFS = {
-  task_assigned:            true,
-  task_updated:             true,
-  task_completed:           true,
-  task_deleted:             true,
-  comment_added:            true,
-  project_changes:          true,
-  deadline_reminders:       true,
-  announcements:            true,
-  account_actions:          true,
+  task_assigned: true,
+  task_updated: true,
+  task_completed: true,
+  task_deleted: true,
+  comment_added: true,
+  project_changes: true,
+  deadline_reminders: true,
+  announcements: true,
+  account_actions: true,
   floating_windows_enabled: false,
-  snap_windows_enabled:     false,
-  snap_pattern:             'grid',
+  snap_windows_enabled: false,
+  snap_pattern: 'grid',
+  workspace_background_enabled: true,
+  workspace_window_count_enabled: true,
 };
 
 export function useSettings() {
-  const [prefs, setPrefs]     = useState(DEFAULT_PREFS);
+  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -49,9 +51,9 @@ export function useSettings() {
     setIsSaving(true);
     try {
       const res = await fetch(`${API}/settings`, {
-        method:  'PUT',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body:    JSON.stringify(prefs),
+        body: JSON.stringify(prefs),
       });
       if (!res.ok) throw new Error();
       toast.success('Settings saved.');

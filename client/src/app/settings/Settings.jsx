@@ -4,57 +4,70 @@ import { useSettings } from './useSettings';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import './settings.css';
 
+const WORKSPACE_PREF = [
+  {
+    key: 'workspace_background_enabled',
+    label: 'Live Background',
+    description: 'Show an interactive particle background in the workspace canvas.',
+  },
+  {
+    key: 'workspace_window_count_enabled',
+    label: 'Show Window Count',
+    description: 'Display an indicator showing how many windows are currently open.',
+  }
+];
+
 const SNAP_PATTERNS = [
   {
-    value:       'free',
-    label:       'Free',
-    icon:        'fa-up-right-and-down-left-from-center',
+    value: 'free',
+    label: 'Free',
+    icon: 'fa-up-right-and-down-left-from-center',
     description: 'Windows cascade freely — no automatic placement',
   },
   {
-    value:       'grid',
-    label:       'Grid',
-    icon:        'fa-table-cells',
+    value: 'grid',
+    label: 'Grid',
+    icon: 'fa-table-cells',
     description: '2 × 2 quadrants — up to 4 windows tile evenly',
   },
   {
-    value:       'master',
-    label:       'Master + Stack',
-    icon:        'fa-table-columns',
+    value: 'master',
+    label: 'Master + Stack',
+    icon: 'fa-table-columns',
     description: 'First window owns the left; others stack on the right',
   },
   {
-    value:       'columns',
-    label:       'Columns',
-    icon:        'fa-grip-lines-vertical',
+    value: 'columns',
+    label: 'Columns',
+    icon: 'fa-grip-lines-vertical',
     description: 'Up to 3 equal vertical columns side by side',
   },
   {
-    value:       'rows',
-    label:       'Rows',
-    icon:        'fa-grip-lines',
+    value: 'rows',
+    label: 'Rows',
+    icon: 'fa-grip-lines',
     description: 'Up to 3 equal horizontal rows stacked top to bottom',
   },
 ];
 
 const INTERFACE_PREFS = [
   {
-    key:         'floating_windows_enabled',
-    label:       'Floating Windows',
+    key: 'floating_windows_enabled',
+    label: 'Floating Windows',
     description: 'Open project panels as draggable, resizable windows instead of full-screen modals. Desktop only — automatically disabled on mobile.',
   },
 ];
 
 const NOTIFICATION_PREFS = [
-  { key: 'task_assigned',      label: 'Task assigned or unassigned to you'        },
-  { key: 'task_updated',       label: 'Task you are assigned to is updated'       },
-  { key: 'task_completed',     label: 'Task marked as completed'                  },
-  { key: 'task_deleted',       label: 'Task you are assigned to is deleted'       },
-  { key: 'comment_added',      label: 'New comment on your task'                  },
-  { key: 'project_changes',    label: 'Project renamed, members added or removed' },
+  { key: 'task_assigned', label: 'Task assigned or unassigned to you' },
+  { key: 'task_updated', label: 'Task you are assigned to is updated' },
+  { key: 'task_completed', label: 'Task marked as completed' },
+  { key: 'task_deleted', label: 'Task you are assigned to is deleted' },
+  { key: 'comment_added', label: 'New comment on your task' },
+  { key: 'project_changes', label: 'Project renamed, members added or removed' },
   { key: 'deadline_reminders', label: 'Deadline approaching or overdue reminders' },
-  { key: 'announcements',      label: 'New project announcements'                 },
-  { key: 'account_actions',    label: 'Account actions'                           },
+  { key: 'announcements', label: 'New project announcements' },
+  { key: 'account_actions', label: 'Account actions' },
 ];
 
 function ToggleRow({ id, label, description, checked, onChange }) {
@@ -87,7 +100,6 @@ function ToggleRow({ id, label, description, checked, onChange }) {
 function SnapSubPanel({ prefs, updatePref }) {
   return (
     <div className="settings-sub-panel">
-      {/* Snap toggle */}
       <div className="settings-sub-row">
         <label className="settings-toggle-label" htmlFor="snap-windows-toggle" style={{ paddingTop: 0, paddingBottom: 0 }}>
           <div className="settings-toggle-text">
@@ -212,8 +224,27 @@ export default function Settings() {
                     </label>
 
                     {key === 'floating_windows_enabled' && prefs.floating_windows_enabled && (
-                      <SnapSubPanel prefs={prefs} updatePref={updatePref} />
-                    )}
+                      <>
+                        <SnapSubPanel prefs={prefs} updatePref={updatePref} />
+
+                        <div className="settings-sub-panel">
+                          <span className="settings-snap-label">
+                            <i className="fas fa-desktop" /> Workspace Visuals
+                          </span>
+                          <ul className="settings-prefs-list">
+                            {WORKSPACE_PREF.map((wp) => (
+                              <ToggleRow
+                                key={wp.key}
+                                id={`wp-${wp.key}`}
+                                label={wp.label}
+                                description={wp.description}
+                                checked={prefs[wp.key] ?? true}
+                                onChange={(e) => updatePref(wp.key, e.target.checked)}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      </>)}
                   </li>
                 ))}
               </ul>

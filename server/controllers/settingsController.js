@@ -22,6 +22,8 @@ const getSettings = async (req, res) => {
         floating_windows_enabled: false,
         snap_windows_enabled:     false,
         snap_pattern:             'grid',
+        workspace_background_enabled: true,
+        workspace_window_count_enabled: true,
       });
     }
 
@@ -38,6 +40,7 @@ const updateSettings = async (req, res) => {
     comment_added, project_changes, deadline_reminders, announcements,
     account_actions, floating_windows_enabled,
     snap_windows_enabled, snap_pattern,
+    workspace_background_enabled, workspace_window_count_enabled
   } = req.body;
 
   try {
@@ -47,8 +50,9 @@ const updateSettings = async (req, res) => {
          task_assigned, task_updated, task_completed, task_deleted,
          comment_added, project_changes, deadline_reminders, announcements,
          account_actions, floating_windows_enabled,
-         snap_windows_enabled, snap_pattern)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+         snap_windows_enabled, snap_pattern,
+         workspace_background_enabled, workspace_window_count_enabled)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        ON CONFLICT (user_id) DO UPDATE SET
          task_assigned            = $2,
          task_updated             = $3,
@@ -61,7 +65,9 @@ const updateSettings = async (req, res) => {
          account_actions          = $10,
          floating_windows_enabled = $11,
          snap_windows_enabled     = $12,
-         snap_pattern             = $13`,
+         snap_pattern             = $13,
+         workspace_background_enabled = $14,
+         workspace_window_count_enabled = $15`,
       [
         userId,
         task_assigned, task_updated, task_completed, task_deleted,
@@ -69,6 +75,8 @@ const updateSettings = async (req, res) => {
         account_actions, floating_windows_enabled,
         snap_windows_enabled ?? false,
         snap_pattern ?? 'grid',
+        workspace_background_enabled ?? true,
+        workspace_window_count_enabled ?? true
       ]
     );
     res.status(200).json({ message: 'Settings updated successfully.' });

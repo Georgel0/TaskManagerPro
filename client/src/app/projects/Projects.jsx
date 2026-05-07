@@ -12,6 +12,7 @@ import {
   AnnouncementsModal, QuickAddTaskModal, ReadmeModal,
   TasksWindowContent, MembersWindowContent
 } from './components';
+import { ParticleBackground } from '@/components/effects';
 
 import './styles/projects-layout.css';
 import './styles/forms.css';
@@ -48,6 +49,7 @@ const ProjectsSkeleton = () => (
 
 function ProjectsInner({ wmEnabled }) {
   const { user, loading: appLoading } = useApp();
+  const { prefs, loading } = useSettings();
   const wm = useWindowManager();
 
   const workspaceMode = wmEnabled && (wm?.windows?.length ?? 0) > 0;
@@ -374,12 +376,22 @@ function ProjectsInner({ wmEnabled }) {
         </div>
 
         <div className="workspace-canvas" aria-hidden="true">
-          <div className="workspace-canvas-hint">
-            <i className="fas fa-layer-group" />
-            <span>
-              {wm.windows.length} window{wm.windows.length !== 1 ? 's' : ''} open
-            </span>
-          </div>
+          {prefs.workspace_background_enabled && (
+            <ParticleBackground
+              mouseInteraction={true}
+              lineOpacity={0.6}
+              particleOpacity={0.3}
+              speed={0.3}
+            />
+          )}
+          {prefs.workspace_window_count_enabled && (
+            <div className="workspace-canvas-hint">
+              <i className="fas fa-layer-group" />
+              <span>
+                {wm.windows.length} window{wm.windows.length !== 1 ? 's' : ''} open
+              </span>
+            </div>
+          )}
         </div>
 
         {modals}

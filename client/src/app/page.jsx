@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react'; 
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from '@/components/layout';
 import { ParticleBackground } from '@/components/effects';
@@ -17,14 +17,14 @@ function AuthForms() {
     <>
       {view === 'login' && <LoginRegisterForm onForgotClick={() => setView('forgot')} />}
       {view === 'forgot' && <ForgotPasswordForm onBack={() => setView('login')} />}
-      {view === 'reset' && ( <ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />)}
+      {view === 'reset' && (<ResetPasswordForm onSuccess={() => setView('login')} onBack={() => setView('login')} />)}
     </>
   );
 }
 
 function FormLoader() {
   return (
-    <div  className="lp-form-loader">
+    <div className="lp-form-loader">
       <i className="fas fa-circle-notch fa-spin"></i>
       <p>Preparing workspace...</p>
     </div>
@@ -111,8 +111,13 @@ export default function LandingPage() {
         </section>
 
         <section className="auth-column">
-          <ParticleBackground />
-          
+          <ParticleBackground
+            mouseInteraction={false}
+            lineOpacity={0.5}
+            particleOpacity={0.5}
+            speed={0.5}
+          />
+
           <Suspense fallback={<FormLoader />}>
             <AuthForms />
           </Suspense>
