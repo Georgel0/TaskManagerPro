@@ -1,12 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useApp } from '@/context';
+import { useApp, WindowManagerProvider, useWindowManager } from '@/context';
 import { useProjects } from './hooks/useProjects';
 import { useProjectMembers } from './hooks/useProjectMembers';
 import { useSettings } from '../settings/useSettings';
 import { RemovalModal } from '@/components/ui';
-import { WindowManagerProvider, useWindowManager } from '@/components/layout';
 import {
   ProjectCard, ProjectFormModal, MembersModal, TasksModal,
   AnnouncementsModal, QuickAddTaskModal, ReadmeModal,
@@ -47,7 +46,7 @@ const ProjectsSkeleton = () => (
   </div>
 );
 
-function ProjectsInner({ wmEnabled }) {
+function ProjectsInner({ wmEnabled, restorerRef }) {
   const { user, loading: appLoading } = useApp();
   const { prefs, loading } = useSettings();
   const wm = useWindowManager();
@@ -88,11 +87,123 @@ function ProjectsInner({ wmEnabled }) {
   const handleProjectLeave = (project) =>
     _handleProjectLeave(project, setSelectedProject);
 
+  if (restorerRef) {
+    restorerRef.current = (type, meta, close) => {
+      // Show a subtle loader while project data is still loading
+      if (projectsLoading || !user) {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.5 }}>
+            <i className="fas fa-spinner fa-spin" style={{ marginRight: 8 }} />
+            Loading…
+          </div>
+        );
+      }
+
+      const project = meta?.projectId
+        ? projects.find((p) => p.id === meta.projectId) ?? null
+        : null;
+
+      if (meta?.projectId && !project) {
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, opacity: 0.6 }}>
+            <i className="fas fa-folder-open" style={{ fontSize: 32 }} />
+            <span>Project no longer available.</span>
+            <button className="btn btn-secondary" onClick={close}>Close</button>
+          </div>
+        );
+      }
+
+      const isOwner = project ? project.owner_id === user.id : false;
+
+      if (type === 'tasks') {
+        return <TasksWindowContent project={project} onClose={close} />;
+      }
+
+      if (type === 'members') {
+        return (
+          <MembersWindowContent
+            project={project}
+            currentUserId={user.id}
+            isOwner={isOwner}
+            onClose={close}
+          />
+        );
+      }
+
+      if (type === 'announcements') {
+        return (
+          <AnnouncementsModal
+            project={project}
+            isOwner={isOwner}
+            onClose={close}
+            onAnnouncementCreated={() => handleAnnouncementCreated(project.id)}
+            onAnnouncementDeleted={() => handleAnnouncementDeleted(project.id)}
+          />
+        );
+      }
+
+      if (type === 'readme') {
+        return <ReadmeModal project={project} isOwner={isOwner} onClose={close} />;
+      }
+
+      if (type === 'quickAdd') {
+        return (
+          <QuickAddTaskModal
+            project={project}
+            onClose={close}
+            onAdded={() =>
+              setProjects((prev) =>
+                prev.map((p) =>
+                  p.id === project.id ? { ...p, task_count: (p.task_count ?? 0) + 1 } : p
+                )
+              )
+            }
+          />
+        );
+      }
+
+      if (type === 'create-project') {
+        return (
+          <ProjectFormModal
+            mode="create"
+            formData={createForm}
+            onSubmit={(e, members, data) => { handleCreate(e, members, data); close(); }}
+            onClose={close}
+            isSubmitting={isSubmitting}
+          />
+        );
+      }
+
+      if (type.startsWith('edit-') && project) {
+        const formData = {
+          name: project.name,
+          description: project.description || '',
+          tags: project.tags || [],
+          color: project.color || null,
+        };
+        return (
+          <ProjectFormModal
+            mode="edit"
+            formData={formData}
+            onSubmit={(e, members, data) => { handleEdit(e, members, data); close(); }}
+            onClose={close}
+            isSubmitting={isSubmitting}
+          />
+        );
+      }
+
+      return null;
+    };
+  }
+
   const openTasksHandler = (project) => {
     if (wmEnabled && wm) {
-      wm.openWindow('tasks', `${project.name} — Tasks`, (close) => (
-        <TasksWindowContent project={project} onClose={close} />
-      ));
+      wm.openWindow(
+        'tasks',
+        `${project.name} — Tasks`,
+        (close) => <TasksWindowContent project={project} onClose={close} />,
+        { projectId: project.id }
+      );
     } else {
       openTasks(project);
     }
@@ -100,14 +211,19 @@ function ProjectsInner({ wmEnabled }) {
 
   const openMembersHandler = (project) => {
     if (wmEnabled && wm) {
-      wm.openWindow('members', `${project.name} — Team`, (close) => (
-        <MembersWindowContent
-          project={project}
-          currentUserId={user.id}
-          isOwner={project.owner_id === user.id}
-          onClose={close}
-        />
-      ));
+      wm.openWindow(
+        'members',
+        `${project.name} — Team`,
+        (close) => (
+          <MembersWindowContent
+            project={project}
+            currentUserId={user.id}
+            isOwner={project.owner_id === user.id}
+            onClose={close}
+          />
+        ),
+        { projectId: project.id }
+      );
     } else {
       openMembers(project);
     }
@@ -115,15 +231,20 @@ function ProjectsInner({ wmEnabled }) {
 
   const openAnnouncementsHandler = (project) => {
     if (wmEnabled && wm) {
-      wm.openWindow('announcements', `${project.name} — Announcements`, (close) => (
-        <AnnouncementsModal
-          project={project}
-          isOwner={project.owner_id === user.id}
-          onClose={close}
-          onAnnouncementCreated={() => handleAnnouncementCreated(project.id)}
-          onAnnouncementDeleted={() => handleAnnouncementDeleted(project.id)}
-        />
-      ));
+      wm.openWindow(
+        'announcements',
+        `${project.name} — Announcements`,
+        (close) => (
+          <AnnouncementsModal
+            project={project}
+            isOwner={project.owner_id === user.id}
+            onClose={close}
+            onAnnouncementCreated={() => handleAnnouncementCreated(project.id)}
+            onAnnouncementDeleted={() => handleAnnouncementDeleted(project.id)}
+          />
+        ),
+        { projectId: project.id }
+      );
     } else {
       openAnnouncements(project);
     }
@@ -131,13 +252,18 @@ function ProjectsInner({ wmEnabled }) {
 
   const openReadmeHandler = (project) => {
     if (wmEnabled && wm) {
-      wm.openWindow('readme', `${project.name} — README`, (close) => (
-        <ReadmeModal
-          project={project}
-          isOwner={project.owner_id === user.id}
-          onClose={close}
-        />
-      ));
+      wm.openWindow(
+        'readme',
+        `${project.name} — README`,
+        (close) => (
+          <ReadmeModal
+            project={project}
+            isOwner={project.owner_id === user.id}
+            onClose={close}
+          />
+        ),
+        { projectId: project.id }
+      );
     } else {
       setReadmeProject(project);
     }
@@ -145,21 +271,26 @@ function ProjectsInner({ wmEnabled }) {
 
   const openQuickAddHandler = (project) => {
     if (wmEnabled && wm) {
-      wm.openWindow('quickAdd', `Quick Add — ${project.name}`, (close) => (
-        <QuickAddTaskModal
-          project={project}
-          onClose={close}
-          onAdded={() =>
-            setProjects((prev) =>
-              prev.map((p) =>
-                p.id === project.id
-                  ? { ...p, task_count: (p.task_count ?? 0) + 1 }
-                  : p
+      wm.openWindow(
+        'quickAdd',
+        `Quick Add — ${project.name}`,
+        (close) => (
+          <QuickAddTaskModal
+            project={project}
+            onClose={close}
+            onAdded={() =>
+              setProjects((prev) =>
+                prev.map((p) =>
+                  p.id === project.id
+                    ? { ...p, task_count: (p.task_count ?? 0) + 1 }
+                    : p
+                )
               )
-            )
-          }
-        />
-      ));
+            }
+          />
+        ),
+        { projectId: project.id }
+      );
     } else {
       openQuickAdd(project);
     }
@@ -167,15 +298,20 @@ function ProjectsInner({ wmEnabled }) {
 
   const openCreateProjectHandler = () => {
     if (wmEnabled && wm) {
-      wm.openWindow('create-project', 'Create New Project', (close) => (
-        <ProjectFormModal
-          mode="create"
-          formData={createForm}
-          onSubmit={(e, members, data) => { handleCreate(e, members, data); close(); }}
-          onClose={close}
-          isSubmitting={isSubmitting}
-        />
-      ));
+      wm.openWindow(
+        'create-project',
+        'Create New Project',
+        (close) => (
+          <ProjectFormModal
+            mode="create"
+            formData={createForm}
+            onSubmit={(e, members, data) => { handleCreate(e, members, data); close(); }}
+            onClose={close}
+            isSubmitting={isSubmitting}
+          />
+        ),
+        {}
+      );
     } else {
       setIsCreateModalOpen(true);
     }
@@ -192,15 +328,20 @@ function ProjectsInner({ wmEnabled }) {
     setSelectedProject(project);
 
     if (wmEnabled && wm) {
-      wm.openWindow(`edit-${project.id}`, `Edit: ${project.name}`, (close) => (
-        <ProjectFormModal
-          mode="edit"
-          formData={projectData}
-          onSubmit={(e, members, data) => { handleEdit(e, members, data); close(); }}
-          onClose={close}
-          isSubmitting={isSubmitting}
-        />
-      ));
+      wm.openWindow(
+        `edit-${project.id}`,
+        `Edit: ${project.name}`,
+        (close) => (
+          <ProjectFormModal
+            mode="edit"
+            formData={projectData}
+            onSubmit={(e, members, data) => { handleEdit(e, members, data); close(); }}
+            onClose={close}
+            isSubmitting={isSubmitting}
+          />
+        ),
+        { projectId: project.id }
+      );
     } else {
       setIsEditModalOpen(true);
     }
@@ -412,6 +553,8 @@ export default function Projects() {
   const [wmEnabled, setWmEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const restorerRef = useRef(null);
+
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
@@ -429,8 +572,9 @@ export default function Projects() {
       enabled={wmEnabled}
       snapEnabled={snapEnabled}
       snapPattern={snapPattern}
+      restorerRef={restorerRef}
     >
-      <ProjectsInner wmEnabled={wmEnabled} mounted={mounted} />
+      <ProjectsInner wmEnabled={wmEnabled} mounted={mounted} restorerRef={restorerRef} />
     </WindowManagerProvider>
   );
 }

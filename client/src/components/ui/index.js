@@ -3,3 +3,4 @@ export * from './RemovalModal';
 export * from './ArchiveButton';
 export * from './EditorToolbar';
 export * from './ExportButton';
+export * from './WindowManagerUi';

@@ -126,6 +126,10 @@
   color: var(--accent-color);
 }
 
+#team-info-tooltip {
+  z-index: 9999;
+}
+
 @media (max-width: 576px) {
   .tasks-header {
     flex-direction: column;
