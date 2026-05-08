@@ -564,8 +564,8 @@ export default function Projects() {
     }
   }, [prefs.floating_windows_enabled, loading]);
 
-  const snapPattern = prefs.window_snap_pattern ?? 'free';
-  const snapEnabled = snapPattern !== 'free';
+  const snapPattern = prefs.snap_pattern ?? 'free';
+  const snapEnabled = (prefs.snap_windows_enabled ?? false) && snapPattern !== 'free';
 
   return (
     <WindowManagerProvider
