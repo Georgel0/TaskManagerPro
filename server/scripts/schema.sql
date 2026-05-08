@@ -1,38 +1,72 @@
 -- 1. Users Table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE, 
-    email VARCHAR(150) NOT NULL UNIQUE, 
-    password TEXT NOT NULL, 
-    avatar TEXT, 
-    bio TEXT, 
-    reset_token TEXT, 
-    reset_token_expires TIMESTAMP WITHOUT TIME ZONE, 
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+    name VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    avatar TEXT,
+    bio TEXT,
+    reset_token TEXT,
+    reset_token_expires TIMESTAMP WITHOUT TIME ZONE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+); 
+
+-- 2. User Settings Table (1:1 with Users)
+CREATE TABLE user_settings (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    task_assigned BOOLEAN DEFAULT true,
+    task_updated BOOLEAN DEFAULT true,
+    task_completed BOOLEAN DEFAULT true,
+    task_deleted BOOLEAN DEFAULT true,
+    comment_added BOOLEAN DEFAULT true,
+    project_changes BOOLEAN DEFAULT true,
+    deadline_reminders BOOLEAN DEFAULT true,
+    announcements BOOLEAN DEFAULT true,
+    account_actions BOOLEAN DEFAULT true,
+    floating_windows_enabled BOOLEAN DEFAULT false,
+    snap_windows_enabled BOOLEAN NOT NULL DEFAULT false,
+    snap_pattern VARCHAR(20) NOT NULL DEFAULT 'grid',
+    workspace_background_enabled BOOLEAN DEFAULT true,
+    workspace_window_count_enabled BOOLEAN DEFAULT true
 );
 
--- 2. Projects Table
+-- 3. Projects Table
 CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL, 
-    description TEXT, 
-    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE, 
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     tags TEXT[] DEFAULT '{}',
     color VARCHAR(7) DEFAULT NULL,
-    is_archived BOOLEAN DEFAULT false, 
-    archived_at TIMESTAMP WITHOUT TIME ZONE, 
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+    is_archived BOOLEAN DEFAULT false,
+    archived_at TIMESTAMP WITHOUT TIME ZONE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Project Readme Table (1:1 with Project)
+-- 4. Project Members Table (Many-to-Many)
+CREATE TABLE project_members (
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_description TEXT,
+    PRIMARY KEY (project_id, user_id)
+);
+
+-- 5. Starred Projects (Many-to-Many)
+CREATE TABLE starred_projects (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, project_id)
+); 
+
+-- 6. Project Readme Table (1:1 with Project)
 CREATE TABLE project_readme (
     project_id INTEGER PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
     content TEXT DEFAULT '',
-    updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
--- 4. Project Readme Files Table
+-- 7. Project Readme Files
 CREATE TABLE project_readme_files (
     id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
@@ -45,22 +79,7 @@ CREATE TABLE project_readme_files (
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Project Members (Join Table)
-CREATE TABLE project_members (
-    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    role_description TEXT,
-    PRIMARY KEY (project_id, user_id)
-);
-
--- 6. Starred Projects (Join Table)
-CREATE TABLE starred_projects (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, project_id)
-);
-
--- 7. Project Announcements Table
+-- 8. Project Announcements
 CREATE TABLE project_announcements (
     id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
@@ -72,7 +91,7 @@ CREATE TABLE project_announcements (
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. Announcement Acknowledgments (Join Table)
+-- 9. Announcement Acknowledgments
 CREATE TABLE announcement_acknowledgments (
     announcement_id INTEGER REFERENCES project_announcements(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -80,22 +99,22 @@ CREATE TABLE announcement_acknowledgments (
     PRIMARY KEY (announcement_id, user_id)
 );
 
--- 9. Tasks Table
+-- 10. Tasks Table
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
-    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
-    assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(20) DEFAULT 'To Do',
     priority VARCHAR(20) DEFAULT 'Medium',
     deadline DATE,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_archived BOOLEAN DEFAULT false,
-    archived_at TIMESTAMP WITHOUT TIME ZONE,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    archived_at TIMESTAMP WITHOUT TIME ZONE
 );
 
--- 10. Subtasks Table
+-- 11. Subtasks Table
 CREATE TABLE subtasks (
     id SERIAL PRIMARY KEY,
     task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
@@ -104,7 +123,7 @@ CREATE TABLE subtasks (
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 11. Comments Table
+-- 12. Comments Table
 CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
     task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
@@ -114,7 +133,7 @@ CREATE TABLE comments (
     updated_at TIMESTAMP WITHOUT TIME ZONE
 );
 
--- 12. Attachments Table
+-- 13. Attachments Table
 CREATE TABLE attachments (
     id SERIAL PRIMARY KEY,
     task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
@@ -127,28 +146,13 @@ CREATE TABLE attachments (
     uploaded_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 13. Notifications Table
+-- 14. Notifications Table
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     message TEXT NOT NULL,
     read_status BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 14. Notification Preferences Table
-CREATE TABLE notification_preferences (
-    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    task_assigned BOOLEAN DEFAULT true,
-    task_updated BOOLEAN DEFAULT true,
-    task_completed BOOLEAN DEFAULT true,
-    task_deleted BOOLEAN DEFAULT true,
-    comment_added BOOLEAN DEFAULT true,
-    project_changes BOOLEAN DEFAULT true,
-    deadline_reminders BOOLEAN DEFAULT true,
-    announcements BOOLEAN DEFAULT true,
-    account_actions BOOLEAN,
-    floating_windows_enabled BOOLEAN DEFAULT false
 );
 
 -- 15. Push Subscriptions Table
