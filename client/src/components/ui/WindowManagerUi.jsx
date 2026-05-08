@@ -42,42 +42,51 @@ export function getWinCfg(type) {
 const TASKBAR_H = 48;
 const SIDEBAR_W = 70;
 const PANEL_W = 420;
-const WORKSPACE_X = SIDEBAR_W + PANEL_W;
+const WORKSPACE_X = SIDEBAR_W + PANEL_W; 
 const PAD = 6;
+const HEADER_H = 60;
+
+function getWorkspaceX() {
+  if (typeof window === 'undefined') return WORKSPACE_X;
+  const panel = document.querySelector('.workspace-projects-panel');
+  if (panel) return Math.round(panel.getBoundingClientRect().right);
+  return WORKSPACE_X;
+}
 
 export function getSnapRect(pattern, n) {
   if (typeof window === 'undefined' || pattern === 'free') return null;
-  const availW = Math.max(200, window.innerWidth - WORKSPACE_X);
-  const availH = Math.max(200, window.innerHeight - TASKBAR_H);
+  const wx     = getWorkspaceX();
+  const availW = Math.max(200, window.innerWidth  - wx);
+  const availH = Math.max(200, window.innerHeight - TASKBAR_H - HEADER_H);
 
   switch (pattern) {
     case 'grid': {
       const slot = n % 4;
-      const col = slot % 2;
-      const row = Math.floor(slot / 2);
-      const cW = Math.floor(availW / 2);
-      const cH = Math.floor(availH / 2);
-      return { x: WORKSPACE_X + col * cW + PAD, y: row * cH + PAD, w: cW - PAD * 2, h: cH - PAD * 2 };
+      const col  = slot % 2;
+      const row  = Math.floor(slot / 2);
+      const cW   = Math.floor(availW / 2);
+      const cH   = Math.floor(availH / 2);
+      return { x: wx + col * cW + PAD, y: HEADER_H + row * cH + PAD, w: cW - PAD * 2, h: cH - PAD * 2 };
     }
 
     case 'master': {
       const masterW = Math.floor(availW * 0.58);
-      if (n === 0) return { x: WORKSPACE_X + PAD, y: PAD, w: masterW - PAD * 2, h: availH - PAD * 2 };
-      const slot = (n - 1) % 3;
+      if (n === 0) return { x: wx + PAD, y: HEADER_H + PAD, w: masterW - PAD * 2, h: availH - PAD * 2 };
+      const slot  = (n - 1) % 3;
       const slotH = Math.floor(availH / Math.min(n, 3));
-      return { x: WORKSPACE_X + masterW + PAD, y: slot * slotH + PAD, w: availW - masterW - PAD * 2, h: slotH - PAD * 2 };
+      return { x: wx + masterW + PAD, y: HEADER_H + slot * slotH + PAD, w: availW - masterW - PAD * 2, h: slotH - PAD * 2 };
     }
 
     case 'columns': {
-      const col = n % 3;
+      const col  = n % 3;
       const colW = Math.floor(availW / 3);
-      return { x: WORKSPACE_X + col * colW + PAD, y: PAD, w: colW - PAD * 2, h: availH - PAD * 2 };
+      return { x: wx + col * colW + PAD, y: HEADER_H + PAD, w: colW - PAD * 2, h: availH - PAD * 2 };
     }
 
     case 'rows': {
-      const row = n % 3;
+      const row  = n % 3;
       const rowH = Math.floor(availH / 3);
-      return { x: WORKSPACE_X + PAD, y: row * rowH + PAD, w: availW - PAD * 2, h: rowH - PAD * 2 };
+      return { x: wx + PAD, y: HEADER_H + row * rowH + PAD, w: availW - PAD * 2, h: rowH - PAD * 2 };
     }
 
     default: return null;
@@ -88,12 +97,13 @@ let _ci = 0;
 export const cascadePos = (type) => {
   const cfg = getWinCfg(type);
   const off = (_ci++ % 8) * 28;
-  if (typeof window === 'undefined') return { x: WORKSPACE_X + 60 + off, y: 40 + off };
-  const availW = Math.max(0, window.innerWidth - WORKSPACE_X);
-  const availH = Math.max(0, window.innerHeight - TASKBAR_H);
+  if (typeof window === 'undefined') return { x: WORKSPACE_X + 60 + off, y: HEADER_H + 40 + off };
+  const wx     = getWorkspaceX();
+  const availW = Math.max(0, window.innerWidth  - wx);
+  const availH = Math.max(0, window.innerHeight - TASKBAR_H - HEADER_H);
   return {
-    x: WORKSPACE_X + Math.max(0, Math.min(60 + off, availW - cfg.w - 20)),
-    y: Math.max(0, Math.min(40 + off, availH - cfg.h - 20)),
+    x: wx + Math.max(0, Math.min(60 + off, availW - cfg.w - 20)),
+    y: HEADER_H + Math.max(0, Math.min(40 + off, availH - cfg.h - 20)),
   };
 };
 

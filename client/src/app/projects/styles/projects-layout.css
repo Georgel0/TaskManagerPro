@@ -20,7 +20,7 @@
   color: var(--border-color);
 }
 
-.projects-empty-state > button {
+.projects-empty-state>button {
   margin-top: 20px;
 }
 
@@ -263,25 +263,38 @@
 .workspace-root {
   display: flex;
   height: calc(100vh - 60px);
-  overflow: hidden;          
+  overflow: hidden;
 }
 
 .workspace-projects-panel {
-  width: 420px;
-  min-width: 420px;
-  flex-shrink: 0;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 16px 14px 60px; /* bottom pad clears the taskbar */
-  border-right: 1px solid var(--border-color);
+  resize: horizontal;
+  overflow: auto;
+  min-width: 320px;
+  max-width: 580px;
+  border-right: 3px solid transparent;
+  transition: border-color 0.15s ease;
   background: var(--pri-background);
   animation: ws-panel-in 0.22s ease-out;
 }
 
+.workspace-projects-panel:hover {
+  border-right-color: var(--border-color, rgba(0, 0, 0, 0.12));
+}
+
+.workspace-projects-panel::-webkit-resizer {
+  display: none;
+}
+
 @keyframes ws-panel-in {
-  from { transform: translateX(-16px); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+  from {
+    transform: translateX(-16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .workspace-projects-panel .projects-grid {
@@ -307,19 +320,22 @@
   flex: 1;
   position: relative;
   background-color: var(--sec-background);
-  background-image: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--border-color) 70%, transparent) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(circle,
+      color-mix(in srgb, var(--border-color) 70%, transparent) 1px,
+      transparent 1px);
   background-size: 28px 28px;
   animation: ws-canvas-in 0.25s ease-out;
   overflow: hidden;
 }
 
 @keyframes ws-canvas-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .workspace-canvas-hint {
@@ -351,14 +367,17 @@
   .project-card-header {
     padding: 12px 15px;
   }
+
   .project-card-footer {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .project-card-chips {
     width: 100%;
     justify-content: space-between;
   }
+
   .project-header-actions {
     flex-direction: column;
   }
@@ -370,19 +389,23 @@
     align-items: flex-start;
     gap: 16px;
   }
+
   .project-header-actions {
     width: 100%;
     justify-content: space-between;
   }
+
   .project-header-actions .btn {
     flex: 1;
     justify-content: center;
   }
+
   .workspace-root {
     display: block;
     height: auto;
     overflow: visible;
   }
+
   .workspace-projects-panel {
     width: 100%;
     min-width: 0;
@@ -391,6 +414,7 @@
     overflow: visible;
     padding: 16px 14px;
   }
+
   .workspace-canvas {
     display: none;
   }
