@@ -271,6 +271,7 @@
   overflow: auto;
   min-width: 320px;
   max-width: 580px;
+  padding: 10px;
   border-right: 3px solid transparent;
   transition: border-color 0.15s ease;
   background: var(--pri-background);
