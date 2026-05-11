@@ -262,8 +262,9 @@
 
 .workspace-root {
   display: flex;
-  height: calc(100vh - 60px);
+  height: 100vh;
   overflow: hidden;
+  margin: 0; padding: 0;
 }
 
 .workspace-projects-panel {
@@ -272,14 +273,11 @@
   min-width: 320px;
   max-width: 580px;
   padding: 10px;
-  border-right: 3px solid transparent;
+  border-right: none;
+  box-shadow: 1px 0 0 var(--border-color);
   transition: border-color 0.15s ease;
   background: var(--pri-background);
   animation: ws-panel-in 0.22s ease-out;
-}
-
-.workspace-projects-panel:hover {
-  border-right-color: var(--border-color, rgba(0, 0, 0, 0.12));
 }
 
 .workspace-projects-panel::-webkit-resizer {

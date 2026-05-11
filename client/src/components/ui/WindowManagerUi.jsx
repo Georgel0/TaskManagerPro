@@ -2,7 +2,9 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Rnd } from 'react-rnd';
 
-export const STORAGE_KEY = 'fw_state_v1';
+export const STORAGE_KEY = 'fw_state_v2';
+const TASKBAR_H = 1;
+const GAP = 12;
 
 export function loadSaved() {
   if (typeof window === 'undefined') return [];
@@ -38,156 +40,147 @@ export function getWinCfg(type) {
   if (type.startsWith('edit-')) return { w: 500, h: 560, icon: 'fa-pen-to-square' };
   return { w: 500, h: 560, icon: 'fa-square' };
 }
-
-const TASKBAR_H = 48;
-const PANEL_W = 420;
-const WORKSPACE_X = PANEL_W;
-const PAD = 3;
-const HEADER_H = 60;
-
-function getWorkspaceX() {
-  if (typeof window === 'undefined') return WORKSPACE_X;
-  const panel = document.querySelector('.workspace-projects-panel');
-  if (panel) return Math.round(panel.getBoundingClientRect().right);
-  return WORKSPACE_X;
+function getCanvasRect() {
+  if (typeof window === 'undefined') return null;
+  const canvas = document.querySelector('.workspace-canvas');
+  if (!canvas) return null;
+  const rect = canvas.getBoundingClientRect();
+  console.log('=== CANVAS RECT ===');
+  console.log('left:', rect.left, 'top:', rect.top);
+  console.log('width:', rect.width, 'height:', rect.height);
+  console.log('right:', rect.right, 'bottom:', rect.bottom);
+  return rect;
 }
 
-export function getSnapRect(pattern, n) {
-  if (typeof window === 'undefined' || pattern === 'free') return null;
-  const wx = getWorkspaceX();
+export function getSnapRect(pattern, n, total = 1) {
+  const rect = getCanvasRect();
+  if (!rect || pattern === 'free') return null;
 
-  // FIX 1: Use clientWidth/clientHeight to exclude scrollbars that cause cut-offs
-  const cw = document.documentElement.clientWidth;
-  const ch = document.documentElement.clientHeight;
-
-  const availW = Math.max(200, cw - wx);
-  const availH = Math.max(200, ch - TASKBAR_H - HEADER_H);
-  
-  // FIX 2: Proper GAP math for perfectly even spacing
-  // Change this to 0 if you want the windows to be completely flush with zero spacing
-  const GAP = 12; 
+  const wx = rect.left;
+  const wy = rect.top;
+  const availW = rect.width;
+  const availH = rect.height - TASKBAR_H;
 
   switch (pattern) {
     case 'grid': {
       const slot = n % 4;
       const col = slot % 2;
       const row = Math.floor(slot / 2);
-      
-      const cW = (availW - GAP * 3) / 2;
-      const cH = (availH - GAP * 3) / 2;
-      
-      return { 
-        x: wx + GAP + col * (cW + GAP), 
-        y: HEADER_H + GAP + row * (cH + GAP), 
-        w: cW, 
-        h: cH 
+      const winW = (availW - GAP) / 2;
+      const winH = (availH - GAP) / 2;
+      return {
+        x: wx + col * (winW + GAP),
+        y: wy + GAP + row * (winH + GAP),
+        w: winW,
+        h: winH
       };
     }
 
     case 'master': {
-      const masterW = (availW - GAP * 3) * 0.58;
-      const stackW = availW - masterW - GAP * 3;
-      
+      const masterW = (availW - (GAP * 3)) * 0.65;
+      const stackW = (availW - GAP) * 0.35;
       if (n === 0) {
-        return { 
-          x: wx + GAP, 
-          y: HEADER_H + GAP, 
-          w: masterW, 
-          h: availH - GAP * 2 
-        };
+        return { x: wx + GAP, y: wy + GAP, w: masterW, h: availH - (GAP * 2) };
       }
-      
-      // Fixed to 2 standard right-side slots to prevent overlapping when opening multiple windows
-      const stackCount = 2; 
-      const slot = (n - 1) % stackCount;
-      const slotH = (availH - GAP * (stackCount + 1)) / stackCount;
-      
-      return { 
-        x: wx + masterW + GAP * 2, 
-        y: HEADER_H + GAP + slot * (slotH + GAP), 
-        w: stackW, 
-        h: slotH 
+      const slot = (n - 1) % 2;
+      const stackH = (availH - (GAP * 3)) / 2;
+      return {
+        x: wx + masterW + GAP,
+        y: wy + GAP + slot * (stackH + GAP),
+        w: stackW,
+        h: stackH
       };
     }
 
     case 'columns': {
-      const cols = 3;
-      const col = n % cols;
-      const colW = (availW - GAP * (cols + 1)) / cols;
-      
-      return { 
-        x: wx + GAP + col * (colW + GAP), 
-        y: HEADER_H + GAP, 
-        w: colW, 
-        h: availH - GAP * 2 
+      const count = Math.min(total, 3);
+      const col = n % 3;
+      const colW = (availW - (GAP * (count + 1))) / count;
+      return {
+        x: wx + col * (colW + GAP),
+        y: wy + GAP,
+        w: colW,
+        h: availH - (GAP * 2)
       };
     }
 
     case 'rows': {
-      const rows = 3;
-      const row = n % rows;
-      const rowH = (availH - GAP * (rows + 1)) / rows;
-      
-      return { 
-        x: wx + GAP, 
-        y: HEADER_H + GAP + row * (rowH + GAP), 
-        w: availW - GAP * 2, 
-        h: rowH 
+      const count = Math.min(total, 3);
+      const row = n % 3;
+      const rowH = (availH - (GAP * (count + 1))) / count;
+      return {
+        x: wx,
+        y: wy + GAP + row * (rowH + GAP),
+        w: availW - GAP,
+        h: rowH
       };
     }
-
     default: return null;
   }
 }
 
-let _ci = 0;
+let _cascadeCount = 0;
+
+
 export const cascadePos = (type) => {
-  const cfg = getWinCfg(type);
-  const off = (_ci++ % 8) * 28;
-  if (typeof window === 'undefined') return { x: WORKSPACE_X + 60 + off, y: HEADER_H + 40 + off };
-  
-  const wx = getWorkspaceX();
-  
-  // Apply the same clientWidth/Height fix here so free-floating windows don't spawn off-screen
-  const cw = document.documentElement.clientWidth;
-  const ch = document.documentElement.clientHeight;
-  
-  const availW = Math.max(0, cw - wx);
-  const availH = Math.max(0, ch - TASKBAR_H - HEADER_H);
-  
+  const rect = getCanvasRect();
+  if (!rect) return { x: 450, y: 100 };
+  const off = (_cascadeCount++ % 5) * 28;
   return {
-    x: wx + Math.max(0, Math.min(12 + off, availW - cfg.w - 20)),
-    y: HEADER_H + Math.max(0, Math.min(40 + off, availH - cfg.h - 20)),
+    x: rect.left,
+    y: rect.top + GAP + off,
   };
 };
+
+// Use a snap key so Rnd resets its internal position when snap rect changes
+function getSnapKey(win) {
+  if (!win.snapRect) return 'free';
+  return `${Math.round(win.snapRect.x)},${Math.round(win.snapRect.y)},${Math.round(win.snapRect.w)},${Math.round(win.snapRect.h)}`;
+}
 
 export const FloatingWindow = React.memo(function FloatingWindow({ win, onClose, onFocus, onMove, onResize }) {
   const cfg = getWinCfg(win.type);
   const close = useCallback(() => onClose(win.id), [win.id, onClose]);
 
-  const initX = win.snapRect?.x ?? win.position.x;
-  const initY = win.snapRect?.y ?? win.position.y;
-  const initW = win.snapRect?.w ?? win.size?.w ?? cfg.w;
-  const initH = win.snapRect?.h ?? win.size?.h ?? cfg.h;
+  const defaultPos = win.snapRect
+    ? { x: win.snapRect.x, y: win.snapRect.y }
+    : win.position;
+
+  const defaultSize = win.snapRect
+    ? { width: win.snapRect.w, height: win.snapRect.h }
+    : win.size
+      ? { width: win.size.w, height: win.size.h }
+      : { width: cfg.w, height: cfg.h };
+
+  // Use `key` on Rnd so it re-mounts (resets internal position) when snap rect changes.
+  // This is what makes snapped layout work without controlled props.
+  const snapKey = getSnapKey(win);
 
   return (
     <Rnd
-      default={{ x: initX, y: initY, width: initW, height: initH }}
+      key={snapKey}
+      default={{
+        x: defaultPos.x,
+        y: defaultPos.y,
+        width: defaultSize.width,
+        height: defaultSize.height,
+      }}
       enableResizing={{
         top: true, right: true, bottom: true, left: true,
         topRight: true, bottomRight: true, bottomLeft: true, topLeft: true,
       }}
-      minWidth={320}
-      minHeight={200}
+      minWidth={win.snapRect ? 100 : 320}
+      minHeight={win.snapRect ? 100 : 200}
       bounds="window"
       dragHandleClassName="fw-bar"
+      enableUserSelectHack={false}
       onMouseDown={() => onFocus(win.id)}
       onDragStop={(_e, d) => onMove(win.id, d.x, d.y)}
       onResizeStop={(_e, _dir, ref, _delta, pos) => onResize(win.id, ref.offsetWidth, ref.offsetHeight, pos.x, pos.y)}
-      style={{ zIndex: win.zIndex, display: 'flex', flexDirection: 'column' }}
-      className="fw-win"
+      style={{ zIndex: win.zIndex, display: 'flex', flexDirection: 'column', position: 'fixed' }}
+      className={`fw-win ${win.snapRect ? 'is-snapped' : ''}`}
     >
-      <div className="fw-bar" style={{ cursor: 'grab' }}>
+      <div className="fw-bar">
         <div className="fw-bar-left">
           <i className={`fas ${cfg.icon} fw-bar-icon`} />
           <span className="fw-bar-title">{win.title}</span>
@@ -216,11 +209,7 @@ export function FWTaskbar({ windows, onFocus, onClose }) {
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
   };
-
-  const handleMouseLeaveOrUp = () => {
-    setIsDragging(false);
-  };
-
+  const handleMouseLeaveOrUp = () => setIsDragging(false);
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
