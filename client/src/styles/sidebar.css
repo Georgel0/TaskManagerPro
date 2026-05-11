@@ -104,11 +104,11 @@
   font-size: 1rem;
 }
 
-.settings-btn:hover, .sb-archive-btn:hover {
+.settings-btn:hover, .sb-archive-btn:hover, .about-btn:hover {
   color: var(--sec-text-color);
 }
 
-.settings-btn.active, .sb-archive-btn.active {
+.settings-btn.active, .sb-archive-btn.active, .about-btn.active {
   color: var(--accent-color);
 }
 

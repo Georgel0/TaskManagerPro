@@ -55,37 +55,85 @@ function getWorkspaceX() {
 export function getSnapRect(pattern, n) {
   if (typeof window === 'undefined' || pattern === 'free') return null;
   const wx = getWorkspaceX();
-  const availW = Math.max(200, window.innerWidth - wx);
-  const availH = Math.max(200, window.innerHeight - TASKBAR_H - HEADER_H);
+
+  // FIX 1: Use clientWidth/clientHeight to exclude scrollbars that cause cut-offs
+  const cw = document.documentElement.clientWidth;
+  const ch = document.documentElement.clientHeight;
+
+  const availW = Math.max(200, cw - wx);
+  const availH = Math.max(200, ch - TASKBAR_H - HEADER_H);
+  
+  // FIX 2: Proper GAP math for perfectly even spacing
+  // Change this to 0 if you want the windows to be completely flush with zero spacing
+  const GAP = 12; 
 
   switch (pattern) {
     case 'grid': {
       const slot = n % 4;
       const col = slot % 2;
       const row = Math.floor(slot / 2);
-      const cW = Math.floor(availW / 2);
-      const cH = Math.floor(availH / 2);
-      return { x: wx + col * cW + PAD, y: HEADER_H + row * cH + PAD, w: cW - PAD * 2, h: cH - PAD * 2 };
+      
+      const cW = (availW - GAP * 3) / 2;
+      const cH = (availH - GAP * 3) / 2;
+      
+      return { 
+        x: wx + GAP + col * (cW + GAP), 
+        y: HEADER_H + GAP + row * (cH + GAP), 
+        w: cW, 
+        h: cH 
+      };
     }
 
     case 'master': {
-      const masterW = Math.floor(availW * 0.58);
-      if (n === 0) return { x: wx + PAD, y: HEADER_H + PAD, w: masterW - PAD * 2, h: availH - PAD * 2 };
-      const slot = (n - 1) % 3;
-      const slotH = Math.floor(availH / Math.min(n, 3));
-      return { x: wx + masterW + PAD, y: HEADER_H + slot * slotH + PAD, w: availW - masterW - PAD * 2, h: slotH - PAD * 2 };
+      const masterW = (availW - GAP * 3) * 0.58;
+      const stackW = availW - masterW - GAP * 3;
+      
+      if (n === 0) {
+        return { 
+          x: wx + GAP, 
+          y: HEADER_H + GAP, 
+          w: masterW, 
+          h: availH - GAP * 2 
+        };
+      }
+      
+      // Fixed to 2 standard right-side slots to prevent overlapping when opening multiple windows
+      const stackCount = 2; 
+      const slot = (n - 1) % stackCount;
+      const slotH = (availH - GAP * (stackCount + 1)) / stackCount;
+      
+      return { 
+        x: wx + masterW + GAP * 2, 
+        y: HEADER_H + GAP + slot * (slotH + GAP), 
+        w: stackW, 
+        h: slotH 
+      };
     }
 
     case 'columns': {
-      const col = n % 3;
-      const colW = Math.floor(availW / 3);
-      return { x: wx + col * colW + PAD, y: HEADER_H + PAD, w: colW - PAD * 2, h: availH - PAD * 2 };
+      const cols = 3;
+      const col = n % cols;
+      const colW = (availW - GAP * (cols + 1)) / cols;
+      
+      return { 
+        x: wx + GAP + col * (colW + GAP), 
+        y: HEADER_H + GAP, 
+        w: colW, 
+        h: availH - GAP * 2 
+      };
     }
 
     case 'rows': {
-      const row = n % 3;
-      const rowH = Math.floor(availH / 3);
-      return { x: wx + PAD, y: HEADER_H + row * rowH + PAD, w: availW - PAD * 2, h: rowH - PAD * 2 };
+      const rows = 3;
+      const row = n % rows;
+      const rowH = (availH - GAP * (rows + 1)) / rows;
+      
+      return { 
+        x: wx + GAP, 
+        y: HEADER_H + GAP + row * (rowH + GAP), 
+        w: availW - GAP * 2, 
+        h: rowH 
+      };
     }
 
     default: return null;
@@ -97,11 +145,18 @@ export const cascadePos = (type) => {
   const cfg = getWinCfg(type);
   const off = (_ci++ % 8) * 28;
   if (typeof window === 'undefined') return { x: WORKSPACE_X + 60 + off, y: HEADER_H + 40 + off };
+  
   const wx = getWorkspaceX();
-  const availW = Math.max(0, window.innerWidth - wx);
-  const availH = Math.max(0, window.innerHeight - TASKBAR_H - HEADER_H);
+  
+  // Apply the same clientWidth/Height fix here so free-floating windows don't spawn off-screen
+  const cw = document.documentElement.clientWidth;
+  const ch = document.documentElement.clientHeight;
+  
+  const availW = Math.max(0, cw - wx);
+  const availH = Math.max(0, ch - TASKBAR_H - HEADER_H);
+  
   return {
-    x: wx + Math.max(0, Math.min(PAD + off, availW - cfg.w - 20)),
+    x: wx + Math.max(0, Math.min(12 + off, availW - cfg.w - 20)),
     y: HEADER_H + Math.max(0, Math.min(40 + off, availH - cfg.h - 20)),
   };
 };

@@ -90,6 +90,9 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
           <button onClick={handleLogout} className='logout-btn' title='Log Out'>
             <i className="fa fa-right-from-bracket"></i>
           </button>
+          <Link href="/about" className={`about-btn ${pathname === '/about' ? 'active' : ''}`} title='About'>
+            <i className="fas fa-circle-info"></i>
+          </Link>
           <Link href="/settings" className={`settings-btn ${pathname === '/settings' ? 'active' : ''}`} title='Settings'>
             <i className="fas fa-gear"></i>
           </Link>
