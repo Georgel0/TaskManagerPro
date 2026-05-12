@@ -2,11 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useTheme } from '@/context';
+import { useTheme, useApp } from '@/context';
 import './About.css';
 
 export default function About() {
   const { currentTheme } = useTheme();
+  const { user } = useApp();
 
   const isDark = currentTheme.startsWith('dark');
 
@@ -20,12 +21,20 @@ export default function About() {
         <h1 className="about-page-title">About TaskManagerPro</h1>
         <p className="about-page-subtitle">Your Ultimate Project Managment Partner</p>
         <div className="about-header-actions">
-          <Link href="/dashboard" className="btn btn-secondary about-btn-back">
-            <i className="fas fa-chart-simple"></i> Back to Dashboard
-          </Link>
-          <Link href="/projects" className="btn btn-primary about-btn-start">
-            <i className="fas fa-folder"></i> Back to Projects
-          </Link>
+          {user ? (
+            <Link href="/" className="btn btn-primary about-btn-back">
+               Get Started
+            </Link>
+          ) : (
+            <>
+              <Link href="/dashboard" className="btn btn-secondary about-btn-back">
+                <i className="fas fa-chart-simple"></i> Back to Dashboard
+              </Link>
+              <Link href="/projects" className="btn btn-primary about-btn-start">
+                <i className="fas fa-folder"></i> Back to Projects
+              </Link>
+            </>
+          )}
         </div>
       </header>
 

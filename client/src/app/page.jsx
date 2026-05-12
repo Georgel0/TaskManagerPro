@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LoginRegisterForm, ResetPasswordForm, ForgotPasswordForm } from '@/components/layout';
@@ -50,6 +51,8 @@ export default function LandingPage() {
                 A productivity platform for individuals and teams.
                 Manage projects, track tasks, and collaborate — all in one place.
               </p>
+              <br />
+              <Link href="/about" className="btn btn-primary" title="Learn More">Learn More <i className="fas fa-arrow-right"></i></Link>
             </div>
 
             <div className="info-features">

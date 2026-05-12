@@ -3,11 +3,7 @@ export default function sitemap() {
 
   const routes = [
     '',
-    '/dashboard',
-    '/projects',
-    '/tasks',
-    '/profile',
-    '/archive'
+    '/about',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split('T')[0],
