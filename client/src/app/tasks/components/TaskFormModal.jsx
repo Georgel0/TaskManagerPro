@@ -90,7 +90,7 @@ export function TaskFormModal({ isOpen, onClose, onSubmit, mode, initialData, pr
             <h3>Create New Task</h3>
             <button className="btn-icon" onClick={onClose}><i className="fas fa-times"></i></button>
           </div>
-          <div className="modal-body text-center"><p className="text-form-warning"><i className="fas fa-exclamation-triangle"></i> Create a project first to add project tasks.</p></div>
+          <div className="modal-body"><p className="text-form-warning"><i className="fas fa-exclamation-triangle"></i> Create a project first to add project tasks.</p></div>
         </div>
       </div>
     );

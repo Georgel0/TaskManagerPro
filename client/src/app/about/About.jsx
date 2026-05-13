@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useTheme, useApp } from '@/context';
 import './About.css';
@@ -9,11 +9,46 @@ export default function About() {
   const { currentTheme } = useTheme();
   const { user } = useApp();
 
+  const [activeForm, setActiveForm] = useState(null);
+  const [status, setStatus] = useState(null);
+
   const isDark = currentTheme.startsWith('dark');
 
   const missionImage = isDark ? '/assets/mission_dark.png' : '/assets/mission_light.png';
   const techStackImage = isDark ? '/assets/tech_dark.png' : '/assets/tech_light.png';
   const storyImage = isDark ? '/assets/story_dark.png' : '/assets/story_light.png';
+
+  const toggleForm = (formType) => {
+    setActiveForm(activeForm === formType ? null : formType);
+    setStatus(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch("https://formspree.io/f/xqalokdd", {
+        method: "POST",
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        form.reset();
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      setStatus('error');
+    }
+  };
 
   return (
     <div className="about-page-wrapper page-content">
@@ -23,7 +58,7 @@ export default function About() {
         <div className="about-header-actions">
           {!user ? (
             <Link href="/" className="btn btn-primary about-btn-back">
-               Get Started
+              Get Started
             </Link>
           ) : (
             <>
@@ -62,7 +97,7 @@ export default function About() {
 
         <section className="about-section about-features-section card">
           <div className="card-body about-features-body">
-            <h2 className="about-section-title text-center">Power-Packed Features</h2>
+            <h2 className="about-section-title">Power-Packed Features</h2>
 
             <div className="about-features-grid">
               <div className="about-feature-item">
@@ -95,12 +130,26 @@ export default function About() {
                 <h3 className="about-feature-title">Project Announcements</h3>
                 <p className="about-feature-desc">Broadcast important updates to your entire team with Markdown support and pinning capabilities.</p>
               </div>
+              <div className="about-feature-item">
+                <div className="about-feature-icon"><i className="fas fa-bullhorn"></i></div>
+                <h3 className="about-feature-title">Custom UI</h3>
+                <p className="about-feature-desc">Broadcast important updates to your entire team with Markdown support and pinning capabilities.</p>
+              </div>
+              <div className="about-feature-item">
+                <div className="about-feature-icon"><i className="fas fa-layer-group"></i></div>
+                <h3 className="about-feature-title">Multi-Window Workspace</h3>
+                <p className="about-feature-desc">A React-based UI system that manages multiple draggable and resizable windows through a specialized layout engine supporting diffrent patterns.</p>
+              </div>
+              <div className="about-feature-item">
+                <div className="about-feature-icon"><i className="fas fa-box-archive"></i></div>
+                <h3 className="about-feature-title">Data Archiving System</h3>
+                <p className="about-feature-desc">A repository for managing inactive projects and tasks that allows for the restoration of items to the active workspace.</p>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="about-section about-story-section">
-          {/* PLACEHOLDER: Image/Illustration representing a journey, growth, or the 'story' concept */}
           <img
             src={storyImage}
             alt="Conceptual illustration of a developmental journey"
@@ -139,7 +188,7 @@ export default function About() {
                 className="about-image about-tech-stack-image"
               />
             </div>
-            <p className="about-paragraph text-center">
+            <p className="about-paragraph">
               TaskManagerPro is a modern full-stack application built for performance, security, and scalability.
               Our technology stack is meticulously chosen to deliver a seamless user experience, ensuring your data is safe and your tools are always available.
             </p>
@@ -160,29 +209,102 @@ export default function About() {
 
         <section className="about-section about-team-section">
           <div className="about-text-block">
-            <h2 className="about-section-title text-center">Built By Visionaries, Driven By You</h2>
-            <p className="about-paragraph text-center">
-              While we prefer to let our work do the talking, it's worth mentioning that TaskManagerPro is the product of
-              a dedicated team of developers, designers, and project managers passionate about efficiency. But the most
-              important part of our team? That's you. Your usage, your feedback, and your success define our mission and drive
-              our continuous innovation.
+            <h2 className="about-section-title">Built By Visionaries, Driven By You</h2>
+            <p className="about-paragraph">
+              We are committed to transparent development and active community engagement.
+              Have an idea for a feature? Found a bug? We'd love to hear from you.
             </p>
-            <p className="about-paragraph text-center">
-              We are committed to transparent development and active community engagement. Have an idea for a feature?
-              Found a bug? Want to share how TaskManagerPro changed your workflow? We'd love to hear from you. Your input
-              directly helps us make our platform better for everyone.
-            </p>
+
             <div className="about-team-contact">
-              <Link href="#" className="btn btn-secondary about-contact-btn">
+              <button onClick={() => toggleForm('contact')} className={`btn ${activeForm === 'contact' ? 'btn-primary' : 'btn-secondary'} about-contact-btn`}>
                 <i className="fas fa-envelope"></i> Contact Us
-              </Link>
-              <Link href="#" className="btn btn-ghost about-contact-btn">
+              </button>
+              <button onClick={() => toggleForm('bug')} className={`btn ${activeForm === 'bug' ? 'btn-primary' : 'btn-ghost'} about-contact-btn`}>
                 <i className="fas fa-bug"></i> Report a Bug
-              </Link>
+              </button>
             </div>
+
+            {activeForm && (
+              <div className="about-form-container">
+                <h3 className="about-form-heading">
+                  {activeForm === 'contact' ? 'Send us a Message' : 'Submit a Bug Report'}
+                </h3>
+
+                {status === 'success' ? (
+                  <div className="about-status-message about-status-success">
+                    <i className="fas fa-check-circle"></i>
+                    <p>Thanks! Your report has been submitted successfully.</p>
+                    <button className="btn btn-ghost" onClick={() => setStatus(null)}>
+                      Submit another?
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="about-form">
+                    <input
+                      type="hidden"
+                      name="_subject"
+                      value={activeForm === 'bug' ? "New Bug Report!" : "General Inquiry"}
+                    />
+
+                    <div className="about-form-row">
+                      <div className="about-form-group">
+                        <label className="about-form-label">Name</label>
+                        <input type="text" name="name" className="about-form-input" placeholder="Your Name" required />
+                      </div>
+                      <div className="about-form-group">
+                        <label className="about-form-label">Email</label>
+                        <input type="email" name="email" className="about-form-input" placeholder="Your Email" required />
+                      </div>
+                    </div>
+
+                    {activeForm === 'bug' ? (
+                      <>
+                        <div className="about-form-row">
+                          <div className="about-form-group">
+                            <label className="about-form-label">Severity</label>
+                            <select name="severity" className="about-form-select" required>
+                              <option value="low">Low (UI/Minor)</option>
+                              <option value="medium">Medium (Feature Bug)</option>
+                              <option value="high">High (Broken Workflow)</option>
+                              <option value="critical">Critical (Crash/Data Loss)</option>
+                            </select>
+                          </div>
+                          <div className="about-form-group">
+                            <label className="about-form-label">Environment</label>
+                            <input type="text" name="environment" className="about-form-input" placeholder="e.g. Chrome on Windows 11" required />
+                          </div>
+                        </div>
+
+                        <div className="about-form-group">
+                          <label className="about-form-label">Steps to Reproduce</label>
+                          <textarea name="steps" className="about-form-textarea" placeholder="1. Click on... 2. Navigate to..." rows="3" required></textarea>
+                        </div>
+
+                        <div className="about-form-group">
+                          <label className="about-form-label">Expected vs Actual Behavior</label>
+                          <textarea name="behavior" className="about-form-textarea" placeholder="What should have happened, and what actually happened?" rows="3" required></textarea>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="about-form-group">
+                        <label className="about-form-label">Message</label>
+                        <textarea name="message" className="about-form-textarea" placeholder="How can we help you?" rows="5" required></textarea>
+                      </div>
+                    )}
+
+                    <button type="submit" className="btn btn-primary about-form-submit" disabled={status === 'sending'}>
+                      {status === 'sending' ? 'Sending...' : activeForm === 'bug' ? 'Submit Bug Report' : 'Send Message'}
+                    </button>
+
+                    {status === 'error' && (
+                      <p className="about-status-error">Oops! Something went wrong. Please try again.</p>
+                    )}
+                  </form>
+                )}
+              </div>
+            )}
           </div>
         </section>
-
       </main>
 
       <footer className="about-footer">
