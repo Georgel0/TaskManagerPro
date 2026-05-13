@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react';
+import { useApp } from '@/context';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -12,7 +13,7 @@ const pages = [
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isCollapsed }) {
-
+  const { logout } = useApp();
   const sidebarRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -51,9 +52,7 @@ export default function Sidebar({ isOpen, toggleSidebar, toggleCollapse, isColla
   }, [isCollapsed, toggleCollapse]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/');
+    logout();
   };
 
   return (

@@ -11,7 +11,7 @@ import { ProfileStatsExpanded, DangerZone, ProfileSkeleton } from './components'
 import './profile.css';
 
 export default function ProfilePage() {
-  const { user, setUser, loading } = useApp();
+  const { user, setUser, loading, logout } = useApp();
 
   const fetchWithAuth = async (endpoint, payload) => {
     const token = localStorage.getItem('token');
@@ -31,9 +31,7 @@ export default function ProfilePage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
+    logout();
   };
 
   const getNewIdenticon = (seed) => {

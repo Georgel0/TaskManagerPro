@@ -27,7 +27,7 @@ function FormLoader() {
   return (
     <div className="lp-form-loader">
       <i className="fas fa-circle-notch fa-spin"></i>
-      <p>Preparing workspace...</p>
+      <p>Preparing...</p>
     </div>
   );
 }

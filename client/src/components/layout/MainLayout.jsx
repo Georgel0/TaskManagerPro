@@ -84,7 +84,7 @@ export function MainLayout({ children }) {
     <div className="app-wrapper">
       <Toaster position="bottom-right" />
 
-      {!isLandingPage && !isAboutPage && (
+      {(!isLandingPage && user) && (
         <Sidebar
           isOpen={sidebarOpen}
           toggleSidebar={toggleSidebar}
@@ -102,9 +102,13 @@ export function MainLayout({ children }) {
               <h3>Task Manager Pro</h3>
             </div>
             <div className="topbar-actions">
-              {!user &&  <NotificationsModal />}
-              <Link href={isAboutPage ? '/' : '/profile'} className='topbar-profile-link' title={user && !isAboutPage ? `TMP Account \n ${user?.name || ''} \n ${user?.email || ''}` : 'Log in'}>
-                {user?.avatar && !isAboutPage ? (
+              {user && <NotificationsModal />}
+              <Link
+                href={isAboutPage && !user ? '/' : '/profile'}
+                className='topbar-profile-link'
+                title={user ? `TMP Account \n ${user?.name || ''} \n ${user?.email || ''}` : 'Log in'}
+              >
+                {user?.avatar ? (
                   <img src={user.avatar} alt="User Avatar" className="topbar-avatar" />
                 ) : (
                   <i className="fas fa-user"></i>

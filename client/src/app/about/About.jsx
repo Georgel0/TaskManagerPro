@@ -21,7 +21,7 @@ export default function About() {
         <h1 className="about-page-title">About TaskManagerPro</h1>
         <p className="about-page-subtitle">Your Ultimate Project Managment Partner</p>
         <div className="about-header-actions">
-          {user ? (
+          {!user ? (
             <Link href="/" className="btn btn-primary about-btn-back">
                Get Started
             </Link>

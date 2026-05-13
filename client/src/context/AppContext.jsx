@@ -36,8 +36,16 @@ export const AppProvider = ({ children }) => {
     fetchUser();
   }, [router]);
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/');
+    router.refresh();
+  };
+
   return (
-    <AppContext.Provider value={{ user, setUser, loading, fetchUser }}>
+    <AppContext.Provider value={{ user, setUser, loading, fetchUser, logout }}>
       {children}
     </AppContext.Provider>
   );
