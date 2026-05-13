@@ -3,8 +3,8 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Rnd } from 'react-rnd';
 
 export const STORAGE_KEY = 'fw_state_v2';
-const TASKBAR_H = 1;
-const GAP = 12;
+const TASKBAR_H = 60;
+const GAP = 10;
 
 export function loadSaved() {
   if (typeof window === 'undefined') return [];
@@ -40,6 +40,7 @@ export function getWinCfg(type) {
   if (type.startsWith('edit-')) return { w: 500, h: 560, icon: 'fa-pen-to-square' };
   return { w: 500, h: 560, icon: 'fa-square' };
 }
+
 function getCanvasRect() {
   if (typeof window === 'undefined') return null;
   const canvas = document.querySelector('.workspace-canvas');
@@ -132,7 +133,6 @@ export const cascadePos = (type) => {
   };
 };
 
-// Use a snap key so Rnd resets its internal position when snap rect changes
 function getSnapKey(win) {
   if (!win.snapRect) return 'free';
   return `${Math.round(win.snapRect.x)},${Math.round(win.snapRect.y)},${Math.round(win.snapRect.w)},${Math.round(win.snapRect.h)}`;
@@ -152,8 +152,6 @@ export const FloatingWindow = React.memo(function FloatingWindow({ win, onClose,
       ? { width: win.size.w, height: win.size.h }
       : { width: cfg.w, height: cfg.h };
 
-  // Use `key` on Rnd so it re-mounts (resets internal position) when snap rect changes.
-  // This is what makes snapped layout work without controlled props.
   const snapKey = getSnapKey(win);
 
   return (

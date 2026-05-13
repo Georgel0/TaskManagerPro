@@ -166,11 +166,11 @@
 }
 
 .fw-win, .fw-taskbar {
-  pointer-events: auto; /* Re-enable clicks for the windows/taskbar */
+  pointer-events: auto;
 }
 
 .fw-taskbar {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
