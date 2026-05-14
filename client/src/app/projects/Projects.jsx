@@ -48,7 +48,7 @@ const ProjectsSkeleton = () => (
 
 function ProjectsInner({ wmEnabled, restorerRef }) {
   const { user, loading: appLoading } = useApp();
-  const { prefs, loading } = useSettings();
+  const { prefs } = useSettings();
   const wm = useWindowManager();
 
   const workspaceMode = wmEnabled && (wm?.windows?.length ?? 0) > 0;
@@ -524,14 +524,6 @@ function ProjectsInner({ wmEnabled, restorerRef }) {
               particleOpacity={0.3}
               speed={0.3}
             />
-          )}
-          {prefs.workspace_window_count_enabled && (
-            <div className="workspace-canvas-hint">
-              <i className="fas fa-layer-group" />
-              <span>
-                {wm.windows.length} window{wm.windows.length !== 1 ? 's' : ''} open
-              </span>
-            </div>
           )}
         </div>
 

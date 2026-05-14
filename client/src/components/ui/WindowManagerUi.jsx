@@ -1,6 +1,8 @@
 'use client';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
+import { useWindowManager } from '@/context';
+import { useSettings } from '@/app/settings/useSettings';
 
 export const STORAGE_KEY = 'fw_state_v2';
 const TASKBAR_H = 60;
@@ -122,13 +124,12 @@ export function getSnapRect(pattern, n, total = 1) {
 
 let _cascadeCount = 0;
 
-
 export const cascadePos = (type) => {
   const rect = getCanvasRect();
   if (!rect) return { x: 450, y: 100 };
   const off = (_cascadeCount++ % 5) * 28;
   return {
-    x: rect.left,
+    x: rect.left + GAP,
     y: rect.top + GAP + off,
   };
 };
@@ -169,13 +170,13 @@ export const FloatingWindow = React.memo(function FloatingWindow({ win, onClose,
       }}
       minWidth={win.snapRect ? 100 : 320}
       minHeight={win.snapRect ? 100 : 200}
-      bounds="window"
+      bounds=".workspace-canvas"
       dragHandleClassName="fw-bar"
       enableUserSelectHack={false}
       onMouseDown={() => onFocus(win.id)}
       onDragStop={(_e, d) => onMove(win.id, d.x, d.y)}
       onResizeStop={(_e, _dir, ref, _delta, pos) => onResize(win.id, ref.offsetWidth, ref.offsetHeight, pos.x, pos.y)}
-      style={{ zIndex: win.zIndex, display: 'flex', flexDirection: 'column', position: 'fixed' }}
+      style={{ zIndex: win.zIndex, display: 'flex', flexDirection: 'column' }}
       className={`fw-win ${win.snapRect ? 'is-snapped' : ''}`}
     >
       <div className="fw-bar">
@@ -200,6 +201,9 @@ export function FWTaskbar({ windows, onFocus, onClose }) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
+  const wm = useWindowManager();
+  const { prefs } = useSettings();
+
   if (!windows.length) return null;
 
   const handleMouseDown = (e) => {
@@ -207,7 +211,9 @@ export function FWTaskbar({ windows, onFocus, onClose }) {
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
   };
+
   const handleMouseLeaveOrUp = () => setIsDragging(false);
+
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
@@ -216,9 +222,22 @@ export function FWTaskbar({ windows, onFocus, onClose }) {
     scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
+  const handleWheel = (e) => {
+    e.preventDefault();
+    scrollRef.current.scrollLeft += e.deltaY + e.deltaX;
+  };
+
   return (
     <div className="fw-taskbar">
-      <span className="fw-tb-brand"><i className="fas fa-layer-group" /></span>
+      {prefs.workspace_window_count_enabled ? (
+        <div className="workspace-canvas-hint" title={`${wm.windows.length} window${wm.windows.length !== 1 ? 's' : ''} open`}>
+          <i className="fas fa-layer-group" />
+          <span>{wm.windows.length}</span>
+        </div>
+      ) : (
+        <span className="fw-tb-brand"><i className="fas fa-layer-group" /></span>
+      )}
+
       <div
         className={`fw-tb-list ${isDragging ? 'dragging' : ''}`}
         ref={scrollRef}
@@ -226,6 +245,7 @@ export function FWTaskbar({ windows, onFocus, onClose }) {
         onMouseLeave={handleMouseLeaveOrUp}
         onMouseUp={handleMouseLeaveOrUp}
         onMouseMove={handleMouseMove}
+        onWheel={handleWheel}
       >
         {windows.map((w) => {
           const cfg = getWinCfg(w.type);
