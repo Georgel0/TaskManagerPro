@@ -32,6 +32,7 @@
 }
 
 .project-card {
+  min-height: 200px;
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
   width: auto;

@@ -30,8 +30,32 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
+}
+
+.stat-icon-danger {
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 12%, transparent);
+  color: var(--danger-color, #ef4444);
+}
+
+.stat-icon-urgent {
+  background-color: color-mix(in srgb, #f97316 12%, transparent); /* Orange */
+  color: #f97316;
+}
+
+.stat-icon-today {
+  background-color: color-mix(in srgb, #8b5cf6 12%, transparent); /* Purple */
+  color: #8b5cf6;
+}
+
+.stat-icon-secondary {
+  background-color: color-mix(in srgb, var(--sec-text-color) 12%, transparent);
+  color: var(--sec-text-color);
+}
+
+.text-danger {
+  color: var(--danger-color, #ef4444);
 }
 
 .stat-card {
@@ -42,6 +66,12 @@
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .stat-icon {
@@ -97,6 +127,18 @@
   gap: 24px;
 }
 
+.dashboard-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .stat-info-full {
   flex: 1;
   width: 100%;
@@ -109,19 +151,30 @@
   margin-bottom: 8px;
 }
 
-.stat-progress-container {
+progress.stat-progress-bar {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 8px;
-  background-color: var(--sec-background);
+  border: none;
   border-radius: 10px;
-  overflow: hidden;
+  background-color: var(--sec-background);
 }
 
-.stat-progress-fill {
-  height: 100%;
+progress.stat-progress-bar::-webkit-progress-bar {
+  background-color: var(--sec-background);
+  border-radius: 10px;
+}
+
+progress.stat-progress-bar::-webkit-progress-value {
   background-color: var(--accent-color);
   border-radius: 10px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+progress.stat-progress-bar::-moz-progress-bar {
+  background-color: var(--accent-color);
+  border-radius: 10px;
 }
 
 .stat-icon-info {
@@ -145,6 +198,8 @@
   color: inherit;
   border-bottom: 1px solid var(--border-color);
   transition: background-color var(--transition);
+  position: relative;
+  overflow: visible;
 }
 
 .dash-task-link:last-child {
@@ -153,6 +208,10 @@
 
 .dash-task-link:hover {
   background-color: var(--sec-background);
+}
+
+.dash-task-completed {
+  opacity: 0.8;
 }
 
 .dash-task-item {
@@ -172,6 +231,11 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
+}
+
+.strike-through {
+  text-decoration: line-through;
+  color: var(--sec-text-color);
 }
 
 .dash-task-user {
@@ -205,9 +269,20 @@
   color: var(--sec-text-color);
 }
 
+.dash-task-project {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
 .dash-task-upcoming {
   padding: 14px 20px;
   border-left: 4px solid var(--warning-color);
+}
+
+.dash-task-overdue {
+  padding: 14px 20px;
+  border-left: 4px solid var(--danger-color, #ef4444);
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 3%, transparent);
 }
 
 .dash-task-upcoming-info {
@@ -216,7 +291,7 @@
   justify-content: space-between;
 }
 
-.dash-task-upcoming h4 {
+.dash-task-upcoming h4, .dash-task-overdue h4 {
   margin: 0 0 4px 0;
   font-size: 0.95rem;
   font-weight: 600;
@@ -226,6 +301,15 @@
   font-size: 0.85rem;
   color: var(--warning-color);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash-task-overdue-text {
+  font-size: 0.85rem;
+  color: var(--danger-color, #ef4444);
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -242,6 +326,21 @@
   font-size: 2rem;
   color: var(--warning-color);
   margin-bottom: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--sec-text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+  color: var(--border-color);
 }
 
 .dashboard-empty-project-modal {
@@ -273,23 +372,30 @@
   flex-shrink: 0;
 }
 
-.dash-task-link {
-  display: block;
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color var(--transition);
+.card-margin-top {
+  margin-top: 24px;
 }
 
-.dash-task-link:last-child {
-  border-bottom: none;
+.text-danger {
+  color: var(--danger-color, #ef4444);
 }
 
-.dash-task-link:hover {
-  background-color: var(--sec-background);
+.border-danger {
+  border-bottom: 1px solid var(--danger-color, #ef4444) !important;
 }
 
-.dash-task-link {
-  position: relative;
-  overflow: visible; 
+.skeleton-container-full {
+  width: 100%;
+}
+
+.skeleton-title-w30 {
+  width: 30%;
+  height: 24px;
+}
+
+.skeleton-title-w50 {
+  width: 50%;
+  height: 24px;
 }
 
 .card, 
@@ -302,16 +408,20 @@
   .dashboard-content-grid {
     grid-template-columns: 2fr 1fr;
   }
+  .card-margin-top {
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 768px) {
   .dashboard-header {
-    flex-direction: row;
+    flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .dashboard-projects-btn {
-    display: none !important;
+  .dashboard-header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

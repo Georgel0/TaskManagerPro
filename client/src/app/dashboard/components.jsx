@@ -132,7 +132,7 @@ export function QuickTaskModal({
 export const DashboardSkeleton = () => (
   <div className="page-content dashboard-container">
     <header className="dashboard-header">
-      <div style={{ width: '100%' }}>
+      <div className="skeleton-container-full">
         <div className="skeleton skeleton-title"></div>
         <div className="skeleton skeleton-subtitle"></div>
       </div>
@@ -146,7 +146,7 @@ export const DashboardSkeleton = () => (
       {[1, 2, 3, 4].map((i) => (
         <div key={i} className="stat-card">
           <div className="skeleton stat-icon"></div>
-          <div className="stat-info" style={{ width: '100%' }}>
+          <div className="stat-info skeleton-container-full">
             <div className="skeleton skeleton-text-sm"></div>
             <div className="skeleton skeleton-text-lg"></div>
           </div>
@@ -155,21 +155,23 @@ export const DashboardSkeleton = () => (
     </section>
 
     <div className="dashboard-content-grid">
-      <section className="card">
-        <div className="card-header">
-          <div className="skeleton" style={{ width: '30%', height: '24px' }}></div>
-        </div>
-        <div className="card-body dashboard-card-body">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="skeleton skeleton-task-item"></div>
-          ))}
-        </div>
-      </section>
+      <div className="dashboard-main-column">
+        <section className="card">
+          <div className="card-header">
+            <div className="skeleton skeleton-title-w30"></div>
+          </div>
+          <div className="card-body dashboard-card-body">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="skeleton skeleton-task-item"></div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       <div className="dashboard-side-column">
         <section className="card">
           <div className="card-header">
-            <div className="skeleton" style={{ width: '50%', height: '24px' }}></div>
+            <div className="skeleton skeleton-title-w50"></div>
           </div>
           <div className="card-body dashboard-card-body">
             {[1, 2].map((i) => (
