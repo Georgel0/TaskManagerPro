@@ -5,8 +5,9 @@ import { useWindowManager } from '@/context';
 import { useSettings } from '@/app/settings/useSettings';
 
 export const STORAGE_KEY = 'fw_state_v2';
-const TASKBAR_H = 60;
+const TASKBAR_H = 55;
 const GAP = 10;
+const INSET = 10;
 
 export function loadSaved() {
   if (typeof window === 'undefined') return [];
@@ -59,10 +60,10 @@ export function getSnapRect(pattern, n, total = 1) {
   const rect = getCanvasRect();
   if (!rect || pattern === 'free') return null;
 
-  const wx = rect.left;
-  const wy = rect.top;
-  const availW = rect.width;
-  const availH = rect.height - TASKBAR_H;
+  const wx = rect.left + INSET;
+  const wy = rect.top + INSET;
+  const availW = rect.width - INSET * 2;
+  const availH = rect.height - TASKBAR_H - INSET * 2;
 
   switch (pattern) {
     case 'grid': {
@@ -73,7 +74,7 @@ export function getSnapRect(pattern, n, total = 1) {
       const winH = (availH - GAP) / 2;
       return {
         x: wx + col * (winW + GAP),
-        y: wy + GAP + row * (winH + GAP),
+        y: wy + row * (winH + GAP),
         w: winW,
         h: winH
       };
@@ -83,13 +84,13 @@ export function getSnapRect(pattern, n, total = 1) {
       const masterW = (availW - (GAP * 3)) * 0.65;
       const stackW = (availW - GAP) * 0.35;
       if (n === 0) {
-        return { x: wx + GAP, y: wy + GAP, w: masterW, h: availH - (GAP * 2) };
+        return { x: wx + GAP, y: wy, w: masterW - GAP, h: availH - (GAP * 2) };
       }
       const slot = (n - 1) % 2;
       const stackH = (availH - (GAP * 3)) / 2;
       return {
         x: wx + masterW + GAP,
-        y: wy + GAP + slot * (stackH + GAP),
+        y: wy + slot * (stackH + GAP),
         w: stackW,
         h: stackH
       };
@@ -98,23 +99,23 @@ export function getSnapRect(pattern, n, total = 1) {
     case 'columns': {
       const count = Math.min(total, 3);
       const col = n % 3;
-      const colW = (availW - (GAP * (count + 1))) / count;
+      const colW = (availW - (GAP * (count - 1))) / count;
       return {
         x: wx + col * (colW + GAP),
-        y: wy + GAP,
+        y: wy,
         w: colW,
-        h: availH - (GAP * 2)
+        h: availH
       };
     }
 
     case 'rows': {
       const count = Math.min(total, 3);
       const row = n % 3;
-      const rowH = (availH - (GAP * (count + 1))) / count;
+      const rowH = (availH - (GAP * (count - 1))) / count;
       return {
         x: wx,
-        y: wy + GAP + row * (rowH + GAP),
-        w: availW - GAP,
+        y: wy + row * (rowH + GAP),
+        w: availW,
         h: rowH
       };
     }
@@ -129,8 +130,8 @@ export const cascadePos = (type) => {
   if (!rect) return { x: 450, y: 100 };
   const off = (_cascadeCount++ % 5) * 28;
   return {
-    x: rect.left + GAP,
-    y: rect.top + GAP + off,
+    x: rect.left + INSET,
+    y: rect.top + INSET + off,
   };
 };
 
