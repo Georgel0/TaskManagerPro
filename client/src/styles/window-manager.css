@@ -289,7 +289,7 @@
   background: var(--card-background);
   border: 1px solid var(--border-color);
   color: var(--sec-text-color);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
   opacity: 0.8;
   pointer-events: auto;
@@ -299,7 +299,7 @@
 
 .workspace-canvas-hint i {
   color: var(--accent-color);
-  font-size: 0.7rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {

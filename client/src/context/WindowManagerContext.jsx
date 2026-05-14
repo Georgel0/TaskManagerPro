@@ -7,7 +7,21 @@ const WMCtx = createContext(null);
 export const useWindowManager = () => useContext(WMCtx);
 
 let _zc = 200;
-let _wid = 0;
+
+function initWid() {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const saved = JSON.parse(localStorage.getItem('fw_state_v2') || '[]');
+    return saved.reduce((max, w) => {
+      const n = parseInt(w.id?.replace('fw', '') ?? '0', 10);
+      return isNaN(n) ? max : Math.max(max, n);
+    }, 0);
+  } catch {
+    return 0;
+  }
+}
+
+let _wid = initWid();
 const freshZ = () => Math.min(++_zc, 8990);
 const freshId = () => `fw${++_wid}`;
 
@@ -84,8 +98,6 @@ export function WindowManagerProvider({ children, enabled, snapEnabled = false, 
     setHasRestored(true);
     if (!saved.length) return;
     saved.forEach((w) => {
-      const numId = parseInt(w.id.replace('fw', ''), 10);
-      if (!isNaN(numId) && numId > _wid) _wid = numId;
       if (w.zIndex > _zc) _zc = w.zIndex;
     });
     setWindows(saved.map((w) => ({

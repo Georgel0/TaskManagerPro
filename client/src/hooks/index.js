@@ -3,3 +3,4 @@ export * from './useAuth';
 export * from './useArchive';
 export * from './useReadme';
 export * from './useExport';
+export * from './usePanelResize';

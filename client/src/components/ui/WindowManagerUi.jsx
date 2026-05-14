@@ -49,11 +49,22 @@ function getCanvasRect() {
   const canvas = document.querySelector('.workspace-canvas');
   if (!canvas) return null;
   const rect = canvas.getBoundingClientRect();
-  console.log('=== CANVAS RECT ===');
-  console.log('left:', rect.left, 'top:', rect.top);
-  console.log('width:', rect.width, 'height:', rect.height);
-  console.log('right:', rect.right, 'bottom:', rect.bottom);
   return rect;
+}
+
+function getResponsiveDims(availW, availH) {
+  let gridCols, gridRows;
+  if (availW >= 3300) { gridCols = 5; gridRows = 5; }
+  else if (availW >= 2500) { gridCols = 4; gridRows = 4; }
+  else if (availW >= 1700) { gridCols = 3; gridRows = 3; }
+  else { gridCols = 2; gridRows = 2; }
+
+  const maxCols = availW >= 1400 ? 5 : 3;
+  const maxRows = availH >= 900 ? 5 : 3;
+
+  const masterCount = availW >= 1400 ? 2 : 1;
+
+  return { gridCols, gridRows, maxCols, maxRows, masterCount };
 }
 
 export function getSnapRect(pattern, n, total = 1) {
@@ -65,60 +76,85 @@ export function getSnapRect(pattern, n, total = 1) {
   const availW = rect.width - INSET * 2;
   const availH = rect.height - TASKBAR_H - INSET * 2;
 
+  const { gridCols, gridRows, maxCols, maxRows, masterCount } = getResponsiveDims(availW, availH);
+
   switch (pattern) {
     case 'grid': {
-      const slot = n % 4;
-      const col = slot % 2;
-      const row = Math.floor(slot / 2);
-      const winW = (availW - GAP) / 2;
-      const winH = (availH - GAP) / 2;
+      const capacity = gridCols * gridRows;
+      const slot = n % capacity;
+      const col = slot % gridCols;
+      const row = Math.floor(slot / gridCols);
+      const winW = (availW - GAP * (gridCols - 1)) / gridCols;
+      const winH = (availH - GAP * (gridRows - 1)) / gridRows;
       return {
         x: wx + col * (winW + GAP),
         y: wy + row * (winH + GAP),
         w: winW,
-        h: winH
+        h: winH,
       };
     }
 
     case 'master': {
-      const masterW = (availW - (GAP * 3)) * 0.65;
-      const stackW = (availW - GAP) * 0.35;
-      if (n === 0) {
-        return { x: wx + GAP, y: wy, w: masterW - GAP, h: availH - (GAP * 2) };
+      const masterAreaW = (availW - GAP * (masterCount + 1)) * 0.6;
+      const stackW = availW - masterAreaW - GAP * (masterCount + 1);
+      const singleMasterW = (masterAreaW - GAP * (masterCount - 1)) / masterCount;
+
+      if (n < masterCount) {
+        return {
+          x: wx + GAP + n * (singleMasterW + GAP),
+          y: wy,
+          w: singleMasterW,
+          h: availH - GAP * 2,
+        };
       }
-      const slot = (n - 1) % 2;
-      const stackH = (availH - (GAP * 3)) / 2;
+
+      const stackSlot = n - masterCount;
+      const stackCols = masterCount >= 2 ? 2 : 1;
+      const stackRows = 2;
+      const stackCapacity = stackCols * stackRows;
+      const slotInStack = stackSlot % stackCapacity;
+      const sCol = slotInStack % stackCols;
+      const sRow = Math.floor(slotInStack / stackCols);
+      const cellW = (stackW - GAP * (stackCols - 1)) / stackCols;
+      const cellH = (availH - GAP * (stackRows + 1)) / stackRows;
       return {
-        x: wx + masterW + GAP,
-        y: wy + slot * (stackH + GAP),
-        w: stackW,
-        h: stackH
+        x: wx + masterAreaW + GAP * (masterCount + 1) + sCol * (cellW + GAP),
+        y: wy + sRow * (cellH + GAP),
+        w: cellW,
+        h: cellH,
       };
     }
 
     case 'columns': {
-      const count = Math.min(total, 3);
-      const col = n % 3;
-      const colW = (availW - (GAP * (count - 1))) / count;
+      const colCount = Math.min(total, maxCols);
+      const layers = availH >= 700 ? 2 : 1;
+      const layerH = layers > 1 ? (availH - GAP) / 2 : availH;
+      const col = n % colCount;
+      const layer = Math.floor(n / colCount) % layers;
+      const colW = (availW - GAP * (colCount - 1)) / colCount;
       return {
         x: wx + col * (colW + GAP),
-        y: wy,
+        y: wy + layer * (layerH + GAP),
         w: colW,
-        h: availH
+        h: layerH,
       };
     }
 
     case 'rows': {
-      const count = Math.min(total, 3);
-      const row = n % 3;
-      const rowH = (availH - (GAP * (count - 1))) / count;
+      const rowCount = Math.min(total, maxRows);
+      const layers = availW >= 900 ? 2 : 1;
+      const layerW = layers > 1 ? (availW - GAP) / 2 : availW;
+      const row = n % rowCount;
+      const layer = Math.floor(n / rowCount) % layers;
+      const rowH = (availH - GAP * (rowCount - 1)) / rowCount;
       return {
-        x: wx,
+        x: wx + layer * (layerW + GAP),
         y: wy + row * (rowH + GAP),
-        w: availW,
-        h: rowH
+        w: layerW,
+        h: rowH,
       };
     }
+
     default: return null;
   }
 }

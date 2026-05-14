@@ -268,20 +268,45 @@
 }
 
 .workspace-projects-panel {
-  resize: horizontal;
+  position: relative;
   overflow: auto;
   min-width: 320px;
-  max-width: 580px;
+  max-width: 640px;
+  width: 400px;
+  flex-shrink: 0;
   padding: 10px;
-  border-right: none;
   box-shadow: 1px 0 0 var(--border-color);
-  transition: border-color 0.15s ease;
   background: var(--pri-background);
   animation: ws-panel-in 0.22s ease-out;
 }
 
-.workspace-projects-panel::-webkit-resizer {
-  display: none;
+.workspace-panel-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workspace-panel-resizer::after {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--border-color);
+  transition: background 0.15s, height 0.15s;
+}
+
+.workspace-panel-resizer:hover::after,
+.workspace-panel-resizer.is-dragging::after {
+  background: var(--accent-color);
+  height: 64px;
 }
 
 @keyframes ws-panel-in {
