@@ -7,6 +7,7 @@ import '@/styles/layout.css';
 import '@/styles/window-manager.css';
 
 export const metadata = {
+  title: 'TaskManagerPro | Collaborative Task Management',
   openGraph: {
     title: 'TaskManagerPro | Collaborative Task Management',
     description: 'Manage projects, track deadlines, and collaborate with your team in real-time.',
@@ -34,7 +35,8 @@ export const metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "TaskManagerPro",
+  "name": "Task Manager Pro",
+  "url": "https://task-manager-pro-demo.vercel.app/",
   "operatingSystem": "Web",
   "applicationCategory": "BusinessApplication",
   "description": "A full-stack project and task management application supporting real-time notifications, team collaboration, and project announcements.",
@@ -60,6 +62,7 @@ const themeCheckScript = `
     } catch (e) {};
   })();
 `;
+
 
 export default function RootLayout({ children }) {
   return (
