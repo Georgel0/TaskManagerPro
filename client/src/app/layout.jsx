@@ -34,7 +34,7 @@ export const metadata = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebSite",
   "name": "Task Manager Pro",
   "url": "https://task-manager-pro-demo.vercel.app/",
   "operatingSystem": "Web",
